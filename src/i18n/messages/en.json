@@ -1,0 +1,113 @@
+{
+  "brand": {
+    "name": "Tiraji",
+    "tagline": "Second-hand, out-of-print & old books"
+  },
+  "nav": {
+    "buy": "Buy",
+    "swap": "Swap",
+    "giveaway": "Give away",
+    "sell": "List a book",
+    "messages": "Messages",
+    "signIn": "Sign in"
+  },
+  "home": {
+    "heroTitle": "Find your next book",
+    "heroSubtitle": "Thousands of second-hand, out-of-print and old books — search by title or author, all in one place.",
+    "searchPlaceholder": "Search by title, author or ISBN…",
+    "searchButton": "Search",
+    "heroEyebrow": "BOOKS",
+    "heroTitleUsed": "Used books",
+    "heroLead": "Tiraji is where Georgian readers buy, swap and give away books. Save money, be sustainable, and find great reads like",
+    "heroTail": "and many more out-of-print and old editions — cheap and all in one place.",
+    "searchTitle": "Search for a book",
+    "fAuthor": "Author",
+    "fTitle": "Title",
+    "fKeyword": "Keyword",
+    "fAuthorPh": "e.g. Rustaveli",
+    "fTitlePh": "e.g. The Knight…",
+    "fKeywordPh": "word or ISBN",
+    "browseBuy": "Browse books for sale",
+    "browseSwap": "Books to swap",
+    "browseGiveaway": "Free books",
+    "sectionsTitle": "Browse by category",
+    "buyDesc": "Buy books from other readers.",
+    "swapDesc": "Trade books you've read for new ones.",
+    "giveawayDesc": "Take or give away books for free.",
+    "promoTitle": "Thousands of second-hand books — in one place",
+    "promoSubtitle": "Buy, swap or take for free. Search by title or author.",
+    "promoCta": "List a book",
+    "categoriesTitle": "Categories",
+    "forSaleTitle": "For sale",
+    "toSwapTitle": "To swap",
+    "freeTitle": "Free to take",
+    "recentTitle": "Recently added",
+    "emptyRecent": "No books listed yet. Be the first!",
+    "alertTitle": "Can't find what you're looking for?",
+    "alertDesc": "Subscribe and we'll email you the moment a matching book is listed.",
+    "alertCta": "Notify me"
+  },
+  "footer": {
+    "about": "Tiraji — where Georgian readers sell, swap and give away books.",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "rights": "All rights reserved."
+  },
+  "common": {
+    "loading": "Loading…",
+    "negotiable": "Negotiable",
+    "free": "Free",
+    "viewAll": "View all"
+  },
+  "card": {
+    "swap": "Swap",
+    "free": "Free",
+    "negotiable": "Negotiable"
+  },
+  "pages": {
+    "buyTitle": "Books for sale",
+    "buyLede": "Buy second-hand books from other readers.",
+    "swapTitle": "Books to swap",
+    "swapLede": "Trade books you've read for new ones.",
+    "giveTitle": "Free books",
+    "giveLede": "Take or give away books for free.",
+    "sellTitle": "List a book",
+    "sellLede": "Add a book to sell, swap or give away.",
+    "messagesTitle": "Messages",
+    "termsTitle": "Terms & Conditions",
+    "privacyTitle": "Privacy Policy",
+    "comingSoon": "This section is coming soon.",
+    "resultsSoon": "Search results will appear here once books are listed.",
+    "searchingFor": "Searching for: {query}"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginLede": "Sign in or create an account with your email — no password needed.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendMagicLink": "Send me a sign-in link",
+    "sending": "Sending…",
+    "magicLinkSent": "Check your email — we sent you a sign-in link.",
+    "orContinueWith": "or",
+    "continueWithGoogle": "Continue with Google",
+    "signOut": "Sign out",
+    "account": "My account",
+    "myListings": "My listings",
+    "error": "Something went wrong. Please try again.",
+    "signInRequired": "Please sign in to continue.",
+    "signIn": "Sign in"
+  },
+  "account": {
+    "title": "My account",
+    "lede": "Manage your profile and contact details.",
+    "displayName": "Display name",
+    "city": "City",
+    "phone": "Phone",
+    "phonePlaceholder": "5XX XX XX XX",
+    "showPhone": "Show my phone on listings",
+    "showPhoneHint": "If on, buyers can see your number. Otherwise they'll reach you through in-app messages.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Profile saved"
+  }
+}

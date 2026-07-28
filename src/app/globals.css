@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* FiraGO (humanist sans). Noto Sans Georgian fallback supplies Mtavruli capitals. */
+  --font-sans: var(--font-firago), var(--font-noto-sans);
+  --font-mono: var(--font-firago), var(--font-noto-sans);
+  --font-heading: var(--font-firago), var(--font-noto-sans);
+
+  /* Tiraji brand extras */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-price: var(--price);
+  --color-success: var(--success);
+  /* Section accents (Sell / Swap / Give away) */
+  --color-buy: var(--buy);
+  --color-swap: var(--swap);
+  --color-give: var(--give);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.7);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.4);
+  --radius-xl: calc(var(--radius) * 2);
+  --radius-2xl: calc(var(--radius) * 2.6);
+}
+
+/*
+  Tiraji — clean "used-book marketplace": green accent on white,
+  dense book grids, all sans. Optimized for readability (older users too).
+*/
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+
+  --primary: #1f7a4d; /* brand green — buttons, links, price */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f2f4f3; /* soft neutral */
+  --secondary-foreground: #14532d;
+
+  --muted: #f4f5f6;
+  --muted-foreground: #5c6660;
+
+  --accent: #eaf4ee; /* subtle green tint (hover) */
+  --accent-foreground: #14532d;
+
+  --destructive: #c0392b;
+
+  --border: #e6e8eb;
+  --input: #dde1e4;
+  --ring: #1f7a4d;
+
+  --radius: 0.5rem;
+
+  /* Brand extras */
+  --brand: #1f7a4d;
+  --brand-dark: #14532d;
+  --price: #1f7a4d;
+  --success: #1f7a4d;
+
+  /* Section accents */
+  --buy: #1f7a4d; /* Sale  — green */
+  --swap: #2563eb; /* Swap  — blue */
+  --give: #d97706; /* Give  — amber */
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #1f7a4d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf4ee;
+  --sidebar-accent-foreground: #14532d;
+  --sidebar-border: #e6e8eb;
+  --sidebar-ring: #1f7a4d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 1rem; /* 16px */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Hide scrollbars on horizontal "shelf" rows while keeping them scrollable. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+  Georgian capitals (Mtavruli): the text is uppercased in JS (String.toUpperCase
+  maps Mkhedruli → Mtavruli codepoints). FiraGO lacks Mtavruli glyphs, so they
+  render via the Noto Sans Georgian fallback. This class just adds letter-spacing.
+  Used on the logo, section/page headings, and nav tabs.
+*/
+@utility caps {
+  letter-spacing: 0.02em;
+}
+
