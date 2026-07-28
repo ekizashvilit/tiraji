@@ -45,7 +45,30 @@
     "emptyRecent": "No books listed yet. Be the first!",
     "alertTitle": "Can't find what you're looking for?",
     "alertDesc": "Subscribe and we'll email you the moment a matching book is listed.",
-    "alertCta": "Notify me"
+    "alertCta": "Notify me",
+    "whyTitle": "Why Tiraji?",
+    "why": {
+      "b1t": "Save money",
+      "b1d": "Second-hand books cost far less — find editions you can't buy anywhere else.",
+      "b2t": "Give books a second life",
+      "b2d": "Let a book you've read make someone else happy — sell, swap or give it away.",
+      "b3t": "Find rare & out-of-print",
+      "b3d": "Old and vanished editions you'll never find in a shop.",
+      "b4t": "A local community",
+      "b4d": "Connect with readers in your city — Tbilisi, Batumi, Kutaisi and beyond."
+    },
+    "howTitle": "How it works",
+    "how": {
+      "s1t": "Search or browse",
+      "s1d": "Find a book by title or author, or browse by genre.",
+      "s2t": "Contact the seller",
+      "s2d": "Message or call — agree on a price and a place to meet.",
+      "s3t": "Meet and exchange",
+      "s3d": "Get your book. Want to sell too? List your own books."
+    },
+    "popularTitle": "Popular searches",
+    "fictionShelf": "Fiction",
+    "nonfictionShelf": "Non-fiction"
   },
   "footer": {
     "about": "Tiraji — where Georgian readers sell, swap and give away books.",

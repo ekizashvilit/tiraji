@@ -61,6 +61,21 @@ export async function getListingsByType(
   return (data as ListingCard[]) ?? [];
 }
 
+export async function getListingsByGenre(
+  genreId: number,
+  limit = 12,
+): Promise<ListingCard[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .eq("genre_id", genreId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data as ListingCard[]) ?? [];
+}
+
 // Search via the trigram RPC + filters (used by the browse pages).
 export async function searchListings(params: {
   q?: string;
