@@ -16,6 +16,8 @@
     "heroSubtitle": "Thousands of second-hand, out-of-print and old books — search by title or author, all in one place.",
     "searchPlaceholder": "Search by title, author or ISBN…",
     "searchButton": "Search",
+    "noResults": "No matches found",
+    "searchAll": "All results for “{q}”",
     "heroEyebrow": "BOOKS",
     "heroTitleUsed": "Used books",
     "heroLead": "Tiraji is where Georgian readers buy, swap and give away books. Save money, be sustainable, and find great reads like",
