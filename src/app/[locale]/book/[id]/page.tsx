@@ -150,21 +150,26 @@ export default async function BookPage({ params }: Params) {
 
           {/* Seller + contact */}
           <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
-            <div className="flex items-center gap-3">
+            <Link
+              href={`/user/${listing.seller_id}`}
+              className="flex items-center gap-3 rounded-lg transition-colors hover:opacity-80"
+            >
               <Avatar className="size-11">
                 <AvatarFallback className="bg-secondary text-brand-dark">
                   {sellerName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="truncate font-semibold">{sellerName}</p>
+                <p className="truncate font-semibold hover:underline">
+                  {sellerName}
+                </p>
                 {memberSince && (
                   <p className="text-sm text-muted-foreground">
                     {t("memberSince", { date: memberSince })}
                   </p>
                 )}
               </div>
-            </div>
+            </Link>
 
             <div className="mt-4">
               {isOwner ? (

@@ -312,6 +312,10 @@
     "unhide": "Unhide",
     "restored": "Listing is visible again"
   },
+  "profile": {
+    "booksTitle": "{count, plural, =0 {Listings} one {# listing} other {# listings}}",
+    "empty": "No active listings yet."
+  },
   "chat": {
     "title": "Messages",
     "empty": "No messages yet. Start a conversation from a book you're interested in.",

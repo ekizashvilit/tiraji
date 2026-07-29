@@ -84,6 +84,20 @@ export async function getListingsByType(
   return (data as ListingCard[]) ?? [];
 }
 
+// A user's public (active) listings, for their profile page.
+export async function getListingsBySeller(
+  sellerId: string,
+): Promise<ListingCard[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .eq("seller_id", sellerId)
+    .order("created_at", { ascending: false });
+  return (data as ListingCard[]) ?? [];
+}
+
 export async function getListingsByGenre(
   genreId: number,
   limit = 12,
