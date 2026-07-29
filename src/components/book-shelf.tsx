@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 import { BookCard } from "@/components/book-card";
+import { ScrollRow } from "@/components/scroll-row";
 import type { ListingCard } from "@/lib/listings";
 
 // A horizontally-scrolling row of book cards (like the reference sites' shelves).
@@ -39,7 +40,7 @@ export function BookShelf({
         </Link>
       </div>
 
-      <div className="no-scrollbar -mx-2 flex gap-1 overflow-x-auto px-2 pb-1">
+      <ScrollRow>
         {listings.map((listing) => (
           <BookCard
             key={listing.id}
@@ -47,7 +48,7 @@ export function BookShelf({
             className="w-[42vw] shrink-0 sm:w-40"
           />
         ))}
-      </div>
+      </ScrollRow>
     </section>
   );
 }
