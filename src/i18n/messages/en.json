@@ -141,6 +141,8 @@
     "giveLede": "Take or give away books for free.",
     "sellTitle": "List a book",
     "sellLede": "Add a book to sell, swap or give away.",
+    "editTitle": "Edit listing",
+    "editLede": "Update your book's details.",
     "messagesTitle": "Messages",
     "termsTitle": "Terms & Conditions",
     "privacyTitle": "Privacy Policy",
@@ -239,8 +241,27 @@
     "publish": "Publish listing",
     "publishing": "Publishing…",
     "published": "Your book is listed!",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "updated": "Listing updated",
     "errorTitle": "Please enter a title.",
     "errorUpload": "A photo failed to upload. Please try again.",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "myListings": {
+    "empty": "You haven't listed any books yet.",
+    "emptyCta": "List your first book",
+    "status_active": "Active",
+    "status_closed": "Closed",
+    "status_hidden": "Hidden",
+    "edit": "Edit",
+    "markClosed": "Mark as closed",
+    "reactivate": "Reactivate",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this listing? This can't be undone.",
+    "deleted": "Listing deleted",
+    "closed": "Listing closed",
+    "reactivated": "Listing is active again",
+    "actionError": "Something went wrong. Please try again."
   }
 }

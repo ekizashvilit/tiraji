@@ -23,37 +23,81 @@ const TYPES: ListingType[] = ["sale", "swap", "giveaway"];
 const CONDITIONS: BookCondition[] = ["new", "like_new", "good", "worn"];
 const MAX_PHOTOS = 3;
 
+// Fields the form can edit on an existing listing.
+export type EditableListing = {
+  id: string;
+  listing_type: ListingType;
+  title: string;
+  author: string | null;
+  condition: BookCondition | null;
+  price: number | null;
+  is_negotiable: boolean;
+  swap_wanted: string | null;
+  city: string | null;
+  book_language: string | null;
+  genre_id: number | null;
+  cover_image_paths: string[];
+};
+
 // Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
 function genreName(genre: GenreRow, locale: string): string {
   return locale === "en" ? genre.name_en : genre.name_ka;
 }
 
-type Photo = { file: File; url: string };
+function publicCoverUrl(path: string): string {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/covers/${path}`;
+}
+
+// A photo is either already uploaded (has a storage path) or newly picked (a File).
+type Photo =
+  | { kind: "existing"; path: string; url: string }
+  | { kind: "new"; file: File; url: string };
 
 export function SellForm({
   genres,
   defaultCity,
   defaultType,
+  listing,
 }: {
   genres: GenreRow[];
   defaultCity: string;
   defaultType: ListingType;
+  listing?: EditableListing;
 }) {
   const t = useTranslations("sell");
   const locale = useLocale();
   const router = useRouter();
+  const isEdit = !!listing;
 
-  const [listingType, setListingType] = useState<ListingType>(defaultType);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [condition, setCondition] = useState<BookCondition | "">("");
-  const [price, setPrice] = useState("");
-  const [isNegotiable, setIsNegotiable] = useState(false);
-  const [swapWanted, setSwapWanted] = useState("");
-  const [city, setCity] = useState(defaultCity);
-  const [bookLanguage, setBookLanguage] = useState("ka");
-  const [genreId, setGenreId] = useState("");
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [listingType, setListingType] = useState<ListingType>(
+    listing?.listing_type ?? defaultType,
+  );
+  const [title, setTitle] = useState(listing?.title ?? "");
+  const [author, setAuthor] = useState(listing?.author ?? "");
+  const [condition, setCondition] = useState<BookCondition | "">(
+    listing?.condition ?? "",
+  );
+  const [price, setPrice] = useState(
+    listing?.price != null ? String(listing.price) : "",
+  );
+  const [isNegotiable, setIsNegotiable] = useState(
+    listing?.is_negotiable ?? false,
+  );
+  const [swapWanted, setSwapWanted] = useState(listing?.swap_wanted ?? "");
+  const [city, setCity] = useState(listing?.city ?? defaultCity);
+  const [bookLanguage, setBookLanguage] = useState(
+    listing?.book_language ?? "ka",
+  );
+  const [genreId, setGenreId] = useState(
+    listing?.genre_id != null ? String(listing.genre_id) : "",
+  );
+  const [photos, setPhotos] = useState<Photo[]>(
+    listing?.cover_image_paths.map((path) => ({
+      kind: "existing" as const,
+      path,
+      url: publicCoverUrl(path),
+    })) ?? [],
+  );
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -66,7 +110,8 @@ export function SellForm({
       toast.error(t("photosMax", { max: MAX_PHOTOS }));
       return;
     }
-    const added = files.slice(0, room).map((file) => ({
+    const added: Photo[] = files.slice(0, room).map((file) => ({
+      kind: "new",
       file,
       url: URL.createObjectURL(file),
     }));
@@ -75,7 +120,8 @@ export function SellForm({
 
   function removePhoto(index: number) {
     setPhotos((prev) => {
-      URL.revokeObjectURL(prev[index].url);
+      const photo = prev[index];
+      if (photo.kind === "new") URL.revokeObjectURL(photo.url);
       return prev.filter((_, i) => i !== index);
     });
   }
@@ -99,22 +145,23 @@ export function SellForm({
       return;
     }
 
-    // Compress + upload each photo to covers/{uid}/… (matches storage RLS).
-    const paths: string[] = [];
+    // Upload only the newly-added photos; existing ones keep their paths.
+    const newPaths: string[] = [];
     try {
-      for (const { file } of photos) {
-        const compressed = await imageCompression(file, {
+      for (const photo of photos) {
+        if (photo.kind !== "new") continue;
+        const compressed = await imageCompression(photo.file, {
           maxSizeMB: 0.6,
           maxWidthOrHeight: 1600,
           useWebWorker: true,
         });
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const ext = (photo.file.name.split(".").pop() || "jpg").toLowerCase();
         const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("covers")
           .upload(path, compressed, { contentType: compressed.type });
         if (uploadError) throw uploadError;
-        paths.push(path);
+        newPaths.push(path);
       }
     } catch {
       setSubmitting(false);
@@ -122,34 +169,56 @@ export function SellForm({
       return;
     }
 
-    const { error } = await supabase.from("listings").insert({
-      seller_id: user.id,
+    const retainedPaths = photos
+      .filter((p) => p.kind === "existing")
+      .map((p) => (p as { path: string }).path);
+    const coverPaths = [...retainedPaths, ...newPaths];
+
+    const fields = {
       listing_type: listingType,
       title: title.trim(),
       author: author.trim() || null,
-      description: null,
       condition: condition || null,
       price:
         listingType === "sale" && !isNegotiable && price.trim()
           ? Number(price)
           : null,
       is_negotiable: listingType === "sale" ? isNegotiable : false,
-      swap_wanted:
-        listingType === "swap" ? swapWanted.trim() || null : null,
+      swap_wanted: listingType === "swap" ? swapWanted.trim() || null : null,
       city: city || null,
       book_language: bookLanguage || null,
       genre_id: genreId ? Number(genreId) : null,
-      isbn: null,
-      cover_external_url: null,
-      cover_image_paths: paths,
-    });
+      cover_image_paths: coverPaths,
+    };
 
-    setSubmitting(false);
+    const { error } = isEdit
+      ? await supabase.from("listings").update(fields).eq("id", listing!.id)
+      : await supabase.from("listings").insert({
+          seller_id: user.id,
+          description: null,
+          isbn: null,
+          cover_external_url: null,
+          ...fields,
+        });
+
     if (error) {
+      setSubmitting(false);
       toast.error(t("errorGeneric"));
       return;
     }
-    toast.success(t("published"));
+
+    // On edit, delete any cover files the seller removed so they don't orphan.
+    if (isEdit) {
+      const removed = listing!.cover_image_paths.filter(
+        (p) => !retainedPaths.includes(p),
+      );
+      if (removed.length) {
+        await supabase.storage.from("covers").remove(removed);
+      }
+    }
+
+    setSubmitting(false);
+    toast.success(isEdit ? t("updated") : t("published"));
     router.push("/my-listings");
   }
 
@@ -364,7 +433,13 @@ export function SellForm({
 
       <Button type="submit" size="lg" disabled={submitting} className="gap-2">
         {submitting && <Loader2 className="size-4 animate-spin" aria-hidden />}
-        {submitting ? t("publishing") : t("publish")}
+        {submitting
+          ? isEdit
+            ? t("saving")
+            : t("publishing")
+          : isEdit
+            ? t("save")
+            : t("publish")}
       </Button>
     </form>
   );
