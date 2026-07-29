@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BookOpen, Menu, Plus, X } from "lucide-react";
 
@@ -21,6 +21,29 @@ export function SiteHeader() {
 	const t = useTranslations("nav");
 	const pathname = usePathname();
 	const [open, setOpen] = useState(false);
+	const [navHidden, setNavHidden] = useState(false);
+
+	// Hide the nav row when scrolling down, reveal it when scrolling back up.
+	useEffect(() => {
+		let lastY = window.scrollY;
+		let ticking = false;
+		function update() {
+			const y = Math.max(0, window.scrollY);
+			if (y < 80) setNavHidden(false);
+			else if (y - lastY > 6) setNavHidden(true);
+			else if (lastY - y > 6) setNavHidden(false);
+			lastY = y;
+			ticking = false;
+		}
+		function onScroll() {
+			if (!ticking) {
+				ticking = true;
+				requestAnimationFrame(update);
+			}
+		}
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
 
 	const navLinks = SECTIONS.map((s) => {
 		const active = pathname === s.href || pathname.startsWith(s.href + "/");
@@ -41,15 +64,15 @@ export function SiteHeader() {
 		<header className="sticky top-0 z-40 bg-background">
 			{/* Top row: logo · search · account */}
 			<div className="border-b border-border">
-				<div className="mx-auto flex h-20 max-w-6xl items-center gap-4 px-4">
+				<div className="mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 justify-between">
 					<Link href="/" className="flex shrink-0 items-center gap-2 text-primary" onClick={() => setOpen(false)}>
 						<BookOpen className="h-7 w-7" aria-hidden />
 						<span className="caps text-2xl font-bold text-brand-dark">{"ტირაჟი".toUpperCase()}</span>
 					</Link>
 
-					<HeaderSearch className="hidden max-w-2xl flex-1 md:flex" />
+					<HeaderSearch className="hidden flex-1 md:flex" />
 
-					<div className="ml-auto flex items-center gap-2">
+					<div className="flex items-center gap-4">
 						<div className="hidden sm:block">
 							<LanguageSwitcher />
 						</div>
@@ -69,7 +92,12 @@ export function SiteHeader() {
 			</div>
 
 			{/* Nav row (AbeBooks-style): sections on the left, List a book on the right */}
-			<div className="border-b border-border">
+			<div
+				className={cn(
+					"overflow-hidden border-b border-border transition-[max-height,opacity] duration-300 ease-out",
+					navHidden ? "max-h-0 opacity-0" : "max-h-16 opacity-100",
+				)}
+			>
 				<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
 					<div className="flex items-center">{navLinks}</div>
 					<Link href="/sell" className="caps flex items-center gap-1.5 px-3 py-3.5 text-[0.9rem] font-semibold text-primary hover:underline">
