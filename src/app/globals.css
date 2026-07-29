@@ -16,6 +16,8 @@
   /* Tiraji brand extras */
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-cta: var(--cta);
+  --color-cta-foreground: var(--cta-foreground);
   --color-price: var(--price);
   --color-success: var(--success);
   /* Section accents (Sell / Swap / Give away) */
@@ -67,45 +69,48 @@
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
 
-  --primary: #1f7a4d; /* brand green — buttons, links, price */
+  --primary: #0a7d3e; /* World of Books green — buttons, links, price (AA on white) */
   --primary-foreground: #ffffff;
 
-  --secondary: #f2f4f3; /* soft neutral */
-  --secondary-foreground: #14532d;
+  --cta: #f7b500; /* World of Books golden yellow — primary call-to-action */
+  --cta-foreground: #1a1a1a; /* dark text — yellow needs a dark label for AA */
+
+  --secondary: #f2f4f3; /* soft neutral — category chips */
+  --secondary-foreground: #0e5c37;
 
   --muted: #f4f5f6;
   --muted-foreground: #5c6660;
 
-  --accent: #eaf4ee; /* subtle green tint (hover) */
-  --accent-foreground: #14532d;
+  --accent: #e6f4ec; /* subtle green tint (hover) */
+  --accent-foreground: #0e5c37;
 
   --destructive: #c0392b;
 
   --border: #e6e8eb;
   --input: #dde1e4;
-  --ring: #1f7a4d;
+  --ring: #0a7d3e;
 
   --radius: 0.5rem;
 
   /* Brand extras */
-  --brand: #1f7a4d;
-  --brand-dark: #14532d;
-  --price: #1f7a4d;
-  --success: #1f7a4d;
+  --brand: #00a24c; /* brighter decorative green — logo, brand accents */
+  --brand-dark: #0e5c37; /* deep green — footer, dark headings */
+  --price: #0a7d3e;
+  --success: #0a7d3e;
 
   /* Section accents */
-  --buy: #1f7a4d; /* Sale  — green */
-  --swap: #2563eb; /* Swap  — blue */
-  --give: #d97706; /* Give  — amber */
+  --buy: #0a7d3e; /* Sale  — green */
+  --swap: #0e7a6c; /* Swap  — teal */
+  --give: #f5b400; /* Give  — golden yellow (WoB accent) */
 
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #1f7a4d;
+  --sidebar-primary: #0a7d3e;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eaf4ee;
-  --sidebar-accent-foreground: #14532d;
+  --sidebar-accent: #e6f4ec;
+  --sidebar-accent-foreground: #0e5c37;
   --sidebar-border: #e6e8eb;
-  --sidebar-ring: #1f7a4d;
+  --sidebar-ring: #0a7d3e;
 }
 
 @layer base {
