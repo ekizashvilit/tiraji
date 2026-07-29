@@ -1,25 +1,52 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { PlusCircle } from "lucide-react";
 
+import { redirect } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getGenres } from "@/lib/genres";
 import { PageHeader } from "@/components/page-header";
+import { SellForm } from "@/components/sell/sell-form";
+import type { ListingType } from "@/lib/supabase/types";
+
+const TYPES: ListingType[] = ["sale", "swap", "giveaway"];
 
 export default async function SellPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ type?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("pages");
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect({ href: "/?auth=required", locale });
+  }
+
+  const [{ data: profile }, genres] = await Promise.all([
+    supabase.from("profiles").select("city").eq("id", user!.id).single(),
+    getGenres(),
+  ]);
+
+  const { type } = await searchParams;
+  const defaultType: ListingType = TYPES.includes(type as ListingType)
+    ? (type as ListingType)
+    : "sale";
+
   return (
     <>
       <PageHeader title={t("sellTitle")} lede={t("sellLede")} />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">
-          <PlusCircle className="h-10 w-10 text-muted-foreground" aria-hidden />
-          <p className="max-w-sm text-muted-foreground">{t("comingSoon")}</p>
-        </div>
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <SellForm
+          genres={genres}
+          defaultCity={profile?.city ?? ""}
+          defaultType={defaultType}
+        />
       </div>
     </>
   );
