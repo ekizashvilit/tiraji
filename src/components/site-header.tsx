@@ -20,21 +20,46 @@ const SECTIONS = [
 export function SiteHeader() {
 	const t = useTranslations("nav");
 	const pathname = usePathname();
+	const isHome = pathname === "/";
 	const [open, setOpen] = useState(false);
 	const [navHidden, setNavHidden] = useState(false);
 
 	// Hide the nav row when scrolling down, reveal it when scrolling back up.
 	useEffect(() => {
-		let lastY = window.scrollY;
+		let anchorY = window.scrollY; // last point we reacted to — NOT updated every frame
+		let hidden = false;
 		let ticking = false;
+		const THRESHOLD = 12; // min distance in one direction before toggling — absorbs jitter
+		const TOP_ZONE = 96; // always reveal near the top
+
 		function update() {
-			const y = Math.max(0, window.scrollY);
-			if (y < 80) setNavHidden(false);
-			else if (y - lastY > 6) setNavHidden(true);
-			else if (lastY - y > 6) setNavHidden(false);
-			lastY = y;
 			ticking = false;
+			const y = Math.max(0, window.scrollY);
+			const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+			// On short pages, collapsing the nav shrinks the document and bounces the
+			// scroll position, which feeds back into another toggle (the lag/flicker).
+			// Only engage when there's clearly more room than the nav's own height.
+			if (maxScroll < 240 || y <= TOP_ZONE) {
+				anchorY = y;
+				if (hidden) {
+					hidden = false;
+					setNavHidden(false);
+				}
+				return;
+			}
+
+			const delta = y - anchorY;
+			if (Math.abs(delta) < THRESHOLD) return; // keep the anchor; ignore small moves
+
+			const next = delta > 0; // scrolling down → hide
+			anchorY = y;
+			if (next !== hidden) {
+				hidden = next;
+				setNavHidden(next);
+			}
 		}
+
 		function onScroll() {
 			if (!ticking) {
 				ticking = true;
@@ -91,21 +116,25 @@ export function SiteHeader() {
 				<HeaderSearch />
 			</div>
 
-			{/* Nav row (AbeBooks-style): sections on the left, List a book on the right */}
-			<div
-				className={cn(
-					"overflow-hidden border-b border-border transition-[max-height,opacity] duration-300 ease-out",
-					navHidden ? "max-h-0 opacity-0" : "max-h-16 opacity-100",
-				)}
-			>
-				<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
-					<div className="flex items-center">{navLinks}</div>
-					<Link href="/sell" className="caps flex items-center gap-1.5 px-3 py-3.5 text-[0.9rem] font-semibold text-primary hover:underline">
-						<Plus className="h-4 w-4" aria-hidden />
-						{t("sell").toUpperCase()}
-					</Link>
-				</nav>
-			</div>
+			{/* Nav row (AbeBooks-style): sections on the left, List a book on the right — home only */}
+			{isHome && (
+				<div
+					className={cn(
+						"grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+						navHidden ? "grid-rows-[0fr]" : "grid-rows-[1fr]",
+					)}
+				>
+					<div className="overflow-hidden border-b border-border">
+						<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
+							<div className="flex items-center">{navLinks}</div>
+							<Link href="/sell" className="caps flex items-center gap-1.5 px-3 py-3.5 text-[0.9rem] font-semibold text-primary hover:underline">
+								<Plus className="h-4 w-4" aria-hidden />
+								{t("sell").toUpperCase()}
+							</Link>
+						</nav>
+					</div>
+				</div>
+			)}
 
 			{/* Mobile menu */}
 			{open && (
