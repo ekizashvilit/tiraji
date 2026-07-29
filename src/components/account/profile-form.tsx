@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
 import type { ProfileRow } from "@/lib/supabase/types";
+import { CITIES, cityLabel } from "@/lib/cities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 
 export function ProfileForm({ profile }: { profile: ProfileRow }) {
   const t = useTranslations("account");
+  const locale = useLocale();
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [city, setCity] = useState(profile.city ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
@@ -55,12 +58,25 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
 
       <div className="space-y-2">
         <Label htmlFor="city">{t("city")}</Label>
-        <Input
-          id="city"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="h-11 bg-background"
-        />
+        <div className="relative">
+          <select
+            id="city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="h-11 w-full appearance-none rounded-lg border border-border bg-background pl-3 pr-10 text-[0.95rem] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="">{t("cityPlaceholder")}</option>
+            {CITIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {cityLabel(c.code, locale)}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

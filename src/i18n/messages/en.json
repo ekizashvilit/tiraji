@@ -194,6 +194,7 @@
     "lede": "Manage your profile and contact details.",
     "displayName": "Display name",
     "city": "City",
+    "cityPlaceholder": "Select a city",
     "phone": "Phone",
     "phonePlaceholder": "5XX XX XX XX",
     "showPhone": "Show my phone on listings",

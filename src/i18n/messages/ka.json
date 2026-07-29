@@ -194,6 +194,7 @@
     "lede": "მართე შენი პროფილი და საკონტაქტო ინფორმაცია.",
     "displayName": "სახელი",
     "city": "ქალაქი",
+    "cityPlaceholder": "აირჩიე ქალაქი",
     "phone": "ტელეფონი",
     "phonePlaceholder": "5XX XX XX XX",
     "showPhone": "ტელეფონის ჩვენება განცხადებებზე",

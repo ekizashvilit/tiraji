@@ -9,6 +9,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { GenreRow } from "@/lib/supabase/types";
 import type { ListingFacets } from "@/lib/listings";
 import { languageLabel } from "@/lib/languages";
+import { cityLabel } from "@/lib/cities";
 import { cn } from "@/lib/utils";
 
 // Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
@@ -68,7 +69,9 @@ export function SearchFilters({ genres, facets, locale }: Props) {
   ].filter((o) => facets.conditions[o.value]);
 
   const genreOptions = genres.filter((g) => facets.genres[g.id]);
-  const cityOptions = Object.keys(facets.cities).sort();
+  const cityOptions = Object.keys(facets.cities).sort((a, b) =>
+    cityLabel(a, locale).localeCompare(cityLabel(b, locale), locale),
+  );
   const languageOptions = Object.keys(facets.languages).sort((a, b) =>
     languageLabel(a, locale).localeCompare(languageLabel(b, locale), locale),
   );
@@ -228,7 +231,7 @@ export function SearchFilters({ genres, facets, locale }: Props) {
             {cityOptions.map((c) => (
               <OptionRow
                 key={c}
-                label={c}
+                label={cityLabel(c, locale)}
                 count={facets.cities[c]}
                 active={params.get("city") === c}
                 href={hrefWith({
