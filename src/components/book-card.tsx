@@ -66,15 +66,19 @@ export function BookCard({
         )}
       </div>
 
-      <div className="min-w-0 space-y-0.5">
-        <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
-          {listing.title}
-        </p>
-        {listing.author && (
+      <div className="min-w-0">
+        {/* Fixed-height zone, top-aligned: the title flows (1 or 2 lines) with
+            the author tight beneath it, and the zone always reserves room for a
+            2-line title + author so the price/tag below lands at the same
+            height across every card. */}
+        <div className="min-h-15 space-y-0.5">
+          <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
+            {listing.title}
+          </p>
           <p className="line-clamp-1 text-xs text-muted-foreground">
             {listing.author}
           </p>
-        )}
+        </div>
         <PriceOrTag listing={listing} t={t} />
       </div>
     </Link>
@@ -102,14 +106,14 @@ function PriceOrTag({
       </span>
     );
   }
+  // "Negotiable" (ფასი შეთანხმებით) means the price is by agreement — there's no
+  // fixed number, so it replaces the price rather than sitting alongside it.
+  if (listing.is_negotiable || listing.price == null) {
+    return <p className="text-sm font-semibold text-muted-foreground">{t("negotiable")}</p>;
+  }
   return (
     <p className="text-sm font-bold text-price">
-      {listing.price != null ? formatLari(listing.price) : "—"}
-      {listing.is_negotiable && (
-        <span className="ml-1 text-xs font-normal text-muted-foreground">
-          · {t("negotiable")}
-        </span>
-      )}
+      {formatLari(listing.price)}
     </p>
   );
 }

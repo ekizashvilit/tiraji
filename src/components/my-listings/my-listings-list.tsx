@@ -210,14 +210,9 @@ function PriceOrTag({
   if (item.listing_type === "giveaway") {
     return <span className="font-medium text-give">{tCard("free")}</span>;
   }
-  return (
-    <span className="font-bold text-price">
-      {item.price != null ? `₾${item.price}` : "—"}
-      {item.is_negotiable && (
-        <span className="ml-1 text-xs font-normal text-muted-foreground">
-          · {tCard("negotiable")}
-        </span>
-      )}
-    </span>
-  );
+  // "Negotiable" means price by agreement — no fixed number, so it replaces the price.
+  if (item.is_negotiable || item.price == null) {
+    return <span className="font-semibold text-muted-foreground">{tCard("negotiable")}</span>;
+  }
+  return <span className="font-bold text-price">{`₾${item.price}`}</span>;
 }
