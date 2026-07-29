@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { CheckCircle2, Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "register";
 type Method = "phone" | "email";
-type Sent = "confirm" | "magic";
 
 const MIN_PASSWORD = 8;
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -35,7 +34,7 @@ export default function LoginPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState<Sent | null>(null);
+  const [sent, setSent] = useState(false);
 
   // Cloudflare Turnstile: token is single-use, so we reset the widget after
   // every auth attempt to get a fresh one for the next try.
@@ -129,7 +128,7 @@ export default function LoginPage() {
       // With email confirmation disabled, a session is returned immediately.
       if (!data.session) {
         setLoading(false);
-        if (method === "email") setSent("confirm");
+        if (method === "email") setSent(true);
         else setError(t("phoneSignupFailed"));
         return;
       }
@@ -151,40 +150,6 @@ export default function LoginPage() {
     router.refresh();
   }
 
-  // Passwordless: email the user a one-click sign-in link (also creates the
-  // account if they're new). More secure and simpler than a password.
-  async function sendMagicLink() {
-    setError(null);
-    const email = identifier.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError(t("invalidEmail"));
-      return;
-    }
-    const captcha = captchaOptions();
-    if (captcha === "missing") {
-      setError(t("captchaRequired"));
-      return;
-    }
-
-    setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: true,
-        ...captcha,
-      },
-    });
-    resetCaptcha();
-    setLoading(false);
-    if (error) {
-      setError(mapError(error.message));
-      return;
-    }
-    setSent("magic");
-  }
-
   async function signInWithGoogle() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
@@ -199,13 +164,9 @@ export default function LoginPage() {
         <PageHeader title={t("registerTitle")} />
         <div className="mx-auto max-w-md px-4 py-12">
           <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
-            {sent === "magic" ? (
-              <Mail className="h-10 w-10 text-primary" aria-hidden />
-            ) : (
-              <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
-            )}
+            <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
             <p className="text-lg">
-              {sent === "magic" ? t("magicLinkSent") : t("checkEmail")}
+              {t("checkEmail")}
             </p>
           </div>
         </div>
@@ -356,21 +317,6 @@ export default function LoginPage() {
                   ? t("createAccount")
                   : t("signInButton")}
             </Button>
-
-            {/* Passwordless option — email only */}
-            {method === "email" && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                className="w-full"
-                disabled={loading}
-                onClick={sendMagicLink}
-              >
-                <Mail className="h-4 w-4" aria-hidden />
-                {t("getLoginLink")}
-              </Button>
-            )}
           </form>
 
           <div className="my-6 flex items-center gap-3">
