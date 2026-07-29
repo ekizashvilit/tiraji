@@ -1,5 +1,13 @@
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
-import type { ListingType, BookCondition } from "@/lib/supabase/types";
+import type {
+  ListingType,
+  BookCondition,
+  ListingRow,
+  GenreRow,
+  PublicSellerRow,
+} from "@/lib/supabase/types";
 
 // Minimal shape used by cards/shelves/grids.
 export type ListingCard = {
@@ -27,6 +35,21 @@ export function coverUrl(listing: {
     return `${base}/storage/v1/object/public/covers/${listing.cover_image_paths[0]}`;
   }
   return listing.cover_external_url ?? null;
+}
+
+// Public URLs for every one of a listing's photos (for the detail gallery).
+// Uploaded photos win; otherwise the single external fallback, if any.
+export function coverUrls(listing: {
+  cover_image_paths: string[];
+  cover_external_url: string | null;
+}): string[] {
+  if (listing.cover_image_paths?.length) {
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return listing.cover_image_paths.map(
+      (p) => `${base}/storage/v1/object/public/covers/${p}`,
+    );
+  }
+  return listing.cover_external_url ? [listing.cover_external_url] : [];
 }
 
 // Format a price in Georgian lari.
@@ -75,6 +98,48 @@ export async function getListingsByGenre(
     .limit(limit);
   return (data as ListingCard[]) ?? [];
 }
+
+// Full listing for the SSR detail page, with its genre and the seller's public
+// profile joined in. Wrapped in React `cache` so generateMetadata and the page
+// component share a single set of queries per request. Visibility is enforced
+// by RLS — a hidden/removed listing (or bad id) resolves to null.
+export type ListingDetail = ListingRow & {
+  genre: GenreRow | null;
+  seller: PublicSellerRow | null;
+};
+
+export const getListingDetail = cache(
+  async (id: string): Promise<ListingDetail | null> => {
+    const supabase = await createClient();
+    const { data: listing } = await supabase
+      .from("listings")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle<ListingRow>();
+    if (!listing) return null;
+
+    const [genreRes, sellerRes] = await Promise.all([
+      listing.genre_id != null
+        ? supabase
+            .from("genres")
+            .select("*")
+            .eq("id", listing.genre_id)
+            .maybeSingle<GenreRow>()
+        : Promise.resolve({ data: null as GenreRow | null }),
+      supabase
+        .from("public_seller")
+        .select("*")
+        .eq("id", listing.seller_id)
+        .maybeSingle<PublicSellerRow>(),
+    ]);
+
+    return {
+      ...listing,
+      genre: genreRes.data ?? null,
+      seller: sellerRes.data ?? null,
+    };
+  },
+);
 
 // Search via the trigram RPC + filters (used by the browse pages).
 export async function searchListings(params: {

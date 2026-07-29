@@ -263,5 +263,23 @@
     "closed": "Listing closed",
     "reactivated": "Listing is active again",
     "actionError": "Something went wrong. Please try again."
+  },
+  "book": {
+    "sellerFallback": "Seller",
+    "memberSince": "Member since {date}",
+    "showPhone": "Show phone number",
+    "messageSeller": "Message seller",
+    "messagingSoon": "In-app messaging is coming soon — please use the phone number for now.",
+    "editListing": "Edit this listing",
+    "description": "Description",
+    "wantsInReturn": "Wants in return",
+    "details": "Details",
+    "isbn": "ISBN",
+    "posted": "Posted",
+    "closedNotice": "This listing is no longer active.",
+    "report": "Report this listing",
+    "reportReason": "Why are you reporting this listing? (optional)",
+    "reported": "Thanks — we'll review this listing.",
+    "reportError": "Couldn't submit your report. Please try again."
   }
 }
