@@ -1,9 +1,9 @@
-import { Fragment } from "react";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { HeroSearch } from "@/components/hero-search";
+import { HeroCarousel } from "@/components/home/hero-carousel";
 import { BookShelf } from "@/components/book-shelf";
 import { CategoryTiles } from "@/components/category-tiles";
 import { WhyTiraji } from "@/components/home/why-tiraji";
@@ -14,7 +14,7 @@ import {
   getListingsByType,
   getListingsByGenre,
 } from "@/lib/listings";
-import { getGenres, genreName } from "@/lib/genres";
+import { getGenres } from "@/lib/genres";
 
 export default async function HomePage({
   params,
@@ -42,32 +42,9 @@ export default async function HomePage({
 
   return (
     <div>
-      {/* Editorial hero */}
-      <section className="mx-auto max-w-3xl px-4 pb-8 pt-12 text-center">
-        <div className="mb-3">
-          <Link
-            href="/buy"
-            className="caps text-sm font-bold text-buy hover:underline"
-          >
-            {t("heroEyebrow").toUpperCase()}
-          </Link>
-        </div>
-        <h1 className="text-4xl font-bold sm:text-5xl">{t("heroTitleUsed")}</h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          {t("heroLead")}{" "}
-          {genres.map((g, i) => (
-            <Fragment key={g.id}>
-              <Link
-                href={`/buy?genre=${g.id}`}
-                className="text-primary hover:underline"
-              >
-                {genreName(g, locale)}
-              </Link>
-              {i < genres.length - 1 ? ", " : " "}
-            </Fragment>
-          ))}
-          {t("heroTail")}
-        </p>
+      {/* Promotional banner slider */}
+      <section className="mx-auto max-w-6xl px-4 pb-8 pt-8">
+        <HeroCarousel />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-14">
@@ -99,7 +76,7 @@ export default async function HomePage({
         />
         <BookShelf
           title={t("fictionShelf")}
-          href={fictionId ? `/buy?genre=${fictionId}` : "/buy"}
+          href={fictionId ? `/search?genre=${fictionId}` : "/search"}
           listings={fiction}
           accent="buy"
         />
@@ -111,7 +88,7 @@ export default async function HomePage({
         />
         <BookShelf
           title={t("nonfictionShelf")}
-          href={nonfictionId ? `/buy?genre=${nonfictionId}` : "/buy"}
+          href={nonfictionId ? `/search?genre=${nonfictionId}` : "/search"}
           listings={nonfiction}
           accent="buy"
         />
