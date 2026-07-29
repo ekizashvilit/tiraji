@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // Where to send the user afterwards (defaults to the account page).
-  const next = searchParams.get("next") ?? "/account";
+  // Where to send the user afterwards (defaults to the homepage).
+  const next = searchParams.get("next") ?? "/";
 
   if (code) {
     const supabase = await createClient();

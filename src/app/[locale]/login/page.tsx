@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { CheckCircle2, Eye, EyeOff, Loader2, Mail } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
@@ -16,6 +17,10 @@ import { cn } from "@/lib/utils";
 
 type Mode = "signin" | "register";
 type Method = "phone" | "email";
+type Sent = "confirm" | "magic";
+
+const MIN_PASSWORD = 8;
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -27,9 +32,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkEmail, setCheckEmail] = useState(false);
+  const [sent, setSent] = useState<Sent | null>(null);
+
+  // Cloudflare Turnstile: token is single-use, so we reset the widget after
+  // every auth attempt to get a fresh one for the next try.
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<TurnstileInstance>(null);
+  function resetCaptcha() {
+    setCaptchaToken(null);
+    captchaRef.current?.reset();
+  }
 
   function mapError(message: string): string {
     const m = message.toLowerCase();
@@ -37,33 +52,46 @@ export default function LoginPage() {
       return t("alreadyRegistered");
     if (m.includes("invalid login") || m.includes("credentials"))
       return t("badCredentials");
+    if (m.includes("captcha")) return t("captchaRequired");
     return t("error");
+  }
+
+  // Resolve the entered identifier to the email Supabase authenticates against.
+  // Returns null (and sets an error) when the input is invalid.
+  function resolveEmail(): { email: string; phone: string | null } | null {
+    if (method === "phone") {
+      const phone = normalizeGeorgianPhone(identifier);
+      if (!phone) {
+        setError(t("invalidPhone"));
+        return null;
+      }
+      return { email: phoneToEmail(phone), phone };
+    }
+    const email = identifier.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError(t("invalidEmail"));
+      return null;
+    }
+    return { email, phone: null };
+  }
+
+  // When Turnstile is configured we require a token before hitting Supabase.
+  function captchaOptions(): { captchaToken?: string } | "missing" {
+    if (!SITE_KEY) return {};
+    if (!captchaToken) return "missing";
+    return { captchaToken };
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    // Resolve the identifier to the email Supabase authenticates against.
-    let email: string;
-    let phoneCanonical: string | null = null;
-    if (method === "phone") {
-      phoneCanonical = normalizeGeorgianPhone(identifier);
-      if (!phoneCanonical) {
-        setError(t("invalidPhone"));
-        return;
-      }
-      email = phoneToEmail(phoneCanonical);
-    } else {
-      email = identifier.trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError(t("invalidEmail"));
-        return;
-      }
-    }
+    const resolved = resolveEmail();
+    if (!resolved) return;
+    const { email, phone } = resolved;
 
     if (mode === "register") {
-      if (password.length < 6) {
+      if (password.length < MIN_PASSWORD) {
         setError(t("weakPassword"));
         return;
       }
@@ -71,6 +99,12 @@ export default function LoginPage() {
         setError(t("passwordMismatch"));
         return;
       }
+    }
+
+    const captcha = captchaOptions();
+    if (captcha === "missing") {
+      setError(t("captchaRequired"));
+      return;
     }
 
     setLoading(true);
@@ -82,9 +116,11 @@ export default function LoginPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: phoneCanonical ? { phone_number: phoneCanonical } : {},
+          data: phone ? { phone_number: phone } : {},
+          ...captcha,
         },
       });
+      resetCaptcha();
       if (error) {
         setError(mapError(error.message));
         setLoading(false);
@@ -93,7 +129,7 @@ export default function LoginPage() {
       // With email confirmation disabled, a session is returned immediately.
       if (!data.session) {
         setLoading(false);
-        if (method === "email") setCheckEmail(true);
+        if (method === "email") setSent("confirm");
         else setError(t("phoneSignupFailed"));
         return;
       }
@@ -101,7 +137,9 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { ...captcha },
       });
+      resetCaptcha();
       if (error) {
         setError(mapError(error.message));
         setLoading(false);
@@ -109,8 +147,42 @@ export default function LoginPage() {
       }
     }
 
-    router.push("/account");
+    router.push("/");
     router.refresh();
+  }
+
+  // Passwordless: email the user a one-click sign-in link (also creates the
+  // account if they're new). More secure and simpler than a password.
+  async function sendMagicLink() {
+    setError(null);
+    const email = identifier.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError(t("invalidEmail"));
+      return;
+    }
+    const captcha = captchaOptions();
+    if (captcha === "missing") {
+      setError(t("captchaRequired"));
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: true,
+        ...captcha,
+      },
+    });
+    resetCaptcha();
+    setLoading(false);
+    if (error) {
+      setError(mapError(error.message));
+      return;
+    }
+    setSent("magic");
   }
 
   async function signInWithGoogle() {
@@ -121,14 +193,20 @@ export default function LoginPage() {
     });
   }
 
-  if (checkEmail) {
+  if (sent) {
     return (
       <>
         <PageHeader title={t("registerTitle")} />
         <div className="mx-auto max-w-md px-4 py-12">
           <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
-            <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
-            <p className="text-lg">{t("checkEmail")}</p>
+            {sent === "magic" ? (
+              <Mail className="h-10 w-10 text-primary" aria-hidden />
+            ) : (
+              <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
+            )}
+            <p className="text-lg">
+              {sent === "magic" ? t("magicLinkSent") : t("checkEmail")}
+            </p>
           </div>
         </div>
       </>
@@ -169,7 +247,13 @@ export default function LoginPage() {
                 autoComplete={method === "phone" ? "tel" : "email"}
                 required
                 value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                onChange={(e) =>
+                  setIdentifier(
+                    method === "phone"
+                      ? e.target.value.replace(/[^\d+ ]/g, "")
+                      : e.target.value,
+                  )
+                }
                 placeholder={
                   method === "phone"
                     ? t("phonePlaceholder")
@@ -207,22 +291,54 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {mode === "register" && (
+                <p className="text-xs text-muted-foreground">
+                  {t("passwordHint")}
+                </p>
+              )}
             </div>
 
             {mode === "register" && (
               <div className="space-y-2">
                 <Label htmlFor="confirm">{t("confirmLabel")}</Label>
-                <Input
-                  id="confirm"
-                  type={showPw ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  placeholder={t("confirmPlaceholder")}
-                  className="h-12 bg-background text-base"
-                />
+                <div className="relative">
+                  <Input
+                    id="confirm"
+                    type={showConfirm ? "text" : "password"}
+                    autoComplete="new-password"
+                    required
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder={t("confirmPlaceholder")}
+                    className="h-12 bg-background pr-12 text-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    aria-label={
+                      showConfirm ? t("hidePassword") : t("showPassword")
+                    }
+                    className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirm ? (
+                      <EyeOff className="h-5 w-5" aria-hidden />
+                    ) : (
+                      <Eye className="h-5 w-5" aria-hidden />
+                    )}
+                  </button>
+                </div>
               </div>
+            )}
+
+            {SITE_KEY && (
+              <Turnstile
+                ref={captchaRef}
+                siteKey={SITE_KEY}
+                onSuccess={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+                onError={() => setCaptchaToken(null)}
+                options={{ theme: "auto", size: "flexible" }}
+              />
             )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
@@ -240,6 +356,21 @@ export default function LoginPage() {
                   ? t("createAccount")
                   : t("signInButton")}
             </Button>
+
+            {/* Passwordless option — email only */}
+            {method === "email" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+                onClick={sendMagicLink}
+              >
+                <Mail className="h-4 w-4" aria-hidden />
+                {t("getLoginLink")}
+              </Button>
+            )}
           </form>
 
           <div className="my-6 flex items-center gap-3">
