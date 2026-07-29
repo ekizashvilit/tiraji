@@ -36,6 +36,14 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
       })
       .eq("id", profile.id);
     setSaving(false);
+    if (!error) {
+      // Let the header's avatar refresh its initial without a full reload.
+      window.dispatchEvent(
+        new CustomEvent("tiraji:profile-updated", {
+          detail: { display_name: displayName.trim() || null },
+        }),
+      );
+    }
     toast[error ? "error" : "success"](
       error ? error.message : t("saved"),
     );

@@ -15,18 +15,43 @@ export function UserMenu() {
 	const t = useTranslations("auth");
 	const router = useRouter();
 	const [user, setUser] = useState<User | null>(null);
+	const [displayName, setDisplayName] = useState<string | null>(null);
 	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
 		const supabase = createClient();
+
+		async function loadName(userId: string) {
+			const { data } = await supabase
+				.from("profiles")
+				.select("display_name")
+				.eq("id", userId)
+				.single();
+			setDisplayName(data?.display_name ?? null);
+		}
+
 		supabase.auth.getUser().then(({ data }) => {
 			setUser(data.user);
 			setLoaded(true);
+			if (data.user) loadName(data.user.id);
 		});
 		const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
 			setUser(session?.user ?? null);
+			if (session?.user) loadName(session.user.id);
+			else setDisplayName(null);
 		});
-		return () => sub.subscription.unsubscribe();
+
+		// Live-update the initial when the profile is saved elsewhere on the page.
+		function onProfileUpdated(e: Event) {
+			const detail = (e as CustomEvent<{ display_name?: string | null }>).detail;
+			setDisplayName(detail?.display_name ?? null);
+		}
+		window.addEventListener("tiraji:profile-updated", onProfileUpdated);
+
+		return () => {
+			sub.subscription.unsubscribe();
+			window.removeEventListener("tiraji:profile-updated", onProfileUpdated);
+		};
 	}, []);
 
 	async function signOut() {
@@ -50,7 +75,9 @@ export function UserMenu() {
 		);
 	}
 
-	const initial = (user.email ?? "?").charAt(0).toUpperCase();
+	const initial = (displayName?.trim() || user.email || "?")
+		.charAt(0)
+		.toUpperCase();
 
 	return (
 		<DropdownMenu>
