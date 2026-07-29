@@ -6,6 +6,7 @@ import { BookMarked, LogOut, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
+import { useAuthSheet } from "@/components/auth/auth-sheet";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,12 +16,15 @@ type MinimalUser = { email: string | null };
 export function UserMenu({
 	initialUser = null,
 	initialDisplayName = null,
+	onNavigate,
 }: {
 	initialUser?: MinimalUser | null;
 	initialDisplayName?: string | null;
+	onNavigate?: () => void;
 }) {
 	const t = useTranslations("auth");
 	const router = useRouter();
+	const { openAuth } = useAuthSheet();
 	// Seed from the server so the avatar is correct on first paint — no flash.
 	const [user, setUser] = useState<MinimalUser | null>(initialUser);
 	const [displayName, setDisplayName] = useState<string | null>(initialDisplayName);
@@ -65,11 +69,17 @@ export function UserMenu({
 
 	if (!user) {
 		return (
-			<Button asChild variant="ghost" className="h-11 gap-1.5 px-0 cursor-pointer hover:bg-transparent hover:text-inherit">
-				<Link href="/login">
-					<UserRound className="size-5" />
-					{t("signIn")}
-				</Link>
+			<Button
+				type="button"
+				variant="ghost"
+				onClick={() => {
+					onNavigate?.();
+					openAuth();
+				}}
+				className="h-11 gap-1.5 px-0 cursor-pointer hover:bg-transparent hover:text-inherit"
+			>
+				<UserRound className="size-5" />
+				{t("signIn")}
 			</Button>
 		);
 	}

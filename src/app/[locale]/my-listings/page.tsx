@@ -18,7 +18,7 @@ export default async function MyListingsPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect({ href: "/login", locale });
+    redirect({ href: "/?auth=required", locale });
   }
 
   const tAuth = await getTranslations("auth");

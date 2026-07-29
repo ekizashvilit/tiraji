@@ -16,6 +16,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Something went wrong — send them to login with an error flag.
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  // Something went wrong — send them home and flag the auth error (toast + sheet).
+  return NextResponse.redirect(`${origin}/?auth=error`);
 }

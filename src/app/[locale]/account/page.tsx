@@ -19,7 +19,7 @@ export default async function AccountPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect({ href: "/login", locale });
+    redirect({ href: "/?auth=required", locale });
   }
 
   const { data: profile } = await supabase

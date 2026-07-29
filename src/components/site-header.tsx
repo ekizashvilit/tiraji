@@ -162,6 +162,7 @@ export function SiteHeader({
 							<UserMenu
 								initialUser={initialUser}
 								initialDisplayName={initialDisplayName}
+								onNavigate={() => setOpen(false)}
 							/>
 						</div>
 					</nav>

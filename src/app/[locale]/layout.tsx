@@ -8,6 +8,7 @@ import { Providers } from "@/app/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthSheetProvider } from "@/components/auth/auth-sheet";
 import { createClient } from "@/lib/supabase/server";
 import "@/app/globals.css";
 
@@ -64,12 +65,14 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>
           <Providers>
-            <SiteHeader
-              initialUser={initialUser}
-              initialDisplayName={displayName}
-            />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
+            <AuthSheetProvider>
+              <SiteHeader
+                initialUser={initialUser}
+                initialDisplayName={displayName}
+              />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+            </AuthSheetProvider>
             <Toaster />
           </Providers>
         </NextIntlClientProvider>
