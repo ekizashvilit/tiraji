@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { Select } from "@/components/ui/select";
 
 export function SortSelect() {
 	const t = useTranslations("filters");
@@ -21,17 +22,16 @@ export function SortSelect() {
 	}
 
 	return (
-		<label className="flex items-center gap-2 text-sm">
-			<select
-				value={current}
-				onChange={(e) => onChange(e.target.value)}
-				className="h-10 rounded-md border border-input bg-background px-2 text-sm font-medium outline-none focus:border-primary"
-			>
-				<option value="recent">{t("sortRecent")}</option>
-				<option value="relevance">{t("sortRelevance")}</option>
-				<option value="price_asc">{t("sortPriceAsc")}</option>
-				<option value="price_desc">{t("sortPriceDesc")}</option>
-			</select>
-		</label>
+		<Select
+			aria-label={t("sortBy")}
+			value={current}
+			onChange={(e) => onChange(e.target.value)}
+			className="w-auto"
+		>
+			<option value="recent">{t("sortRecent")}</option>
+			<option value="relevance">{t("sortRelevance")}</option>
+			<option value="price_asc">{t("sortPriceAsc")}</option>
+			<option value="price_desc">{t("sortPriceDesc")}</option>
+		</Select>
 	);
 }

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
@@ -11,6 +10,7 @@ import { CITIES, cityLabel } from "@/lib/cities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
 export function ProfileForm({ profile }: { profile: ProfileRow }) {
@@ -85,25 +85,19 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
 
       <div className="space-y-2">
         <Label htmlFor="city">{t("city")}</Label>
-        <div className="relative">
-          <select
-            id="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="h-11 w-full appearance-none rounded-lg border border-border bg-background pl-3 pr-10 text-[0.95rem] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <option value="">{t("cityPlaceholder")}</option>
-            {CITIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {cityLabel(c.code, locale)}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-        </div>
+        <Select
+          id="city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="h-11"
+        >
+          <option value="">{t("cityPlaceholder")}</option>
+          {CITIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {cityLabel(c.code, locale)}
+            </option>
+          ))}
+        </Select>
       </div>
 
       <div className="space-y-2">
