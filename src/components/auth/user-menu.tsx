@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BookMarked, LogOut, Shield, UserRound } from "lucide-react";
+import { BookMarked, LogOut, MessageCircle, Shield, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -29,6 +29,8 @@ export function UserMenu({
 	const [user, setUser] = useState<MinimalUser | null>(initialUser);
 	const [displayName, setDisplayName] = useState<string | null>(initialDisplayName);
 	const [isAdmin, setIsAdmin] = useState(false);
+	const [unread, setUnread] = useState(0);
+	const meIdRef = useRef<string | null>(null);
 
 	useEffect(() => {
 		const supabase = createClient();
@@ -43,14 +45,50 @@ export function UserMenu({
 			setIsAdmin(data?.is_admin ?? false);
 		}
 
+		// Unread = number of conversations with unread messages addressed to me
+		// (so two unread messages in one chat still count as one). RLS scopes the
+		// query to the current user, so no extra filtering is needed.
+		async function loadUnread() {
+			const uid = meIdRef.current;
+			if (!uid) {
+				setUnread(0);
+				return;
+			}
+			const { data } = await supabase
+				.from("messages")
+				.select("conversation_id")
+				.is("read_at", null)
+				.neq("sender_id", uid);
+			const conversations = new Set(
+				(data ?? []).map((m) => m.conversation_id),
+			);
+			setUnread(conversations.size);
+		}
+
 		const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
 			setUser(session?.user ? { email: session.user.email ?? null } : null);
-			if (session?.user) loadProfile(session.user.id);
-			else {
+			if (session?.user) {
+				meIdRef.current = session.user.id;
+				loadProfile(session.user.id);
+				loadUnread();
+			} else {
+				meIdRef.current = null;
 				setDisplayName(null);
 				setIsAdmin(false);
+				setUnread(0);
 			}
 		});
+
+		// Refresh the badge live as messages arrive or get marked read.
+		const channel = supabase
+			.channel("unread-messages")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "messages" },
+				() => loadUnread(),
+			)
+			.subscribe();
+		window.addEventListener("tiraji:messages-read", loadUnread);
 
 		// Live-update the initial when the profile is saved elsewhere on the page.
 		function onProfileUpdated(e: Event) {
@@ -61,6 +99,8 @@ export function UserMenu({
 
 		return () => {
 			sub.subscription.unsubscribe();
+			supabase.removeChannel(channel);
+			window.removeEventListener("tiraji:messages-read", loadUnread);
 			window.removeEventListener("tiraji:profile-updated", onProfileUpdated);
 		};
 	}, []);
@@ -99,12 +139,20 @@ export function UserMenu({
 				<Button
 					variant="ghost"
 					size="icon"
-					className="rounded-full cursor-pointer hover:bg-transparent hover:text-inherit aria-expanded:bg-transparent aria-expanded:text-inherit"
+					className="relative rounded-full cursor-pointer hover:bg-transparent hover:text-inherit aria-expanded:bg-transparent aria-expanded:text-inherit"
 					aria-label={t("account")}
 				>
 					<Avatar className="h-9 w-9">
 						<AvatarFallback className="bg-secondary text-brand-dark">{initial}</AvatarFallback>
 					</Avatar>
+					{unread > 0 && (
+						<span
+							className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background"
+							aria-label={t("unreadCount", { count: unread })}
+						>
+							{unread > 9 ? "9+" : unread}
+						</span>
+					)}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" sideOffset={12} className="w-56 p-1.5">
@@ -118,6 +166,17 @@ export function UserMenu({
 					<Link href="/my-listings">
 						<BookMarked className="size-4.5" />
 						{t("myListings")}
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
+					<Link href="/messages">
+						<MessageCircle className="size-4.5" />
+						{t("messages")}
+						{unread > 0 && (
+							<span className="ml-auto grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground">
+								{unread > 9 ? "9+" : unread}
+							</span>
+						)}
 					</Link>
 				</DropdownMenuItem>
 				{isAdmin && (

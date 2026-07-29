@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSheetProvider } from "@/components/auth/auth-sheet";
+import { ChatDockProvider } from "@/components/messages/chat-dock";
 import { createClient } from "@/lib/supabase/server";
 import "@/app/globals.css";
 
@@ -66,12 +67,14 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Providers>
             <AuthSheetProvider>
-              <SiteHeader
-                initialUser={initialUser}
-                initialDisplayName={displayName}
-              />
-              <main className="flex-1">{children}</main>
-              <SiteFooter />
+              <ChatDockProvider>
+                <SiteHeader
+                  initialUser={initialUser}
+                  initialDisplayName={displayName}
+                />
+                <main className="flex-1">{children}</main>
+                <SiteFooter />
+              </ChatDockProvider>
             </AuthSheetProvider>
             <Toaster />
           </Providers>

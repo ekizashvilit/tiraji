@@ -3,21 +3,33 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { MessageCircle, Phone } from "lucide-react";
+import { Loader2, MessageCircle, Phone } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { useAuthSheet } from "@/components/auth/auth-sheet";
+import { useChatDock } from "@/components/messages/chat-dock";
 import { Button } from "@/components/ui/button";
 
 // Contact actions on a listing. The phone (if the seller chose to show it) is
-// the working channel today; "Message seller" opens the sign-in sheet when
-// logged out and, until in-app chat ships, points people to the phone.
-export function ContactSeller({ phone }: { phone: string | null }) {
+// one channel; "Message seller" opens the sign-in sheet when logged out, else
+// finds-or-creates a conversation with the seller and pops open the chat window.
+export function ContactSeller({
+  listingId,
+  sellerId,
+  phone,
+}: {
+  listingId: string;
+  sellerId: string;
+  phone: string | null;
+}) {
   const t = useTranslations("book");
   const { openAuth } = useAuthSheet();
+  const { openChat } = useChatDock();
   const [revealed, setRevealed] = useState(false);
+  const [starting, setStarting] = useState(false);
 
   async function onMessage() {
+    if (starting) return;
     const supabase = createClient();
     const {
       data: { user },
@@ -26,7 +38,37 @@ export function ContactSeller({ phone }: { phone: string | null }) {
       openAuth();
       return;
     }
-    toast(t("messagingSoon"));
+
+    setStarting(true);
+    // One conversation per (listing, buyer) — reuse it if it already exists.
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("listing_id", listingId)
+      .eq("buyer_id", user.id)
+      .maybeSingle<{ id: string }>();
+
+    let conversationId = existing?.id;
+    if (!conversationId) {
+      const { data: created, error } = await supabase
+        .from("conversations")
+        .insert({
+          listing_id: listingId,
+          buyer_id: user.id,
+          seller_id: sellerId,
+        })
+        .select("id")
+        .single<{ id: string }>();
+      if (error || !created) {
+        setStarting(false);
+        toast.error(t("messageError"));
+        return;
+      }
+      conversationId = created.id;
+    }
+
+    setStarting(false);
+    openChat(conversationId);
   }
 
   return (
@@ -54,9 +96,14 @@ export function ContactSeller({ phone }: { phone: string | null }) {
         variant={phone ? "outline" : "default"}
         size="lg"
         className="w-full gap-2"
+        disabled={starting}
         onClick={onMessage}
       >
-        <MessageCircle className="size-4" aria-hidden />
+        {starting ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+        ) : (
+          <MessageCircle className="size-4" aria-hidden />
+        )}
         {t("messageSeller")}
       </Button>
     </div>

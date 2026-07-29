@@ -189,6 +189,8 @@
     "signOut": "Sign out",
     "account": "My account",
     "myListings": "My listings",
+    "messages": "Messages",
+    "unreadCount": "{count, plural, one {# unread message} other {# unread messages}}",
     "admin": "Admin",
     "error": "Something went wrong. Please try again.",
     "signInRequired": "Please sign in to continue.",
@@ -274,6 +276,7 @@
     "showPhone": "Show phone number",
     "messageSeller": "Message seller",
     "messagingSoon": "In-app messaging is coming soon — please use the phone number for now.",
+    "messageError": "Couldn't open the chat. Please try again.",
     "editListing": "Edit this listing",
     "description": "Description",
     "wantsInReturn": "Wants in return",
@@ -308,5 +311,18 @@
     "hiddenEmpty": "No hidden listings.",
     "unhide": "Unhide",
     "restored": "Listing is visible again"
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": "No messages yet. Start a conversation from a book you're interested in.",
+    "someone": "Someone",
+    "noMessages": "No messages yet",
+    "threadEmpty": "Say hello — send the first message.",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "back": "Back to messages",
+    "close": "Close",
+    "openFull": "Open full view",
+    "sendError": "Message couldn't be sent. Please try again."
   }
 }

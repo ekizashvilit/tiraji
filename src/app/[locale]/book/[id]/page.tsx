@@ -176,7 +176,11 @@ export default async function BookPage({ params }: Params) {
                   {t("editListing")}
                 </Link>
               ) : (
-                <ContactSeller phone={phone} />
+                <ContactSeller
+                  listingId={listing.id}
+                  sellerId={listing.seller_id}
+                  phone={phone}
+                />
               )}
             </div>
           </div>
