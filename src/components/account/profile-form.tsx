@@ -22,8 +22,23 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
   const [showPhone, setShowPhone] = useState(profile.show_phone);
   const [saving, setSaving] = useState(false);
 
+  // Last-saved values — Save stays disabled until something actually differs.
+  const [baseline, setBaseline] = useState({
+    displayName: (profile.display_name ?? "").trim(),
+    city: profile.city ?? "",
+    phone: (profile.phone ?? "").trim(),
+    showPhone: profile.show_phone,
+  });
+
+  const dirty =
+    displayName.trim() !== baseline.displayName ||
+    city !== baseline.city ||
+    phone.trim() !== baseline.phone ||
+    showPhone !== baseline.showPhone;
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!dirty || saving) return;
     setSaving(true);
     const supabase = createClient();
     const { error } = await supabase
@@ -37,6 +52,13 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
       .eq("id", profile.id);
     setSaving(false);
     if (!error) {
+      // Reset the baseline so the button disables again until the next change.
+      setBaseline({
+        displayName: displayName.trim(),
+        city,
+        phone: phone.trim(),
+        showPhone,
+      });
       // Let the header's avatar refresh its initial without a full reload.
       window.dispatchEvent(
         new CustomEvent("tiraji:profile-updated", {
@@ -50,10 +72,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="space-y-6 rounded-xl border border-border bg-card p-6"
-    >
+    <form onSubmit={onSubmit} className="max-w-xl space-y-6">
       <div className="space-y-2">
         <Label htmlFor="displayName">{t("displayName")}</Label>
         <Input
@@ -99,7 +118,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
         />
       </div>
 
-      <div className="flex items-start justify-between gap-4 rounded-lg border border-border bg-background p-4">
+      <div className="flex items-start justify-between gap-4 border-t border-border pt-6">
         <div className="space-y-1">
           <Label htmlFor="showPhone" className="text-base">
             {t("showPhone")}
@@ -113,7 +132,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
         />
       </div>
 
-      <Button type="submit" size="lg" disabled={saving}>
+      <Button type="submit" size="lg" disabled={saving || !dirty}>
         {saving ? t("saving") : t("save")}
       </Button>
     </form>

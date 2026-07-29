@@ -45,7 +45,7 @@ export default async function AccountPage({
   return (
     <>
       <PageHeader title={t("title")} lede={t("lede")} />
-      <div className="mx-auto max-w-lg px-4 py-12">
+      <div className="mx-auto max-w-6xl px-4 py-10">
         <ProfileForm profile={safeProfile} />
       </div>
     </>
