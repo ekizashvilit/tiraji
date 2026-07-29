@@ -189,6 +189,7 @@
     "signOut": "Sign out",
     "account": "My account",
     "myListings": "My listings",
+    "admin": "Admin",
     "error": "Something went wrong. Please try again.",
     "signInRequired": "Please sign in to continue.",
     "signIn": "Sign in"
@@ -301,6 +302,11 @@
     "hidden": "Listing hidden",
     "deleted": "Listing deleted",
     "dismissed": "Report dismissed",
-    "actionError": "Something went wrong. Please try again."
+    "actionError": "Something went wrong. Please try again.",
+    "reportsTitle": "Reports",
+    "hiddenTitle": "Hidden listings",
+    "hiddenEmpty": "No hidden listings.",
+    "unhide": "Unhide",
+    "restored": "Listing is visible again"
   }
 }

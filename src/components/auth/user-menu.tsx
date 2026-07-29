@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BookMarked, LogOut, UserRound } from "lucide-react";
+import { BookMarked, LogOut, Shield, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -28,23 +28,28 @@ export function UserMenu({
 	// Seed from the server so the avatar is correct on first paint — no flash.
 	const [user, setUser] = useState<MinimalUser | null>(initialUser);
 	const [displayName, setDisplayName] = useState<string | null>(initialDisplayName);
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	useEffect(() => {
 		const supabase = createClient();
 
-		async function loadName(userId: string) {
+		async function loadProfile(userId: string) {
 			const { data } = await supabase
 				.from("profiles")
-				.select("display_name")
+				.select("display_name,is_admin")
 				.eq("id", userId)
 				.single();
 			setDisplayName(data?.display_name ?? null);
+			setIsAdmin(data?.is_admin ?? false);
 		}
 
 		const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
 			setUser(session?.user ? { email: session.user.email ?? null } : null);
-			if (session?.user) loadName(session.user.id);
-			else setDisplayName(null);
+			if (session?.user) loadProfile(session.user.id);
+			else {
+				setDisplayName(null);
+				setIsAdmin(false);
+			}
 		});
 
 		// Live-update the initial when the profile is saved elsewhere on the page.
@@ -115,6 +120,14 @@ export function UserMenu({
 						{t("myListings")}
 					</Link>
 				</DropdownMenuItem>
+				{isAdmin && (
+					<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
+						<Link href="/admin">
+							<Shield className="size-4.5" />
+							{t("admin")}
+						</Link>
+					</DropdownMenuItem>
+				)}
 				<DropdownMenuSeparator className="my-1.5" />
 				<DropdownMenuItem onClick={signOut} className="gap-3 px-3 py-2.5 text-[0.95rem]">
 					<LogOut className="size-4.5" />
