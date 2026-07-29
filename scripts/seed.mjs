@@ -137,7 +137,7 @@ async function main() {
       swap_wanted:
         type === "swap" ? "ნებისმიერი ქართული პროზა" : null,
       city,
-      book_language: /[a-zA-Z]/.test(title) ? "English" : "ქართული",
+      book_language: /[a-zA-Z]/.test(title) ? "en" : "ka",
       genre_id: genreId[slug] ?? null,
       cover_external_url: cover,
     });

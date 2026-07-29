@@ -75,7 +75,7 @@ export function HeaderSearch({ className }: { className?: string }) {
 
   function goToSearch(term: string) {
     setOpen(false);
-    router.push(term ? `/buy?q=${encodeURIComponent(term)}` : "/buy");
+    router.push(term ? `/search?q=${encodeURIComponent(term)}` : "/search");
   }
 
   function tag(s: Suggestion) {

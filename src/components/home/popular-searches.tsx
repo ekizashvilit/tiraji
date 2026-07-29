@@ -29,7 +29,7 @@ export async function PopularSearches() {
         {TAGS.map((tag) => (
           <Link
             key={tag}
-            href={`/buy?q=${encodeURIComponent(tag)}`}
+            href={`/search?q=${encodeURIComponent(tag)}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-accent"
           >
             <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />

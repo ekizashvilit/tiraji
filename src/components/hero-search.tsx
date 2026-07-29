@@ -22,7 +22,7 @@ export function HeroSearch() {
       .map((s) => s.trim())
       .filter(Boolean)
       .join(" ");
-    router.push(q ? `/buy?q=${encodeURIComponent(q)}` : "/buy");
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
   }
 
   const fields = [
