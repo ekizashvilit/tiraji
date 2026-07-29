@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const NAMES: Record<string, string> = { ka: "ქართული", en: "English" };
 const LABELS: Record<string, string> = { ka: "ქარ", en: "ENG" };
@@ -34,15 +35,18 @@ export function LanguageSwitcher() {
 					{LABELS[locale]}
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-40">
+			<DropdownMenuContent align="end" sideOffset={12} className="w-44 p-1.5">
 				{routing.locales.map((l) => (
 					<DropdownMenuItem
 						key={l}
 						onClick={() => router.replace({ pathname, query }, { locale: l })}
-						className={l === locale ? "font-medium text-primary" : ""}
+						className={cn(
+							"gap-3 px-3 py-2.5 text-[0.95rem]",
+							l === locale && "font-medium text-primary",
+						)}
 					>
 						{NAMES[l] ?? l}
-						{l === locale && <Check className="ml-auto h-4 w-4" />}
+						{l === locale && <Check className="ml-auto size-4.5" />}
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>

@@ -102,22 +102,22 @@ export function UserMenu({
 					</Avatar>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-52">
-				<DropdownMenuItem asChild>
+			<DropdownMenuContent align="end" sideOffset={12} className="w-56 p-1.5">
+				<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
 					<Link href="/account">
-						<UserRound className="h-4 w-4" />
+						<UserRound className="size-4.5" />
 						{t("account")}
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem asChild>
+				<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
 					<Link href="/my-listings">
-						<BookMarked className="h-4 w-4" />
+						<BookMarked className="size-4.5" />
 						{t("myListings")}
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={signOut}>
-					<LogOut className="h-4 w-4" />
+				<DropdownMenuSeparator className="my-1.5" />
+				<DropdownMenuItem onClick={signOut} className="gap-3 px-3 py-2.5 text-[0.95rem]">
+					<LogOut className="size-4.5" />
 					{t("signOut")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
