@@ -19,16 +19,18 @@ export function PageHeader({
   return (
     <div className="border-b border-border">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <span
-          className={cn("mb-3 block h-1 w-12 rounded-full", bar)}
-          aria-hidden
-        />
-        <h1 className="caps text-2xl font-bold sm:text-3xl">
-          {title.toUpperCase()}
-        </h1>
-        {lede && (
-          <p className="mt-2 max-w-xl text-muted-foreground">{lede}</p>
-        )}
+        <div className="flex gap-4">
+          <span
+            className={cn("w-1.5 shrink-0 self-stretch rounded-full", bar)}
+            aria-hidden
+          />
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">{title}</h1>
+            {lede && (
+              <p className="mt-1.5 max-w-xl text-muted-foreground">{lede}</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
