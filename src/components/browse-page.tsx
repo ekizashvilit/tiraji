@@ -40,12 +40,14 @@ export async function BrowsePage({
   const t = await getTranslations("pages");
   const tf = await getTranslations("filters");
   const sp = searchParams;
+  const genres = await getGenres();
 
   // Shared filter set (type is fixed) for both results and facet counts.
+  // The genre is a readable slug in the URL (e.g. ?genre=fiction) → resolve to its id.
   const filters = {
     q: sp.q,
     type,
-    genre: sp.genre ? Number(sp.genre) : undefined,
+    genre: genres.find((g) => g.slug === sp.genre)?.id,
     city: sp.city,
     condition: (sp.condition as BookCondition) || undefined,
     language: sp.language,
@@ -53,8 +55,7 @@ export async function BrowsePage({
     maxPrice: sp.max ? Number(sp.max) : undefined,
   };
 
-  const [genres, facets, listings] = await Promise.all([
-    getGenres(),
+  const [facets, listings] = await Promise.all([
     getListingFacets(filters),
     searchListings({ ...filters, sort: sp.sort }),
   ]);

@@ -42,7 +42,7 @@ export function CategoryTiles({
         return (
           <Link
             key={genre.id}
-            href={`/search?genre=${genre.id}`}
+            href={`/search?genre=${genre.slug}`}
             className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40 hover:bg-accent/50"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-primary">

@@ -194,10 +194,9 @@ export function SearchFilters({ genres, facets, locale, hideType = false }: Prop
                 key={g.id}
                 label={genreName(g, locale)}
                 count={facets.genres[g.id]}
-                active={params.get("genre") === String(g.id)}
+                active={params.get("genre") === g.slug}
                 href={hrefWith({
-                  genre:
-                    params.get("genre") === String(g.id) ? null : String(g.id),
+                  genre: params.get("genre") === g.slug ? null : g.slug,
                 })}
               />
             ))}

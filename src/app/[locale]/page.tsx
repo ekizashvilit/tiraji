@@ -53,9 +53,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 				</section>
 
 				<BookShelf title={t("forSaleTitle")} href="/buy" listings={forSale} accent="buy" />
-				<BookShelf title={t("fictionShelf")} href={fictionId ? `/search?genre=${fictionId}` : "/search"} listings={fiction} accent="buy" />
+				<BookShelf title={t("fictionShelf")} href="/search?genre=fiction" listings={fiction} accent="buy" />
 				<BookShelf title={t("toSwapTitle")} href="/swap" listings={toSwap} accent="swap" />
-				<BookShelf title={t("nonfictionShelf")} href={nonfictionId ? `/search?genre=${nonfictionId}` : "/search"} listings={nonfiction} accent="buy" />
+				<BookShelf title={t("nonfictionShelf")} href="/search?genre=nonfiction" listings={nonfiction} accent="buy" />
 				<BookShelf title={t("freeTitle")} href="/giveaway" listings={free} accent="give" />
 
 				<WhyTiraji />
