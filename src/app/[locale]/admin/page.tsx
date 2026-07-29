@@ -96,7 +96,7 @@ export default async function AdminPage({ params }: { params: Promise<{ locale: 
 		<>
 			<PageHeader title={t("title")} lede={t("lede")} />
 			<div className="mx-auto max-w-6xl px-4 py-8">
-				<div className="max-w-4xl space-y-10">
+				<div className="space-y-10">
 					<section className="space-y-3">
 						<h2 className="text-lg font-bold">{t("reportsTitle")}</h2>
 						<AdminReports items={items} />
