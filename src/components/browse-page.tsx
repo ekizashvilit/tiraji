@@ -65,7 +65,7 @@ export async function BrowsePage({
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
           <aside className="lg:pr-2">
-            <SearchFilters genres={genres} facets={facets} locale={locale} />
+            <SearchFilters genres={genres} facets={facets} locale={locale} hideType />
           </aside>
 
           <div className="min-w-0">

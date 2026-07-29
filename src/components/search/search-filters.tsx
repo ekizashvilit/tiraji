@@ -21,6 +21,8 @@ type Props = {
   genres: GenreRow[];
   facets: ListingFacets;
   locale: string;
+  // Hide the listing-type group (browse pages are already locked to one type).
+  hideType?: boolean;
 };
 
 // Keys the sidebar controls (everything except the text query and sort).
@@ -34,7 +36,7 @@ const FILTER_KEYS = [
   "max",
 ];
 
-export function SearchFilters({ genres, facets, locale }: Props) {
+export function SearchFilters({ genres, facets, locale, hideType = false }: Props) {
   const t = useTranslations("filters");
   const params = useSearchParams();
   const pathname = usePathname();
@@ -77,7 +79,7 @@ export function SearchFilters({ genres, facets, locale }: Props) {
   );
 
   // A group with only one available value adds no filtering power → hide it.
-  const showType = typeOptions.length > 1;
+  const showType = !hideType && typeOptions.length > 1;
   const showCondition = conditionOptions.length > 1;
   const showGenre = genreOptions.length > 1;
   const showCity = cityOptions.length > 1;
@@ -168,6 +170,8 @@ export function SearchFilters({ genres, facets, locale }: Props) {
 
         {showPrice && (
           <PriceGroup
+            // Remount when the URL price changes (e.g. "Clear") so the inputs re-seed.
+            key={`${params.get("min") ?? ""}-${params.get("max") ?? ""}`}
             title={t("price")}
             minLabel={t("min")}
             maxLabel={t("max")}
