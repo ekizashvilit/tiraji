@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { User } from "@supabase/supabase-js";
 import { BookMarked, LogOut, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -11,12 +10,20 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export function UserMenu() {
+type MinimalUser = { email: string | null };
+
+export function UserMenu({
+	initialUser = null,
+	initialDisplayName = null,
+}: {
+	initialUser?: MinimalUser | null;
+	initialDisplayName?: string | null;
+}) {
 	const t = useTranslations("auth");
 	const router = useRouter();
-	const [user, setUser] = useState<User | null>(null);
-	const [displayName, setDisplayName] = useState<string | null>(null);
-	const [loaded, setLoaded] = useState(false);
+	// Seed from the server so the avatar is correct on first paint — no flash.
+	const [user, setUser] = useState<MinimalUser | null>(initialUser);
+	const [displayName, setDisplayName] = useState<string | null>(initialDisplayName);
 
 	useEffect(() => {
 		const supabase = createClient();
@@ -30,13 +37,8 @@ export function UserMenu() {
 			setDisplayName(data?.display_name ?? null);
 		}
 
-		supabase.auth.getUser().then(({ data }) => {
-			setUser(data.user);
-			setLoaded(true);
-			if (data.user) loadName(data.user.id);
-		});
 		const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user ?? null);
+			setUser(session?.user ? { email: session.user.email ?? null } : null);
 			if (session?.user) loadName(session.user.id);
 			else setDisplayName(null);
 		});
@@ -60,9 +62,6 @@ export function UserMenu() {
 		router.push("/");
 		router.refresh();
 	}
-
-	// Avoid a flash: render a same-size placeholder until we know the auth state.
-	if (!loaded) return <div className="h-11 w-24" aria-hidden />;
 
 	if (!user) {
 		return (

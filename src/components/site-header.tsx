@@ -17,7 +17,13 @@ const SECTIONS = [
 	{ href: "/giveaway", key: "giveaway" },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({
+	initialUser = null,
+	initialDisplayName = null,
+}: {
+	initialUser?: { email: string | null } | null;
+	initialDisplayName?: string | null;
+}) {
 	const t = useTranslations("nav");
 	const pathname = usePathname();
 	const isHome = pathname === "/";
@@ -102,7 +108,10 @@ export function SiteHeader() {
 							<LanguageSwitcher />
 						</div>
 						<div className="hidden sm:block">
-							<UserMenu />
+							<UserMenu
+								initialUser={initialUser}
+								initialDisplayName={initialDisplayName}
+							/>
 						</div>
 						<Button variant="outline" size="icon" className="h-11 w-11 md:hidden" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
 							{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -150,7 +159,10 @@ export function SiteHeader() {
 						</Link>
 						<div className="mt-2 flex items-center gap-2">
 							<LanguageSwitcher />
-							<UserMenu />
+							<UserMenu
+								initialUser={initialUser}
+								initialDisplayName={initialDisplayName}
+							/>
 						</div>
 					</nav>
 				</div>
