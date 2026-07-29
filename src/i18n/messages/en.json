@@ -281,5 +281,23 @@
     "reportReason": "Why are you reporting this listing? (optional)",
     "reported": "Thanks — we'll review this listing.",
     "reportError": "Couldn't submit your report. Please try again."
+  },
+  "admin": {
+    "title": "Reports",
+    "lede": "Listings reported by users — review and act.",
+    "empty": "No reports. Nothing to review right now.",
+    "reason": "Reason",
+    "noReason": "No reason given",
+    "reportedBy": "Reported by {name}",
+    "anonymous": "a user",
+    "listingGone": "Listing already removed",
+    "hide": "Hide listing",
+    "deleteListing": "Delete listing",
+    "dismiss": "Dismiss",
+    "deleteConfirm": "Delete this listing permanently? This can't be undone.",
+    "hidden": "Listing hidden",
+    "deleted": "Listing deleted",
+    "dismissed": "Report dismissed",
+    "actionError": "Something went wrong. Please try again."
   }
 }
