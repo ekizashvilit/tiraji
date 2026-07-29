@@ -2,33 +2,115 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Mail } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "@/i18n/navigation";
+import { normalizeGeorgianPhone, phoneToEmail } from "@/lib/phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/page-header";
+import { cn } from "@/lib/utils";
+
+type Mode = "signin" | "register";
+type Method = "phone" | "email";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const router = useRouter();
 
-  async function sendMagicLink(e: React.FormEvent) {
+  const [mode, setMode] = useState<Mode>("signin");
+  const [method, setMethod] = useState<Method>("phone");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [checkEmail, setCheckEmail] = useState(false);
+
+  function mapError(message: string): string {
+    const m = message.toLowerCase();
+    if (m.includes("already registered") || m.includes("already exists"))
+      return t("alreadyRegistered");
+    if (m.includes("invalid login") || m.includes("credentials"))
+      return t("badCredentials");
+    return t("error");
+  }
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("sending");
+    setError(null);
+
+    // Resolve the identifier to the email Supabase authenticates against.
+    let email: string;
+    let phoneCanonical: string | null = null;
+    if (method === "phone") {
+      phoneCanonical = normalizeGeorgianPhone(identifier);
+      if (!phoneCanonical) {
+        setError(t("invalidPhone"));
+        return;
+      }
+      email = phoneToEmail(phoneCanonical);
+    } else {
+      email = identifier.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError(t("invalidEmail"));
+        return;
+      }
+    }
+
+    if (mode === "register") {
+      if (password.length < 6) {
+        setError(t("weakPassword"));
+        return;
+      }
+      if (password !== confirm) {
+        setError(t("passwordMismatch"));
+        return;
+      }
+    }
+
+    setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    setStatus(error ? "error" : "sent");
+
+    if (mode === "register") {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: phoneCanonical ? { phone_number: phoneCanonical } : {},
+        },
+      });
+      if (error) {
+        setError(mapError(error.message));
+        setLoading(false);
+        return;
+      }
+      // With email confirmation disabled, a session is returned immediately.
+      if (!data.session) {
+        setLoading(false);
+        if (method === "email") setCheckEmail(true);
+        else setError(t("phoneSignupFailed"));
+        return;
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(mapError(error.message));
+        setLoading(false);
+        return;
+      }
+    }
+
+    router.push("/account");
+    router.refresh();
   }
 
   async function signInWithGoogle() {
@@ -39,67 +121,206 @@ export default function LoginPage() {
     });
   }
 
-  return (
-    <>
-      <PageHeader title={t("loginTitle")} lede={t("loginLede")} />
-      <div className="mx-auto max-w-md px-4 py-12">
-        {status === "sent" ? (
+  if (checkEmail) {
+    return (
+      <>
+        <PageHeader title={t("registerTitle")} />
+        <div className="mx-auto max-w-md px-4 py-12">
           <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
             <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
-            <p className="text-lg">{t("magicLinkSent")}</p>
+            <p className="text-lg">{t("checkEmail")}</p>
           </div>
-        ) : (
-          <div className="rounded-xl border border-border bg-card p-6">
-            <form onSubmit={sendMagicLink} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("emailLabel")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("emailPlaceholder")}
-                  className="h-11 bg-background"
-                />
-              </div>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={status === "sending"}
-              >
-                <Mail className="h-4 w-4" />
-                {status === "sending" ? t("sending") : t("sendMagicLink")}
-              </Button>
-              {status === "error" && (
-                <p className="text-sm text-destructive">{t("error")}</p>
-              )}
-            </form>
+        </div>
+      </>
+    );
+  }
 
-            <div className="my-6 flex items-center gap-3">
-              <Separator className="flex-1" />
-              <span className="text-sm text-muted-foreground">
-                {t("orContinueWith")}
-              </span>
-              <Separator className="flex-1" />
+  return (
+    <>
+      <PageHeader
+        title={mode === "register" ? t("registerTitle") : t("signInTitle")}
+        lede={t("loginLede")}
+      />
+      <div className="mx-auto max-w-md px-4 py-12">
+        <div className="rounded-xl border border-border bg-card p-6">
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Phone / Email method */}
+            <Segmented
+              options={[
+                { value: "phone", label: t("methodPhone") },
+                { value: "email", label: t("methodEmail") },
+              ]}
+              value={method}
+              onChange={(v) => {
+                setMethod(v as Method);
+                setIdentifier("");
+                setError(null);
+              }}
+            />
+
+            <div className="space-y-2">
+              <Label htmlFor="identifier">
+                {method === "phone" ? t("phoneLabel") : t("emailLabel")}
+              </Label>
+              <Input
+                id="identifier"
+                type={method === "phone" ? "tel" : "email"}
+                inputMode={method === "phone" ? "tel" : "email"}
+                autoComplete={method === "phone" ? "tel" : "email"}
+                required
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder={
+                  method === "phone"
+                    ? t("phonePlaceholder")
+                    : t("emailPlaceholder")
+                }
+                className="h-12 bg-background text-base"
+              />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="password">{t("passwordLabel")}</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPw ? "text" : "password"}
+                  autoComplete={
+                    mode === "register" ? "new-password" : "current-password"
+                  }
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t("passwordPlaceholder")}
+                  className="h-12 bg-background pr-12 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  aria-label={showPw ? t("hidePassword") : t("showPassword")}
+                  className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+                >
+                  {showPw ? (
+                    <EyeOff className="h-5 w-5" aria-hidden />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="confirm">{t("confirmLabel")}</Label>
+                <Input
+                  id="confirm"
+                  type={showPw ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder={t("confirmPlaceholder")}
+                  className="h-12 bg-background text-base"
+                />
+              </div>
+            )}
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
             <Button
-              type="button"
-              variant="outline"
+              type="submit"
               size="lg"
               className="w-full"
-              onClick={signInWithGoogle}
+              disabled={loading}
             >
-              <GoogleIcon />
-              {t("continueWithGoogle")}
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading
+                ? t("pleaseWait")
+                : mode === "register"
+                  ? t("createAccount")
+                  : t("signInButton")}
             </Button>
+          </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="text-sm text-muted-foreground">
+              {t("orContinueWith")}
+            </span>
+            <Separator className="flex-1" />
           </div>
-        )}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="w-full"
+            onClick={signInWithGoogle}
+          >
+            <GoogleIcon />
+            {t("continueWithGoogle")}
+          </Button>
+
+          {/* Switch between signing in and creating an account */}
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {mode === "signin" ? t("noAccount") : t("haveAccount")}{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "signin" ? "register" : "signin");
+                setError(null);
+              }}
+              className="font-semibold text-primary hover:underline"
+            >
+              {mode === "signin" ? t("tabRegister") : t("tabSignIn")}
+            </button>
+          </p>
+        </div>
       </div>
     </>
+  );
+}
+
+function Segmented({
+  options,
+  value,
+  onChange,
+  className,
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="tablist"
+      className={cn(
+        "grid grid-cols-2 gap-1 rounded-lg bg-secondary p-1",
+        className,
+      )}
+    >
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "h-10 rounded-md text-sm font-semibold transition-colors",
+              active
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
