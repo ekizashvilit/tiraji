@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { checkImageIsSafe } from "@/lib/nsfw";
+import { isClean } from "@/lib/profanity";
 import { useRouter } from "@/i18n/navigation";
 import { CITIES, cityLabel } from "@/lib/cities";
 import { LANGUAGES, languageLabel } from "@/lib/languages";
@@ -100,8 +102,9 @@ export function SellForm({
   );
 
   const [submitting, setSubmitting] = useState(false);
+  const [checking, setChecking] = useState(false);
 
-  function onAddPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onAddPhotos(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     e.target.value = ""; // allow re-selecting the same file
     if (!files.length) return;
@@ -110,12 +113,31 @@ export function SellForm({
       toast.error(t("photosMax", { max: MAX_PHOTOS }));
       return;
     }
-    const added: Photo[] = files.slice(0, room).map((file) => ({
-      kind: "new",
-      file,
-      url: URL.createObjectURL(file),
-    }));
-    setPhotos((prev) => [...prev, ...added]);
+
+    // Screen each photo for explicit content before it's added (and later
+    // uploaded). Runs entirely in the browser via NSFWJS.
+    setChecking(true);
+    const accepted: Photo[] = [];
+    let rejected = 0;
+    for (const file of files.slice(0, room)) {
+      let safe = true;
+      try {
+        safe = (await checkImageIsSafe(file)).safe;
+      } catch {
+        // If the model can't load, don't block the seller — the report button
+        // and admin queue remain as a fallback.
+        safe = true;
+      }
+      if (!safe) {
+        rejected++;
+        continue;
+      }
+      accepted.push({ kind: "new", file, url: URL.createObjectURL(file) });
+    }
+    setChecking(false);
+
+    if (rejected > 0) toast.error(t("photoRejected"));
+    if (accepted.length) setPhotos((prev) => [...prev, ...accepted]);
   }
 
   function removePhoto(index: number) {
@@ -133,6 +155,14 @@ export function SellForm({
       toast.error(t("errorTitle"));
       return;
     }
+
+    // Screen the free-text fields for offensive language before publishing.
+    const text = [title, author, swapWanted].filter(Boolean).join(" ");
+    if (!isClean(text)) {
+      toast.error(t("errorProfanity"));
+      return;
+    }
+
     setSubmitting(true);
     const supabase = createClient();
 
@@ -416,13 +446,25 @@ export function SellForm({
             </div>
           ))}
           {photos.length < MAX_PHOTOS && (
-            <label className="grid size-24 cursor-pointer place-items-center gap-1 rounded-lg border border-dashed border-border p-2 text-center leading-tight text-muted-foreground hover:bg-muted">
-              <ImagePlus className="size-6" aria-hidden />
-              <span className="text-xs">{t("addPhotos")}</span>
+            <label
+              className={cn(
+                "grid size-24 place-items-center gap-1 rounded-lg border border-dashed border-border p-2 text-center leading-tight text-muted-foreground",
+                checking ? "cursor-wait opacity-70" : "cursor-pointer hover:bg-muted",
+              )}
+            >
+              {checking ? (
+                <Loader2 className="size-6 animate-spin" aria-hidden />
+              ) : (
+                <ImagePlus className="size-6" aria-hidden />
+              )}
+              <span className="text-xs">
+                {checking ? t("checkingPhoto") : t("addPhotos")}
+              </span>
               <input
                 type="file"
                 accept="image/*"
                 multiple
+                disabled={checking}
                 onChange={onAddPhotos}
                 className="sr-only"
               />

@@ -236,6 +236,8 @@
     "photos": "Photos",
     "photosHint": "Add up to 3 photos of your book.",
     "addPhotos": "Add photo",
+    "checkingPhoto": "Checking photo…",
+    "photoRejected": "That photo looks explicit and can't be added.",
     "removePhoto": "Remove photo",
     "photosMax": "You can add up to {max} photos.",
     "publish": "Publish listing",
@@ -245,6 +247,7 @@
     "saving": "Saving…",
     "updated": "Listing updated",
     "errorTitle": "Please enter a title.",
+    "errorProfanity": "Please remove offensive language before publishing.",
     "errorUpload": "A photo failed to upload. Please try again.",
     "errorGeneric": "Something went wrong. Please try again."
   },
