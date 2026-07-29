@@ -130,6 +130,15 @@
     line-height: 1.2;
     letter-spacing: -0.01em;
   }
+  /* Buttons (and button-like controls) show a pointer; disabled ones don't. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: default;
+  }
 }
 
 /* Hide scrollbars on horizontal "shelf" rows while keeping them scrollable. */
