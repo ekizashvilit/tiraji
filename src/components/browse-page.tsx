@@ -41,6 +41,7 @@ export async function BrowsePage({
 }) {
   const t = await getTranslations("pages");
   const tf = await getTranslations("filters");
+  const tNav = await getTranslations("nav");
   const sp = searchParams;
   const genres = await getGenres();
 
@@ -71,7 +72,12 @@ export async function BrowsePage({
 
   return (
     <>
-      <PageHeader title={title} lede={lede} accent={accent} />
+      <PageHeader
+        title={title}
+        lede={lede}
+        accent={accent}
+        crumbs={[{ label: tNav("home"), href: "/" }, { label: title }]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
           <aside className="lg:pr-2">

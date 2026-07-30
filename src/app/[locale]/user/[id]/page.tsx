@@ -8,6 +8,7 @@ import { getListingsBySeller } from "@/lib/listings";
 import { cityLabel } from "@/lib/cities";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BookGrid } from "@/components/book-grid";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 type Params = { params: Promise<{ locale: string; id: string }> };
 
@@ -25,9 +26,10 @@ export default async function UserProfilePage({ params }: Params) {
   const profile = await getPublicProfile(id);
   if (!profile) notFound();
 
-  const [t, tBook] = [
+  const [t, tBook, tNav] = [
     await getTranslations("profile"),
     await getTranslations("book"),
+    await getTranslations("nav"),
   ];
   const listings = await getListingsBySeller(id);
 
@@ -40,6 +42,11 @@ export default async function UserProfilePage({ params }: Params) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <Breadcrumbs
+        items={[{ label: tNav("home"), href: "/" }, { label: name }]}
+        className="mb-5"
+      />
+
       {/* Profile header */}
       <div className="flex items-center gap-4">
         <Avatar className="size-16">

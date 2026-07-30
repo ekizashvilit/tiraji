@@ -35,6 +35,7 @@ export default async function SearchPage({
   const sp = await searchParams;
   const t = await getTranslations("pages");
   const tf = await getTranslations("filters");
+  const tNav = await getTranslations("nav");
 
   const genres = await getGenres();
 
@@ -70,6 +71,10 @@ export default async function SearchPage({
       <PageHeader
         title={t("searchResultsTitle")}
         lede={t("searchResultsLede")}
+        crumbs={[
+          { label: tNav("home"), href: "/" },
+          { label: t("searchResultsTitle") },
+        ]}
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">

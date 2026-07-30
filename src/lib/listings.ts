@@ -98,6 +98,47 @@ export async function getListingsBySeller(
   return (data as ListingCard[]) ?? [];
 }
 
+// A seller's other active listings (excluding the one being viewed) — for the
+// "More from this seller" shelf on the detail page.
+export async function getSellerOtherListings(
+  sellerId: string,
+  excludeId: string,
+  limit = 12,
+): Promise<ListingCard[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .eq("seller_id", sellerId)
+    .neq("id", excludeId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data as ListingCard[]) ?? [];
+}
+
+// Related listings for the detail page: same genre when known (from other
+// sellers, for variety), newest first. Falls back to recent when no genre.
+export async function getSimilarListings(opts: {
+  excludeId: string;
+  genreId: number | null;
+  excludeSellerId?: string;
+  limit?: number;
+}): Promise<ListingCard[]> {
+  const supabase = await createClient();
+  let query = supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .neq("id", opts.excludeId)
+    .order("created_at", { ascending: false })
+    .limit(opts.limit ?? 12);
+  if (opts.genreId != null) query = query.eq("genre_id", opts.genreId);
+  if (opts.excludeSellerId) query = query.neq("seller_id", opts.excludeSellerId);
+  const { data } = await query;
+  return (data as ListingCard[]) ?? [];
+}
+
 export async function getListingsByGenre(
   genreId: number,
   limit = 12,

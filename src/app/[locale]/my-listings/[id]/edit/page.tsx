@@ -14,6 +14,8 @@ export default async function EditListingPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("pages");
+  const tNav = await getTranslations("nav");
+  const tAuth = await getTranslations("auth");
 
   const supabase = await createClient();
   const {
@@ -41,7 +43,15 @@ export default async function EditListingPage({
 
   return (
     <>
-      <PageHeader title={t("editTitle")} lede={t("editLede")} />
+      <PageHeader
+        title={t("editTitle")}
+        lede={t("editLede")}
+        crumbs={[
+          { label: tNav("home"), href: "/" },
+          { label: tAuth("myListings"), href: "/my-listings" },
+          { label: t("editTitle") },
+        ]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <SellForm
           genres={genres}

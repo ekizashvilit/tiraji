@@ -4,6 +4,7 @@
     "tagline": "Second-hand, out-of-print & old books"
   },
   "nav": {
+    "home": "Home",
     "buy": "Buy",
     "swap": "Swap",
     "giveaway": "Give away",
@@ -279,6 +280,11 @@
   "book": {
     "sellerFallback": "Seller",
     "memberSince": "Member since {date}",
+    "sellerLabel": "Sold by",
+    "viewSellerItems": "View this seller's listings",
+    "aboutItem": "About this book",
+    "moreFromSeller": "More from this seller",
+    "similar": "You might also like",
     "showPhone": "Show phone number",
     "messageSeller": "Message seller",
     "messagingSoon": "In-app messaging is coming soon — please use the phone number for now.",

@@ -39,6 +39,7 @@ export default async function MyListingsPage({
   }
 
   const tAuth = await getTranslations("auth");
+  const tNav = await getTranslations("nav");
 
   const { data } = await supabase
     .from("listings")
@@ -62,7 +63,13 @@ export default async function MyListingsPage({
 
   return (
     <>
-      <PageHeader title={tAuth("myListings")} />
+      <PageHeader
+        title={tAuth("myListings")}
+        crumbs={[
+          { label: tNav("home"), href: "/" },
+          { label: tAuth("myListings") },
+        ]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <MyListingsList items={items} />
       </div>

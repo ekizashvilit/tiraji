@@ -19,6 +19,7 @@ export default async function SellPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("pages");
+  const tNav = await getTranslations("nav");
 
   const supabase = await createClient();
   const {
@@ -40,7 +41,14 @@ export default async function SellPage({
 
   return (
     <>
-      <PageHeader title={t("sellTitle")} lede={t("sellLede")} />
+      <PageHeader
+        title={t("sellTitle")}
+        lede={t("sellLede")}
+        crumbs={[
+          { label: tNav("home"), href: "/" },
+          { label: t("sellTitle") },
+        ]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <SellForm
           genres={genres}

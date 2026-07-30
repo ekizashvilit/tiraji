@@ -24,11 +24,15 @@ export default async function MessagesPage({
   }
 
   const t = await getTranslations("chat");
+  const tNav = await getTranslations("nav");
   const conversations = await getMyConversations();
 
   return (
     <>
-      <PageHeader title={t("title")} />
+      <PageHeader
+        title={t("title")}
+        crumbs={[{ label: tNav("home"), href: "/" }, { label: t("title") }]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-8">
         {conversations.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">

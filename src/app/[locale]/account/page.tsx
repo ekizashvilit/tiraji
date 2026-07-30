@@ -29,6 +29,7 @@ export default async function AccountPage({
     .single<ProfileRow>();
 
   const t = await getTranslations("account");
+  const tNav = await getTranslations("nav");
 
   // Fall back to a minimal profile shape if the row isn't readable yet.
   const safeProfile: ProfileRow = profile ?? {
@@ -44,7 +45,11 @@ export default async function AccountPage({
 
   return (
     <>
-      <PageHeader title={t("title")} lede={t("lede")} />
+      <PageHeader
+        title={t("title")}
+        lede={t("lede")}
+        crumbs={[{ label: tNav("home"), href: "/" }, { label: t("title") }]}
+      />
       <div className="mx-auto max-w-6xl px-4 py-10">
         <ProfileForm profile={safeProfile} />
       </div>
