@@ -8,6 +8,7 @@ import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 import { normalizeGeorgianPhone, phoneToEmail } from "@/lib/phone";
+import { getSiteURL } from "@/lib/site-url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -115,7 +116,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getSiteURL()}/auth/callback`,
           data: phone ? { phone_number: phone } : {},
           ...captcha,
         },
@@ -157,7 +158,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${getSiteURL()}/auth/callback` },
     });
   }
 
