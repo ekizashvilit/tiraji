@@ -74,19 +74,20 @@ export function SiteHeader({
 				</div>
 			</header>
 
-			{/* Section bar (AbeBooks-style): the sections on the left, List a book on
-			    the right. Shown on every page on mobile (it's the mobile section nav),
-			    but on desktop only on the home page. Normal flow — scrolls away under
-			    the sticky header, and reappears when you scroll back to the top. */}
-			<div className={cn("bg-background", !isHome && "md:hidden")}>
-				<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
-					<div className="flex flex-1 items-center justify-between md:flex-none md:justify-start">{navLinks}</div>
-					<Link href="/sell" className="caps hidden items-center gap-1.5 px-3 py-6 text-[0.95rem] font-semibold text-primary hover:underline md:flex">
-						<Plus className="h-4 w-4" aria-hidden />
-						{caps(t("sell"))}
-					</Link>
-				</nav>
-			</div>
+			{/* Section bar (AbeBooks-style): sections on the left, List a book on the
+			    right. Home page only, on every viewport. Normal flow — scrolls away
+			    under the sticky header, and reappears when you scroll back to the top. */}
+			{isHome && (
+				<div className="bg-background">
+					<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
+						<div className="flex flex-1 items-center justify-between md:flex-none md:justify-start">{navLinks}</div>
+						<Link href="/sell" className="caps hidden items-center gap-1.5 px-3 py-6 text-[0.95rem] font-semibold text-primary hover:underline md:flex">
+							<Plus className="h-4 w-4" aria-hidden />
+							{caps(t("sell"))}
+						</Link>
+					</nav>
+				</div>
+			)}
 		</>
 	);
 }
