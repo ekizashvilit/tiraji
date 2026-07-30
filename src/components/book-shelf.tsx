@@ -12,11 +12,14 @@ export function BookShelf({
   href,
   listings,
   accent,
+  priority = false,
 }: {
   title: string;
   href: string;
   listings: ListingCard[];
   accent?: "buy" | "swap" | "give";
+  // Eager-load the first few covers — use only for the first, above-the-fold shelf.
+  priority?: boolean;
 }) {
   const t = useTranslations("common");
   if (listings.length === 0) return null;
@@ -41,10 +44,11 @@ export function BookShelf({
       </div>
 
       <ScrollRow>
-        {listings.map((listing) => (
+        {listings.map((listing, i) => (
           <BookCard
             key={listing.id}
             listing={listing}
+            priority={priority && i < 4}
             className="w-[42vw] shrink-0 sm:w-40"
           />
         ))}

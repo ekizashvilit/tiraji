@@ -44,7 +44,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
 			{/* Content */}
 			<div className="mx-auto max-w-6xl space-y-14 px-4 pb-16">
-				<BookShelf title={t("recentTitle")} href="/buy" listings={recent} accent="buy" />
+				<BookShelf title={t("recentTitle")} href="/buy" listings={recent} accent="buy" priority />
 
 				{/* Browse by category */}
 				<section className="space-y-4">

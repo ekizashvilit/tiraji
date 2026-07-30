@@ -9,9 +9,12 @@ import { cn } from "@/lib/utils";
 export function BookCard({
   listing,
   className,
+  priority = false,
 }: {
   listing: ListingCard;
   className?: string;
+  // Eager-load + preload this cover (use only for above-the-fold cards).
+  priority?: boolean;
 }) {
   const t = useTranslations("card");
   const cover = coverUrl(listing);
@@ -31,6 +34,7 @@ export function BookCard({
             alt={listing.title}
             fill
             sizes="(max-width: 640px) 40vw, 160px"
+            priority={priority}
             className="object-cover transition-transform duration-200 group-hover:scale-[1.03]"
           />
         ) : (
