@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   // iOS Safari auto-links things that look like phone numbers/dates/addresses,
   // mutating the DOM before hydration and causing attribute mismatches. Disable it.
   formatDetection: { telephone: false, date: false, address: false, email: false },
+};
+
+// Lock zoom to 1x so iOS never auto-zooms when a small (<16px) input is
+// focused. Trade-off: this also disables pinch-to-zoom.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export function generateStaticParams() {
