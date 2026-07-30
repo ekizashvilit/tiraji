@@ -29,7 +29,19 @@ export function HeaderSearch({ className }: { className?: string }) {
   const [results, setResults] = useState<Suggestion[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  // Long, descriptive placeholder on desktop; just "Search" on mobile. Set in an
+  // effect so the first client render matches the server (no hydration mismatch).
+  const [placeholder, setPlaceholder] = useState(t("searchPlaceholder"));
   const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () =>
+      setPlaceholder(mq.matches ? t("searchShort") : t("searchPlaceholder"));
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, [t]);
 
   const query = q.trim();
   const active = open && query.length >= 2;
@@ -101,17 +113,17 @@ export function HeaderSearch({ className }: { className?: string }) {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder={t("searchPlaceholder")}
+          placeholder={placeholder}
           aria-label={t("searchPlaceholder")}
           autoComplete="off"
-          className="h-11 flex-1 bg-transparent px-4 text-[0.95rem] outline-none placeholder:text-muted-foreground"
+          className="h-9 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground md:h-11 md:px-4 md:text-[0.95rem] [&::-webkit-search-cancel-button]:hidden"
         />
         <button
           type="submit"
           aria-label={t("searchButton")}
-          className="grid w-12 place-items-center bg-brand-dark text-white transition-colors hover:bg-brand-dark/90"
+          className="grid w-10 place-items-center bg-brand-dark text-white transition-colors hover:bg-brand-dark/90 md:w-12"
         >
-          <Search className="h-4.5 w-4.5" aria-hidden />
+          <Search className="h-4 w-4 md:h-4.5 md:w-4.5" aria-hidden />
         </button>
       </form>
 

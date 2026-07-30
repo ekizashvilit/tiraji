@@ -11,6 +11,7 @@ import type { ListingFacets } from "@/lib/listings";
 import { languageLabel } from "@/lib/languages";
 import { cityLabel } from "@/lib/cities";
 import { cn } from "@/lib/utils";
+import { caps } from "@/lib/caps";
 
 // Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
 function genreName(genre: GenreRow, locale: string): string {
@@ -107,7 +108,7 @@ export function SearchFilters({ genres, facets, locale, hideType = false }: Prop
 
       <div className={cn("space-y-6", open ? "block" : "hidden lg:block")}>
         <div className="flex items-center justify-between">
-          <h2 className="caps text-sm font-bold">{t("title").toUpperCase()}</h2>
+          <h2 className="caps text-sm font-bold">{caps(t("title"))}</h2>
           {activeCount > 0 && (
             <button
               type="button"

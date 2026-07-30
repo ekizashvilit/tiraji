@@ -9,12 +9,14 @@
     "giveaway": "Give away",
     "sell": "List a book",
     "messages": "Messages",
+    "menu": "Menu",
     "signIn": "Sign in"
   },
   "home": {
     "heroTitle": "Find your next book",
     "heroSubtitle": "Thousands of second-hand, out-of-print and old books — search by title or author, all in one place.",
     "searchPlaceholder": "Search by title, author or ISBN…",
+    "searchShort": "Search",
     "searchButton": "Search",
     "noResults": "No matches found",
     "searchAll": "All results for “{q}”",

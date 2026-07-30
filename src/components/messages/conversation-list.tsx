@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import type { ConversationSummary } from "@/lib/messaging";
 import { Link } from "@/i18n/navigation";
+import { caps } from "@/lib/caps";
 
 // The inbox list. Each row opens the conversation on its own full page.
 export function ConversationList({
@@ -28,7 +29,7 @@ export function ConversationList({
             className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/50"
           >
             <div className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary text-brand-dark">
-              {(c.otherName || t("someone")).charAt(0).toUpperCase()}
+              {caps((c.otherName || t("someone")).charAt(0))}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">

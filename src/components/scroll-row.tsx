@@ -25,6 +25,9 @@ export function ScrollRow({
   const containerRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
+  // The edge fade is a desktop touch (paired with the arrow buttons); drop it on
+  // mobile. Set in an effect so the first client render matches the server.
+  const [fade, setFade] = useState(true);
   // Vertical span of the card's cover image, so the buttons sit over the
   // covers (like a carousel) rather than the whole card incl. the text.
   const [cover, setCover] = useState<{ top: number; height: number } | null>(null);
@@ -43,6 +46,14 @@ export function ScrollRow({
     const cc = container.getBoundingClientRect();
     const c = coverEl.getBoundingClientRect();
     setCover({ top: c.top - cc.top, height: c.height });
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const apply = () => setFade(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
   }, []);
 
   useEffect(() => {
@@ -81,8 +92,8 @@ export function ScrollRow({
     <div className="relative">
       <div
         ref={emblaRef}
-        style={{ maskImage: mask, WebkitMaskImage: mask }}
-        className="-mx-2 overflow-hidden px-2"
+        style={fade ? { maskImage: mask, WebkitMaskImage: mask } : undefined}
+        className="-mx-4 overflow-hidden px-4 md:-mx-2 md:px-2"
       >
         <div ref={containerRef} className={cn("flex gap-1 pb-1", className)}>
           {children}

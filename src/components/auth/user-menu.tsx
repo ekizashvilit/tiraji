@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BookMarked, LogOut, MessageCircle, Shield, UserRound } from "lucide-react";
 
@@ -10,6 +10,7 @@ import { useAuthSheet } from "@/components/auth/auth-sheet";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { caps } from "@/lib/caps";
 
 type MinimalUser = { email: string | null };
 
@@ -31,6 +32,9 @@ export function UserMenu({
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [unread, setUnread] = useState(0);
 	const meIdRef = useRef<string | null>(null);
+	// The header mounts two UserMenus (desktop + mobile), so each needs its own
+	// realtime channel name — a shared name collides on the second subscribe().
+	const channelId = useId();
 
 	useEffect(() => {
 		const supabase = createClient();
@@ -81,7 +85,7 @@ export function UserMenu({
 
 		// Refresh the badge live as messages arrive or get marked read.
 		const channel = supabase
-			.channel("unread-messages")
+			.channel(`unread-messages-${channelId}`)
 			.on(
 				"postgres_changes",
 				{ event: "*", schema: "public", table: "messages" },
@@ -103,7 +107,7 @@ export function UserMenu({
 			window.removeEventListener("tiraji:messages-read", loadUnread);
 			window.removeEventListener("tiraji:profile-updated", onProfileUpdated);
 		};
-	}, []);
+	}, [channelId]);
 
 	async function signOut() {
 		const supabase = createClient();
@@ -129,9 +133,7 @@ export function UserMenu({
 		);
 	}
 
-	const initial = (displayName?.trim() || user.email || "?")
-		.charAt(0)
-		.toUpperCase();
+	const initial = caps((displayName?.trim() || user.email || "?").charAt(0));
 
 	return (
 		<DropdownMenu>

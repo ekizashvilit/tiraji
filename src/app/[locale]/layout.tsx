@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   },
   description:
     "Tiraji — buy, swap and give away second-hand, out-of-print and old books in Georgia.",
+  // iOS Safari auto-links things that look like phone numbers/dates/addresses,
+  // mutating the DOM before hydration and causing attribute mismatches. Disable it.
+  formatDetection: { telephone: false, date: false, address: false, email: false },
 };
 
 export function generateStaticParams() {
@@ -63,7 +66,7 @@ export default async function LocaleLayout({
       lang={locale}
       className={`${firago.variable} ${notoGeorgian.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider>
           <Providers>
             <AuthSheetProvider>
