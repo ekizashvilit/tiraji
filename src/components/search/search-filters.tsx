@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { GenreRow } from "@/lib/supabase/types";
@@ -12,6 +12,12 @@ import { languageLabel } from "@/lib/languages";
 import { cityLabel } from "@/lib/cities";
 import { cn } from "@/lib/utils";
 import { caps } from "@/lib/caps";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 // Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
 function genreName(genre: GenreRow, locale: string): string {
@@ -24,7 +30,16 @@ type Props = {
   locale: string;
   // Hide the listing-type group (browse pages are already locked to one type).
   hideType?: boolean;
+  // Result count, shown above the mobile controls bar.
+  resultCount?: number;
 };
+
+const SORT_OPTIONS = [
+  "recent",
+  "relevance",
+  "price_asc",
+  "price_desc",
+] as const;
 
 // Keys the sidebar controls (everything except the text query and sort).
 const FILTER_KEYS = [
@@ -37,7 +52,20 @@ const FILTER_KEYS = [
   "max",
 ];
 
-export function SearchFilters({ genres, facets, locale, hideType = false }: Props) {
+const SORT_LABEL_KEY: Record<string, string> = {
+  recent: "sortRecent",
+  relevance: "sortRelevance",
+  price_asc: "sortPriceAsc",
+  price_desc: "sortPriceDesc",
+};
+
+export function SearchFilters({
+  genres,
+  facets,
+  locale,
+  hideType = false,
+  resultCount,
+}: Props) {
   const t = useTranslations("filters");
   const params = useSearchParams();
   const pathname = usePathname();
@@ -87,46 +115,25 @@ export function SearchFilters({ genres, facets, locale, hideType = false }: Prop
   const showLanguage = languageOptions.length > 1;
   const showPrice = (facets.types.sale ?? 0) > 0;
 
-  return (
-    <div>
-      {/* Mobile toggle */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="mb-4 flex w-full items-center justify-between rounded-md border border-border bg-card px-4 py-3 text-sm font-semibold lg:hidden"
-      >
-        <span className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4" aria-hidden />
-          {t("title")}
-        </span>
-        {activeCount > 0 && (
-          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
-            {activeCount}
-          </span>
-        )}
-      </button>
+  const clearButton = activeCount > 0 && (
+    <button
+      type="button"
+      onClick={() => {
+        const sp = new URLSearchParams(params.toString());
+        FILTER_KEYS.forEach((k) => sp.delete(k));
+        const qs = sp.toString();
+        router.push(qs ? `${pathname}?${qs}` : pathname);
+      }}
+      className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+    >
+      <X className="h-3.5 w-3.5" aria-hidden />
+      {t("clear")}
+    </button>
+  );
 
-      <div className={cn("space-y-6", open ? "block" : "hidden lg:block")}>
-        <div className="flex items-center justify-between">
-          <h2 className="caps text-sm font-bold">{caps(t("title"))}</h2>
-          {activeCount > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                const sp = new URLSearchParams(params.toString());
-                FILTER_KEYS.forEach((k) => sp.delete(k));
-                const qs = sp.toString();
-                router.push(qs ? `${pathname}?${qs}` : pathname);
-              }}
-              className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" aria-hidden />
-              {t("clear")}
-            </button>
-          )}
-        </div>
-
-        {showType && (
+  const groups = (
+    <div className="space-y-6">
+      {showType && (
           <Group title={t("type")}>
             <OptionRow
               label={t("any")}
@@ -245,7 +252,95 @@ export function SearchFilters({ genres, facets, locale, hideType = false }: Prop
             ))}
           </Group>
         )}
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Mobile controls: result count + a split Filters / Sort bar. */}
+      <div className="mb-4 lg:hidden">
+        {resultCount != null && (
+          <p className="mb-2.5 text-sm font-semibold">
+            {t("results", { count: resultCount })}
+          </p>
+        )}
+        <div className="grid grid-cols-2 divide-x divide-border overflow-hidden rounded-lg border border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-center gap-2 py-3 text-sm font-semibold hover:bg-accent"
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden />
+            {t("title")}
+            {activeCount > 0 && (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-xs font-bold text-primary-foreground">
+                {activeCount}
+              </span>
+            )}
+          </button>
+          <div className="relative">
+            {/* Centered visual (icon + current sort); the native select sits on
+                top, transparent, so the mobile picker still opens. */}
+            <div className="pointer-events-none flex items-center justify-center gap-2 py-3 text-sm font-semibold">
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground" aria-hidden />
+              {t(SORT_LABEL_KEY[params.get("sort") ?? "recent"])}
+            </div>
+            <select
+              value={params.get("sort") ?? "recent"}
+              onChange={(e) => {
+                const sp = new URLSearchParams(params.toString());
+                if (e.target.value === "recent") sp.delete("sort");
+                else sp.set("sort", e.target.value);
+                const qs = sp.toString();
+                router.push(qs ? `${pathname}?${qs}` : pathname);
+              }}
+              aria-label={t("sortBy")}
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            >
+              {SORT_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {t(SORT_LABEL_KEY[o])}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:block">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="caps text-sm font-bold">{caps(t("title"))}</h2>
+          {clearButton}
+        </div>
+        {groups}
+      </div>
+
+      {/* Mobile bottom sheet — opens from the Filters button, sized to content
+          up to 70% of the screen. */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="bottom"
+          showClose={false}
+          className="flex max-h-[70vh] flex-col gap-0 rounded-t-2xl p-0 lg:hidden"
+        >
+          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+            <SheetTitle className="caps text-sm font-bold">
+              {caps(t("title"))}
+            </SheetTitle>
+            <div className="flex items-center gap-4">
+              {clearButton}
+              <SheetClose
+                aria-label={t("close")}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </SheetClose>
+            </div>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{groups}</div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

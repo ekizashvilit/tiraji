@@ -155,6 +155,10 @@ export const getListingDetail = cache(
   },
 );
 
+// Listings shown per page on the browse/search grids. Divisible by the grid
+// column counts (2/3/4/6) so the final row is always full.
+export const PAGE_SIZE = 24;
+
 // Search via the trigram RPC + filters (used by the browse pages).
 export async function searchListings(params: {
   q?: string;

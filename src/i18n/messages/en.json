@@ -84,7 +84,10 @@
     "loading": "Loading…",
     "negotiable": "Negotiable",
     "free": "Free",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "pagination": "Pagination",
+    "prevPage": "Previous page",
+    "nextPage": "Next page"
   },
   "card": {
     "swap": "Swap",
@@ -94,6 +97,7 @@
   "filters": {
     "title": "Filters",
     "clear": "Clear all",
+    "close": "Close",
     "type": "Type",
     "condition": "Condition",
     "genre": "Genre",

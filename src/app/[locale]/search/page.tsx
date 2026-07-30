@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/page-header";
 import { BookGrid } from "@/components/book-grid";
 import { SearchFilters } from "@/components/search/search-filters";
 import { SortSelect } from "@/components/search/sort-select";
-import { searchListings, getListingFacets } from "@/lib/listings";
+import { Pagination } from "@/components/search/pagination";
+import { searchListings, getListingFacets, PAGE_SIZE } from "@/lib/listings";
 import { getGenres } from "@/lib/genres";
 import type { ListingType, BookCondition } from "@/lib/supabase/types";
 
@@ -19,6 +20,7 @@ type SearchParams = {
   min?: string;
   max?: string;
   sort?: string;
+  page?: string;
 };
 
 export default async function SearchPage({
@@ -49,12 +51,19 @@ export default async function SearchPage({
     maxPrice: sp.max ? Number(sp.max) : undefined,
   };
 
+  const page = Math.max(1, Number(sp.page) || 1);
   const [facets, listings] = await Promise.all([
     // Facets reflect the current query + other active filters (exclude-self).
     getListingFacets(filters),
     // No default type filter — search across Sale, Swap and Give away.
-    searchListings({ ...filters, sort: sp.sort }),
+    searchListings({
+      ...filters,
+      sort: sp.sort,
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    }),
   ]);
+  const totalPages = Math.ceil(facets.total / PAGE_SIZE);
 
   return (
     <>
@@ -65,22 +74,27 @@ export default async function SearchPage({
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
           <aside className="lg:pr-2">
-            <SearchFilters genres={genres} facets={facets} locale={locale} />
+            <SearchFilters
+              genres={genres}
+              facets={facets}
+              locale={locale}
+              resultCount={facets.total}
+            />
           </aside>
 
           <div className="min-w-0">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+            <div className="mb-5 hidden flex-wrap items-center justify-between gap-3 border-b border-border pb-4 lg:flex">
               <p className="text-sm text-muted-foreground">
                 {sp.q ? (
                   <>
                     <span className="font-semibold text-foreground">
-                      {tf("results", { count: listings.length })}
+                      {tf("results", { count: facets.total })}
                     </span>{" "}
                     · {t("searchingFor", { query: sp.q })}
                   </>
                 ) : (
                   <span className="font-semibold text-foreground">
-                    {tf("results", { count: listings.length })}
+                    {tf("results", { count: facets.total })}
                   </span>
                 )}
               </p>
@@ -88,7 +102,10 @@ export default async function SearchPage({
             </div>
 
             {listings.length > 0 ? (
-              <BookGrid listings={listings} />
+              <>
+                <BookGrid listings={listings} />
+                <Pagination page={page} totalPages={totalPages} />
+              </>
             ) : (
               <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
                 <SearchX className="h-10 w-10 text-muted-foreground" aria-hidden />
