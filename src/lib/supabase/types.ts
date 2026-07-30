@@ -186,6 +186,7 @@ export type Database = {
         Returns: ListingRow[];
       };
       is_admin: { Args: Record<string, never>; Returns: boolean };
+      admin_dashboard_stats: { Args: Record<string, never>; Returns: unknown };
     };
     Enums: {
       listing_type: ListingType;

@@ -5,8 +5,7 @@ import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { firago, notoGeorgian } from "@/app/fonts";
 import { Providers } from "@/app/providers";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { PublicChrome } from "@/components/public-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSheetProvider } from "@/components/auth/auth-sheet";
 import { ChatDockProvider } from "@/components/messages/chat-dock";
@@ -71,12 +70,12 @@ export default async function LocaleLayout({
           <Providers>
             <AuthSheetProvider>
               <ChatDockProvider>
-                <SiteHeader
+                <PublicChrome
                   initialUser={initialUser}
                   initialDisplayName={displayName}
-                />
-                <main className="flex-1">{children}</main>
-                <SiteFooter />
+                >
+                  {children}
+                </PublicChrome>
               </ChatDockProvider>
             </AuthSheetProvider>
             <Toaster />
