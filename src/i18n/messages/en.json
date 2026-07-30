@@ -44,9 +44,11 @@
     "promoCta": "List a book",
     "categoriesTitle": "Categories",
     "forSaleTitle": "For sale",
+    "under5Title": "Books under ₾5",
     "toSwapTitle": "To swap",
     "freeTitle": "Free to take",
     "recentTitle": "Recently added",
+    "byAuthorTitle": "Books by {author}",
     "emptyRecent": "No books listed yet. Be the first!",
     "alertTitle": "Can't find what you're looking for?",
     "alertDesc": "Subscribe and we'll email you the moment a matching book is listed.",
@@ -80,6 +82,11 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "rights": "All rights reserved."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you're looking for doesn't exist or may have been moved.",
+    "cta": "Back to home"
   },
   "common": {
     "loading": "Loading…",
@@ -280,7 +287,8 @@
   "book": {
     "sellerFallback": "Seller",
     "memberSince": "Member since {date}",
-    "sellerLabel": "Sold by",
+    "sellerLabel": "Seller",
+    "memberSinceLabel": "Member since",
     "viewSellerItems": "View this seller's listings",
     "aboutItem": "About this book",
     "moreFromSeller": "More from this seller",

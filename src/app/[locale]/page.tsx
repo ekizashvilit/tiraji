@@ -9,7 +9,13 @@ import { CategoryTiles } from "@/components/category-tiles";
 import { WhyTiraji } from "@/components/home/why-tiraji";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { PopularSearches } from "@/components/home/popular-searches";
-import { getRecentListings, getListingsByType, getListingsByGenre } from "@/lib/listings";
+import {
+	getRecentListings,
+	getListingsByType,
+	getListingsByGenre,
+	getListingsUnderPrice,
+	getTopAuthorListings,
+} from "@/lib/listings";
 import { getGenres } from "@/lib/genres";
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -20,14 +26,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 	const fictionId = genres.find((g) => g.slug === "fiction")?.id;
 	const nonfictionId = genres.find((g) => g.slug === "nonfiction")?.id;
 
-	const [recent, forSale, toSwap, free, fiction, nonfiction] = await Promise.all([
-		getRecentListings(12),
-		getListingsByType("sale", 12),
-		getListingsByType("swap", 12),
-		getListingsByType("giveaway", 12),
-		fictionId ? getListingsByGenre(fictionId, 12) : Promise.resolve([]),
-		nonfictionId ? getListingsByGenre(nonfictionId, 12) : Promise.resolve([]),
-	]);
+	const [recent, forSale, under5, topAuthor, toSwap, free, fiction, nonfiction] =
+		await Promise.all([
+			getRecentListings(12),
+			getListingsByType("sale", 12),
+			getListingsUnderPrice(5, 12),
+			getTopAuthorListings(12),
+			getListingsByType("swap", 12),
+			getListingsByType("giveaway", 12),
+			fictionId ? getListingsByGenre(fictionId, 12) : Promise.resolve([]),
+			nonfictionId ? getListingsByGenre(nonfictionId, 12) : Promise.resolve([]),
+		]);
 
 	const t = await getTranslations("home");
 
@@ -46,6 +55,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 			<div className="mx-auto max-w-6xl space-y-14 px-4 pb-16">
 				<BookShelf title={t("recentTitle")} href="/buy" listings={recent} accent="buy" priority />
 
+				{topAuthor && topAuthor.listings.length > 0 && (
+					<BookShelf
+						title={t("byAuthorTitle", { author: topAuthor.author })}
+						href={`/search?q=${encodeURIComponent(topAuthor.author)}`}
+						listings={topAuthor.listings}
+						accent="buy"
+					/>
+				)}
+
 				{/* Browse by category */}
 				<section className="space-y-4">
 					<h2 className="caps text-lg font-bold sm:text-xl">{t("categoriesTitle").toUpperCase()}</h2>
@@ -53,6 +71,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 				</section>
 
 				<BookShelf title={t("forSaleTitle")} href="/buy" listings={forSale} accent="buy" />
+				<BookShelf title={t("under5Title")} href="/buy?max=5" listings={under5} accent="buy" />
 				<BookShelf title={t("fictionShelf")} href="/search?genre=fiction" listings={fiction} accent="buy" />
 				<BookShelf title={t("toSwapTitle")} href="/swap" listings={toSwap} accent="swap" />
 				<BookShelf title={t("nonfictionShelf")} href="/search?genre=nonfiction" listings={nonfiction} accent="buy" />

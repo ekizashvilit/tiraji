@@ -98,6 +98,65 @@ export async function getListingsBySeller(
   return (data as ListingCard[]) ?? [];
 }
 
+// The author with the most active listings, plus their books — for the dynamic
+// "featured author" shelf on the homepage. Returns null if no author has at
+// least two active listings (not worth a dedicated section).
+export async function getTopAuthorListings(
+  limit = 12,
+): Promise<{ author: string; listings: ListingCard[] } | null> {
+  const supabase = await createClient();
+  const { data: rows } = await supabase
+    .from("listings")
+    .select("author")
+    .eq("status", "active")
+    .not("author", "is", null);
+
+  const counts = new Map<string, number>();
+  for (const r of (rows as { author: string | null }[] | null) ?? []) {
+    const a = (r.author ?? "").trim();
+    if (a) counts.set(a, (counts.get(a) ?? 0) + 1);
+  }
+
+  let top: string | null = null;
+  let max = 0;
+  for (const [author, count] of counts) {
+    if (count > max) {
+      max = count;
+      top = author;
+    }
+  }
+  if (!top || max < 2) return null;
+
+  const { data } = await supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .eq("author", top)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { author: top, listings: (data as ListingCard[]) ?? [] };
+}
+
+// Cheap sale listings (fixed price at or under the cap) — for the homepage
+// "Books under ₾X" shelf. Cheapest first.
+export async function getListingsUnderPrice(
+  maxPrice: number,
+  limit = 12,
+): Promise<ListingCard[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(CARD_COLUMNS)
+    .eq("status", "active")
+    .eq("listing_type", "sale")
+    .eq("is_negotiable", false)
+    .not("price", "is", null)
+    .lte("price", maxPrice)
+    .order("price", { ascending: true })
+    .limit(limit);
+  return (data as ListingCard[]) ?? [];
+}
+
 // A seller's other active listings (excluding the one being viewed) — for the
 // "More from this seller" shelf on the detail page.
 export async function getSellerOtherListings(

@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 
 import { redirect } from "@/i18n/navigation";
@@ -30,11 +29,12 @@ export default async function AdminLayout({
     .select("is_admin,display_name")
     .eq("id", user!.id)
     .maybeSingle<{ is_admin: boolean; display_name: string | null }>();
+  // Signed in but not an admin → send them back to the marketplace.
   if (!profile?.is_admin) {
-    notFound();
+    redirect({ href: "/", locale });
   }
 
   return (
-    <AdminShell displayName={profile.display_name}>{children}</AdminShell>
+    <AdminShell displayName={profile!.display_name}>{children}</AdminShell>
   );
 }
