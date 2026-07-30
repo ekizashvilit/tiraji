@@ -9,6 +9,9 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   : undefined;
 
 const nextConfig: NextConfig = {
+  // Allow the Cloudflare quick-tunnel domain to reach the dev server when
+  // testing on a phone (`cloudflared tunnel --url http://localhost:3000`).
+  allowedDevOrigins: ["*.trycloudflare.com"],
   images: {
     remotePatterns: [
       // Uploaded photos served from Supabase Storage (public covers bucket)
