@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowLeftRight, BookOpen, Gift, Plus, ShoppingBag } from "lucide-react";
 
+import { createClient } from "@/lib/supabase/client";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useAuthSheet } from "@/components/auth/auth-sheet";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { UserMenu } from "@/components/auth/user-menu";
 import { MobileMenu } from "@/components/mobile-menu";
@@ -27,6 +30,21 @@ export function SiteHeader({
 	const t = useTranslations("nav");
 	const pathname = usePathname();
 	const isHome = pathname === "/";
+	const { openAuth } = useAuthSheet();
+
+	// Track sign-in state so "List a book" can open the auth sheet directly for
+	// logged-out users instead of bouncing them through /sell first. Seeded from
+	// the server-rendered user and kept live via Supabase auth changes.
+	const [signedIn, setSignedIn] = useState(!!initialUser);
+	useEffect(() => {
+		const supabase = createClient();
+		const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+			setSignedIn(!!session?.user);
+		});
+		return () => sub.subscription.unsubscribe();
+	}, []);
+
+	const sellCls = "caps hidden items-center gap-1.5 px-3 py-6 text-[0.95rem] font-semibold text-primary hover:underline md:flex";
 
 	const navLinks = SECTIONS.map((s) => {
 		const active = pathname === s.href || pathname.startsWith(s.href + "/");
@@ -40,7 +58,6 @@ export function SiteHeader({
 					active ? "text-primary" : "text-muted-foreground",
 				)}
 			>
-				<Icon className="size-4" aria-hidden />
 				{caps(t(s.key))}
 				{active && <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" aria-hidden />}
 			</Link>
@@ -81,10 +98,17 @@ export function SiteHeader({
 				<div className="bg-background">
 					<nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
 						<div className="flex flex-1 items-center justify-between md:flex-none md:justify-start">{navLinks}</div>
-						<Link href="/sell" className="caps hidden items-center gap-1.5 px-3 py-6 text-[0.95rem] font-semibold text-primary hover:underline md:flex">
-							<Plus className="h-4 w-4" aria-hidden />
-							{caps(t("sell"))}
-						</Link>
+						{signedIn ? (
+							<Link href="/sell" className={sellCls}>
+								<Plus className="h-4 w-4" aria-hidden />
+								{caps(t("sell"))}
+							</Link>
+						) : (
+							<button type="button" onClick={openAuth} className={sellCls}>
+								<Plus className="h-4 w-4" aria-hidden />
+								{caps(t("sell"))}
+							</button>
+						)}
 					</nav>
 				</div>
 			)}
