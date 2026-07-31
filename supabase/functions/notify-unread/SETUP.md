@@ -8,18 +8,20 @@ Do these **once**. Steps 1–2 are on websites; 3–6 are terminal/SQL.
 
 ---
 
-## 1. Brevo account (the email sender) — free, no domain needed
+## 1. Brevo account (the email sender) — free
 
 1. Sign up at <https://www.brevo.com> (free plan = 300 emails/day).
-2. **Senders & IP → Senders → Add a sender.** Use an email you control
-   (e.g. your Gmail). Brevo sends a confirmation link — click it. This is your
-   `FROM_EMAIL`.
-3. **SMTP & API → API Keys → Generate a new API key.** Copy it — that's
-   `BREVO_API_KEY`.
+2. **Senders, Domains & IPs → Domains → Add a domain.** Add `tiraji.ge` and add
+   the DKIM/DMARC/branding DNS records Brevo gives you to Cloudflare (all CNAMEs
+   set to "DNS only" / grey cloud). Once it shows **Authenticated**, you can send
+   from any `@tiraji.ge` address — `FROM_EMAIL` is `noreply@tiraji.ge`.
+3. **SMTP & API → API keys & MCP → Generate a new API key.** Copy it — that's
+   `BREVO_API_KEY`. (Note: an API key also expires after 90 days of inactivity,
+   so if the feature stays dormant, regenerate the key when you finally deploy.)
 
-> Later, when you own a domain, verify the domain in Brevo and switch
-> `FROM_EMAIL` to `noreply@yourdomain` for better deliverability. Nothing else
-> changes.
+> The domain is already authenticated (done during initial email setup).
+> Incoming `@tiraji.ge` mail is forwarded to Gmail via Cloudflare Email Routing;
+> that's separate from sending and needs no changes here.
 
 ## 2. Pick a cron secret
 
@@ -38,9 +40,9 @@ it into the dashboard SQL editor). It adds `messages.notified_at` and enables
 supabase secrets set \
   BREVO_API_KEY="your-brevo-key" \
   CRON_SECRET="your-random-secret" \
-  FROM_EMAIL="you@example.com" \
+  FROM_EMAIL="noreply@tiraji.ge" \
   FROM_NAME="ტირაჟი / Tiraji" \
-  SITE_URL="https://your-site-url"
+  SITE_URL="https://tiraji.ge"
 ```
 
 (`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically — do
