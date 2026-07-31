@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, Check, SlidersHorizontal, X } from "lucide-react";
 
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { GenreRow } from "@/lib/supabase/types";
@@ -50,6 +50,7 @@ const FILTER_KEYS = [
   "city",
   "min",
   "max",
+  "photo",
 ];
 
 const SORT_LABEL_KEY: Record<string, string> = {
@@ -72,6 +73,10 @@ export function SearchFilters({
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
+  // Sort default is contextual: relevance when there's a search query (best
+  // match first), newest otherwise. Mirrors SortSelect and searchListings.
+  const defaultSort = params.get("q") ? "relevance" : "recent";
+
   // Build a href that keeps the current params but overrides the given keys.
   function hrefWith(changes: Record<string, string | null>): string {
     const sp = new URLSearchParams(params.toString());
@@ -82,6 +87,24 @@ export function SearchFilters({
     const qs = sp.toString();
     return qs ? `${pathname}?${qs}` : pathname;
   }
+
+  // Multi-select groups store comma-separated values (e.g. ?condition=new,good).
+  const valuesOf = (key: string) => {
+    const v = params.get(key);
+    return v ? v.split(",").filter(Boolean) : [];
+  };
+  // href that toggles one value in/out of a group (OR within the group).
+  const toggleHref = (key: string, value: string) => {
+    const set = new Set(valuesOf(key));
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+    return hrefWith({ [key]: [...set].join(",") || null });
+  };
+
+  // Relevance sort only makes sense once there's a text query.
+  const sortOptions = SORT_OPTIONS.filter(
+    (o) => o !== "relevance" || params.get("q"),
+  );
 
   const activeCount = FILTER_KEYS.filter((k) => params.get(k)).length;
 
@@ -114,6 +137,7 @@ export function SearchFilters({
   const showCity = cityOptions.length > 1;
   const showLanguage = languageOptions.length > 1;
   const showPrice = (facets.types.sale ?? 0) > 0;
+  const showPhoto = facets.total > 0;
 
   const clearButton = activeCount > 0 && (
     <button
@@ -137,7 +161,7 @@ export function SearchFilters({
           <Group title={t("type")}>
             <OptionRow
               label={t("any")}
-              active={!params.get("type")}
+              active={valuesOf("type").length === 0}
               href={hrefWith({ type: null })}
             />
             {typeOptions.map((o) => (
@@ -145,10 +169,8 @@ export function SearchFilters({
                 key={o.value}
                 label={o.label}
                 count={facets.types[o.value]}
-                active={params.get("type") === o.value}
-                href={hrefWith({
-                  type: params.get("type") === o.value ? null : o.value,
-                })}
+                active={valuesOf("type").includes(o.value)}
+                href={toggleHref("type", o.value)}
               />
             ))}
           </Group>
@@ -158,7 +180,7 @@ export function SearchFilters({
           <Group title={t("condition")}>
             <OptionRow
               label={t("any")}
-              active={!params.get("condition")}
+              active={valuesOf("condition").length === 0}
               href={hrefWith({ condition: null })}
             />
             {conditionOptions.map((o) => (
@@ -166,11 +188,8 @@ export function SearchFilters({
                 key={o.value}
                 label={o.label}
                 count={facets.conditions[o.value]}
-                active={params.get("condition") === o.value}
-                href={hrefWith({
-                  condition:
-                    params.get("condition") === o.value ? null : o.value,
-                })}
+                active={valuesOf("condition").includes(o.value)}
+                href={toggleHref("condition", o.value)}
               />
             ))}
           </Group>
@@ -186,7 +205,14 @@ export function SearchFilters({
             applyLabel={t("apply")}
             min={params.get("min") ?? ""}
             max={params.get("max") ?? ""}
-            onApply={(min, max) => router.push(hrefWith({ min, max }))}
+            onApply={(min, max) => {
+              // Guard against a reversed range (min 50, max 10) → swap so the
+              // query returns the obvious intended band instead of nothing.
+              let lo = min;
+              let hi = max;
+              if (lo && hi && Number(lo) > Number(hi)) [lo, hi] = [hi, lo];
+              router.push(hrefWith({ min: lo, max: hi }));
+            }}
           />
         )}
 
@@ -194,7 +220,7 @@ export function SearchFilters({
           <Group title={t("genre")}>
             <OptionRow
               label={t("any")}
-              active={!params.get("genre")}
+              active={valuesOf("genre").length === 0}
               href={hrefWith({ genre: null })}
             />
             {genreOptions.map((g) => (
@@ -202,10 +228,8 @@ export function SearchFilters({
                 key={g.id}
                 label={genreName(g, locale)}
                 count={facets.genres[g.id]}
-                active={params.get("genre") === g.slug}
-                href={hrefWith({
-                  genre: params.get("genre") === g.slug ? null : g.slug,
-                })}
+                active={valuesOf("genre").includes(g.slug)}
+                href={toggleHref("genre", g.slug)}
               />
             ))}
           </Group>
@@ -215,7 +239,7 @@ export function SearchFilters({
           <Group title={t("language")}>
             <OptionRow
               label={t("any")}
-              active={!params.get("language")}
+              active={valuesOf("language").length === 0}
               href={hrefWith({ language: null })}
             />
             {languageOptions.map((l) => (
@@ -223,10 +247,8 @@ export function SearchFilters({
                 key={l}
                 label={languageLabel(l, locale)}
                 count={facets.languages[l]}
-                active={params.get("language") === l}
-                href={hrefWith({
-                  language: params.get("language") === l ? null : l,
-                })}
+                active={valuesOf("language").includes(l)}
+                href={toggleHref("language", l)}
               />
             ))}
           </Group>
@@ -236,7 +258,7 @@ export function SearchFilters({
           <Group title={t("city")}>
             <OptionRow
               label={t("any")}
-              active={!params.get("city")}
+              active={valuesOf("city").length === 0}
               href={hrefWith({ city: null })}
             />
             {cityOptions.map((c) => (
@@ -244,12 +266,20 @@ export function SearchFilters({
                 key={c}
                 label={cityLabel(c, locale)}
                 count={facets.cities[c]}
-                active={params.get("city") === c}
-                href={hrefWith({
-                  city: params.get("city") === c ? null : c,
-                })}
+                active={valuesOf("city").includes(c)}
+                href={toggleHref("city", c)}
               />
             ))}
+          </Group>
+        )}
+
+        {showPhoto && (
+          <Group title={t("photo")}>
+            <OptionRow
+              label={t("hasPhoto")}
+              active={params.get("photo") === "1"}
+              href={hrefWith({ photo: params.get("photo") === "1" ? null : "1" })}
+            />
           </Group>
         )}
     </div>
@@ -283,13 +313,13 @@ export function SearchFilters({
                 top, transparent, so the mobile picker still opens. */}
             <div className="pointer-events-none flex items-center justify-center gap-2 py-3 text-sm font-semibold">
               <ArrowUpDown className="h-4 w-4 text-muted-foreground" aria-hidden />
-              {t(SORT_LABEL_KEY[params.get("sort") ?? "recent"])}
+              {t(SORT_LABEL_KEY[params.get("sort") ?? defaultSort])}
             </div>
             <select
-              value={params.get("sort") ?? "recent"}
+              value={params.get("sort") ?? defaultSort}
               onChange={(e) => {
                 const sp = new URLSearchParams(params.toString());
-                if (e.target.value === "recent") sp.delete("sort");
+                if (e.target.value === defaultSort) sp.delete("sort");
                 else sp.set("sort", e.target.value);
                 const qs = sp.toString();
                 router.push(qs ? `${pathname}?${qs}` : pathname);
@@ -297,7 +327,7 @@ export function SearchFilters({
               aria-label={t("sortBy")}
               className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             >
-              {SORT_OPTIONS.map((o) => (
+              {sortOptions.map((o) => (
                 <option key={o} value={o}>
                   {t(SORT_LABEL_KEY[o])}
                 </option>
@@ -376,11 +406,13 @@ function OptionRow({
     >
       <span
         className={cn(
-          "grid h-4 w-4 shrink-0 place-items-center rounded-full border",
-          active ? "border-primary bg-primary" : "border-muted-foreground/40",
+          "grid h-4 w-4 shrink-0 place-items-center rounded border",
+          active
+            ? "border-primary bg-primary text-white"
+            : "border-muted-foreground/40",
         )}
       >
-        {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+        {active && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}
       </span>
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {count != null && (

@@ -259,31 +259,38 @@ export const getListingDetail = cache(
 // column counts (2/3/4/6) so the final row is always full.
 export const PAGE_SIZE = 24;
 
-// Search via the trigram RPC + filters (used by the browse pages).
-export async function searchListings(params: {
+// Filters shared by the search RPC and the facet-count RPC. Multi-value groups
+// are arrays (OR within a group); price and hasPhoto are plain filters.
+export type ListingFilters = {
   q?: string;
-  type?: ListingType;
-  city?: string;
-  genre?: number;
-  condition?: BookCondition;
-  language?: string;
+  types?: ListingType[];
+  conditions?: BookCondition[];
+  genres?: number[];
+  languages?: string[];
+  cities?: string[];
   minPrice?: number;
   maxPrice?: number;
-  sort?: string;
-  limit?: number;
-  offset?: number;
-}): Promise<ListingCard[]> {
+  hasPhoto?: boolean;
+};
+
+// Search via the trigram RPC + filters (used by the browse/search pages).
+export async function searchListings(
+  params: ListingFilters & { sort?: string; limit?: number; offset?: number },
+): Promise<ListingCard[]> {
   const supabase = await createClient();
   const { data } = await supabase.rpc("search_listings", {
     q: params.q ?? null,
-    p_type: params.type ?? null,
-    p_city: params.city ?? null,
-    p_condition: params.condition ?? null,
-    p_language: params.language ?? null,
-    p_genre: params.genre ?? null,
+    p_types: params.types ?? null,
+    p_conditions: params.conditions ?? null,
+    p_languages: params.languages ?? null,
+    p_cities: params.cities ?? null,
+    p_genres: params.genres ?? null,
     p_min_price: params.minPrice ?? null,
     p_max_price: params.maxPrice ?? null,
-    p_sort: params.sort ?? "recent",
+    p_has_photo: params.hasPhoto ?? null,
+    // Default to relevance when the user searched (best text match first),
+    // otherwise newest first. Must mirror SortSelect's contextual default.
+    p_sort: params.sort ?? (params.q ? "relevance" : "recent"),
     p_limit: params.limit ?? 48,
     p_offset: params.offset ?? 0,
   });
@@ -301,90 +308,31 @@ export type ListingFacets = {
   languages: Record<string, number>;
 };
 
-type FacetRow = {
-  listing_type: string | null;
-  condition: string | null;
-  genre_id: number | null;
-  city: string | null;
-  book_language: string | null;
-  price: number | null;
-};
-
-export type FacetFilters = {
-  q?: string;
-  type?: string;
-  condition?: string;
-  genre?: number;
-  language?: string;
-  city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-};
-
-// Counts are computed over the books matching the current text query, then each
-// facet is counted with all OTHER active filters applied but its own excluded —
-// so a group still shows the alternatives you could switch to (standard faceting).
-export async function getListingFacets(f: FacetFilters = {}): Promise<ListingFacets> {
+// Facet counts, computed entirely in the database via listing_facets(): each
+// group is counted with all OTHER active filters applied but its own excluded
+// (standard "exclude-self" faceting), so a group still shows the alternatives
+// you could switch to. No row cap — counts stay correct at any scale.
+export async function getListingFacets(f: ListingFilters = {}): Promise<ListingFacets> {
   const supabase = await createClient();
-  // Rows matching the text query only; structured filters are applied in JS below.
-  const { data } = await supabase.rpc("search_listings", {
+  const { data } = await supabase.rpc("listing_facets", {
     q: f.q ?? null,
-    p_type: null,
-    p_city: null,
-    p_condition: null,
-    p_language: null,
-    p_genre: null,
-    p_min_price: null,
-    p_max_price: null,
-    p_sort: "recent",
-    p_limit: 1000,
-    p_offset: 0,
+    p_types: f.types ?? null,
+    p_conditions: f.conditions ?? null,
+    p_languages: f.languages ?? null,
+    p_cities: f.cities ?? null,
+    p_genres: f.genres ?? null,
+    p_min_price: f.minPrice ?? null,
+    p_max_price: f.maxPrice ?? null,
+    p_has_photo: f.hasPhoto ?? null,
   });
-  const rows = (data as FacetRow[]) ?? [];
 
-  const inPrice = (price: number | null) => {
-    if (f.minPrice == null && f.maxPrice == null) return true;
-    if (price == null) return false;
-    if (f.minPrice != null && price < f.minPrice) return false;
-    if (f.maxPrice != null && price > f.maxPrice) return false;
-    return true;
-  };
-
-  // Does a row pass every active filter except the named one?
-  const passExcept = (r: FacetRow, except: string) => {
-    if (except !== "type" && f.type && r.listing_type !== f.type) return false;
-    if (except !== "condition" && f.condition && r.condition !== f.condition)
-      return false;
-    if (except !== "genre" && f.genre != null && r.genre_id !== f.genre)
-      return false;
-    if (except !== "language" && f.language && r.book_language !== f.language)
-      return false;
-    if (except !== "city" && f.city && r.city !== f.city) return false;
-    if (except !== "price" && !inPrice(r.price)) return false;
-    return true;
-  };
-
-  const facets: ListingFacets = {
-    total: rows.filter((r) => passExcept(r, "none")).length,
+  const empty: ListingFacets = {
+    total: 0,
     types: {},
     conditions: {},
     genres: {},
     cities: {},
     languages: {},
   };
-
-  const bump = (map: Record<string, number>, key: string | null) => {
-    if (key) map[key] = (map[key] ?? 0) + 1;
-  };
-
-  for (const r of rows) {
-    if (passExcept(r, "type")) bump(facets.types, r.listing_type);
-    if (passExcept(r, "condition")) bump(facets.conditions, r.condition);
-    if (passExcept(r, "genre") && r.genre_id != null)
-      facets.genres[r.genre_id] = (facets.genres[r.genre_id] ?? 0) + 1;
-    if (passExcept(r, "language")) bump(facets.languages, r.book_language);
-    if (passExcept(r, "city")) bump(facets.cities, r.city);
-  }
-
-  return facets;
+  return { ...empty, ...((data as Partial<ListingFacets> | null) ?? {}) };
 }

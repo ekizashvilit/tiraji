@@ -186,18 +186,33 @@ export type Database = {
       search_listings: {
         Args: {
           q?: string | null;
-          p_type?: ListingType | null;
-          p_city?: string | null;
+          p_types?: ListingType[] | null;
+          p_conditions?: BookCondition[] | null;
+          p_languages?: string[] | null;
+          p_cities?: string[] | null;
+          p_genres?: number[] | null;
           p_min_price?: number | null;
           p_max_price?: number | null;
-          p_condition?: BookCondition | null;
-          p_language?: string | null;
-          p_genre?: number | null;
+          p_has_photo?: boolean | null;
           p_sort?: string | null;
           p_limit?: number | null;
           p_offset?: number | null;
         };
         Returns: ListingRow[];
+      };
+      listing_facets: {
+        Args: {
+          q?: string | null;
+          p_types?: ListingType[] | null;
+          p_conditions?: BookCondition[] | null;
+          p_languages?: string[] | null;
+          p_cities?: string[] | null;
+          p_genres?: number[] | null;
+          p_min_price?: number | null;
+          p_max_price?: number | null;
+          p_has_photo?: boolean | null;
+        };
+        Returns: unknown;
       };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       admin_dashboard_stats: { Args: Record<string, never>; Returns: unknown };

@@ -18,6 +18,7 @@ export type BrowseSearchParams = {
   language?: string;
   min?: string;
   max?: string;
+  photo?: string;
   sort?: string;
   page?: string;
 };
@@ -45,17 +46,24 @@ export async function BrowsePage({
   const sp = searchParams;
   const genres = await getGenres();
 
-  // Shared filter set (type is fixed) for both results and facet counts.
-  // The genre is a readable slug in the URL (e.g. ?genre=fiction) → resolve to its id.
+  // Shared filter set (type is fixed to this page) for both results and facet
+  // counts. Other groups are multi-select: comma-separated values in the URL.
+  // Genres are readable slugs (?genre=fiction) → resolve to ids.
+  const list = (v?: string) => (v ? v.split(",").filter(Boolean) : undefined);
+  const genreIds = list(sp.genre)
+    ?.map((slug) => genres.find((g) => g.slug === slug)?.id)
+    .filter((id): id is number => id != null);
+
   const filters = {
     q: sp.q,
-    type,
-    genre: genres.find((g) => g.slug === sp.genre)?.id,
-    city: sp.city,
-    condition: (sp.condition as BookCondition) || undefined,
-    language: sp.language,
+    types: [type] as ListingType[],
+    conditions: list(sp.condition) as BookCondition[] | undefined,
+    genres: genreIds?.length ? genreIds : undefined,
+    cities: list(sp.city),
+    languages: list(sp.language),
     minPrice: sp.min ? Number(sp.min) : undefined,
     maxPrice: sp.max ? Number(sp.max) : undefined,
+    hasPhoto: sp.photo === "1" ? true : undefined,
   };
 
   const page = Math.max(1, Number(sp.page) || 1);
