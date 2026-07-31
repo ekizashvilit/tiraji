@@ -6,6 +6,8 @@ import { BookGrid } from "@/components/book-grid";
 import { SearchFilters } from "@/components/search/search-filters";
 import { SortSelect } from "@/components/search/sort-select";
 import { Pagination } from "@/components/search/pagination";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { searchListings, getListingFacets, PAGE_SIZE } from "@/lib/listings";
 import { getGenres } from "@/lib/genres";
 import type { ListingType, BookCondition } from "@/lib/supabase/types";
@@ -36,6 +38,7 @@ export default async function SearchPage({
   const t = await getTranslations("pages");
   const tf = await getTranslations("filters");
   const tNav = await getTranslations("nav");
+  const tAlerts = await getTranslations("alerts");
 
   const genres = await getGenres();
 
@@ -112,11 +115,20 @@ export default async function SearchPage({
                 <Pagination page={page} totalPages={totalPages} />
               </>
             ) : (
-              <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
+              <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
                 <SearchX className="h-10 w-10 text-muted-foreground" aria-hidden />
-                <p className="max-w-sm text-muted-foreground">
-                  {sp.q ? t("noResultsFor", { query: sp.q }) : t("resultsSoon")}
-                </p>
+                <div>
+                  <p className="max-w-sm text-muted-foreground">
+                    {sp.q ? t("noResultsFor", { query: sp.q }) : t("resultsSoon")}
+                  </p>
+                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">{tAlerts("promptBody")}</p>
+                </div>
+                {/* Send them to the alerts page, carrying the search term to prefill. */}
+                <Button asChild>
+                  <Link href={sp.q ? `/account/alerts?title=${encodeURIComponent(sp.q)}` : "/account/alerts"}>
+                    {tAlerts("searchCta")}
+                  </Link>
+                </Button>
               </div>
             )}
           </div>

@@ -1,5 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { redirect } from "@/i18n/navigation";
+import { Bell, ChevronRight } from "lucide-react";
+
+import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/account/profile-form";
@@ -30,6 +32,7 @@ export default async function AccountPage({
 
   const t = await getTranslations("account");
   const tNav = await getTranslations("nav");
+  const tAlerts = await getTranslations("alerts");
 
   // Fall back to a minimal profile shape if the row isn't readable yet.
   const safeProfile: ProfileRow = profile ?? {
@@ -51,8 +54,22 @@ export default async function AccountPage({
         lede={t("lede")}
         crumbs={[{ label: tNav("home"), href: "/" }, { label: t("title") }]}
       />
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
         <ProfileForm profile={safeProfile} />
+
+        <Link
+          href="/account/alerts"
+          className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:bg-secondary"
+        >
+          <div className="flex items-start gap-3">
+            <Bell className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+            <div>
+              <p className="font-semibold text-foreground">{tAlerts("pageTitle")}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{tAlerts("pageLede")}</p>
+            </div>
+          </div>
+          <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+        </Link>
       </div>
     </>
   );

@@ -88,7 +88,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 						<p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
 					</div>
 					<Button asChild size="lg">
-						<Link href="/buy">{t("alertCta")}</Link>
+						<Link href="/account/alerts">{t("alertCta")}</Link>
 					</Button>
 				</section>
 			</div>
