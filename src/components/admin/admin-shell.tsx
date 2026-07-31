@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Users,
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/admin", key: "navDashboard", icon: LayoutDashboard },
   { href: "/admin/listings", key: "navListings", icon: BookMarked },
+  { href: "/admin/users", key: "navUsers", icon: Users },
   { href: "/admin/reports", key: "navReports", icon: Flag },
 ] as const;
 

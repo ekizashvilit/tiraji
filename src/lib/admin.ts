@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { coverUrl } from "@/lib/listings";
-import type { ListingType, ListingStatus } from "@/lib/supabase/types";
+import type {
+  AdminUserRow,
+  ListingType,
+  ListingStatus,
+} from "@/lib/supabase/types";
 
 export type DayCount = { day: string; count: number };
 
@@ -135,4 +139,51 @@ export async function getAdminListings(opts: {
   }));
 
   return { items, total: count ?? 0 };
+}
+
+export const ADMIN_USERS_PAGE_SIZE = 30;
+
+export type AdminUser = {
+  id: string;
+  displayName: string | null;
+  city: string | null;
+  phone: string | null;
+  email: string | null;
+  isAdmin: boolean;
+  banned: boolean;
+  created_at: string;
+  listingCount: number;
+};
+
+// Every registered user, for the admin users table. Goes through an admin-gated
+// SECURITY DEFINER RPC (admin_list_users) so it can include the auth email and a
+// listing count — data the plain profiles table / RLS wouldn't expose.
+export async function getAdminUsers(opts: {
+  q?: string;
+  page?: number;
+}): Promise<{ items: AdminUser[]; total: number }> {
+  const supabase = await createClient();
+  const page = Math.max(1, opts.page ?? 1);
+  const offset = (page - 1) * ADMIN_USERS_PAGE_SIZE;
+
+  const { data } = await supabase.rpc("admin_list_users", {
+    p_search: opts.q?.trim() || null,
+    p_limit: ADMIN_USERS_PAGE_SIZE,
+    p_offset: offset,
+  });
+  const rows = (data as AdminUserRow[] | null) ?? [];
+
+  const items: AdminUser[] = rows.map((r) => ({
+    id: r.id,
+    displayName: r.display_name?.trim() || null,
+    city: r.city,
+    phone: r.phone,
+    email: r.email,
+    isAdmin: r.is_admin,
+    banned: r.banned,
+    created_at: r.created_at,
+    listingCount: Number(r.listing_count),
+  }));
+
+  return { items, total: rows.length ? Number(rows[0].total_count) : 0 };
 }

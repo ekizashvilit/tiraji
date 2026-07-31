@@ -40,6 +40,7 @@ export default async function AccountPage({
     show_phone: false,
     avatar_path: null,
     is_admin: false,
+    banned: false,
     created_at: new Date().toISOString(),
   };
 

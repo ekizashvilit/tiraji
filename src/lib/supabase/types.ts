@@ -15,7 +15,21 @@ export type ProfileRow = {
   show_phone: boolean;
   avatar_path: string | null;
   is_admin: boolean;
+  banned: boolean;
   created_at: Timestamp;
+}
+
+export type AdminUserRow = {
+  id: string;
+  display_name: string | null;
+  city: string | null;
+  phone: string | null;
+  email: string | null;
+  is_admin: boolean;
+  banned: boolean;
+  created_at: Timestamp;
+  listing_count: number;
+  total_count: number;
 }
 
 export type ListingRow = {
@@ -187,6 +201,14 @@ export type Database = {
       };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       admin_dashboard_stats: { Args: Record<string, never>; Returns: unknown };
+      admin_list_users: {
+        Args: {
+          p_search?: string | null;
+          p_limit?: number | null;
+          p_offset?: number | null;
+        };
+        Returns: AdminUserRow[];
+      };
     };
     Enums: {
       listing_type: ListingType;
