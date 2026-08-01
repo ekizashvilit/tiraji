@@ -1,13 +1,11 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { AlertsCta } from "@/components/alerts/alerts-cta";
 import { HeroSearch } from "@/components/hero-search";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { BookShelf } from "@/components/book-shelf";
 import { CategoryTiles } from "@/components/category-tiles";
 import { WhyTiraji } from "@/components/home/why-tiraji";
-import { HowItWorks } from "@/components/home/how-it-works";
 import { PopularSearches } from "@/components/home/popular-searches";
 import {
   getRecentListings,
@@ -125,9 +123,7 @@ export default async function HomePage({
             </h2>
             <p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
           </div>
-          <Button asChild size="lg">
-            <Link href="/account/alerts">{t("alertCta")}</Link>
-          </Button>
+          <AlertsCta size="lg">{t("alertCta")}</AlertsCta>
         </section>
         <BookShelf
           title={t("nonfictionShelf")}
@@ -143,7 +139,6 @@ export default async function HomePage({
         />
 
         <WhyTiraji />
-        <HowItWorks />
       </div>
     </div>
   );

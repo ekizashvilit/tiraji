@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { PiggyBank, Recycle, Gem, MapPin } from "lucide-react";
+import { PiggyBank, Recycle, Gem, LayoutGrid } from "lucide-react";
 
 export async function WhyTiraji() {
   const t = await getTranslations("home");
@@ -8,7 +8,7 @@ export async function WhyTiraji() {
     { Icon: PiggyBank, title: t("why.b1t"), desc: t("why.b1d") },
     { Icon: Recycle, title: t("why.b2t"), desc: t("why.b2d") },
     { Icon: Gem, title: t("why.b3t"), desc: t("why.b3d") },
-    { Icon: MapPin, title: t("why.b4t"), desc: t("why.b4d") },
+    { Icon: LayoutGrid, title: t("why.b4t"), desc: t("why.b4d") },
   ];
 
   return (

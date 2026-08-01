@@ -6,8 +6,7 @@ import { BookGrid } from "@/components/book-grid";
 import { SearchFilters } from "@/components/search/search-filters";
 import { SortSelect } from "@/components/search/sort-select";
 import { Pagination } from "@/components/search/pagination";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
+import { AlertsCta } from "@/components/alerts/alerts-cta";
 import { searchListings, getListingFacets, PAGE_SIZE } from "@/lib/listings";
 import { getGenres } from "@/lib/genres";
 import type { ListingType, BookCondition } from "@/lib/supabase/types";
@@ -143,18 +142,18 @@ export default async function SearchPage({
                       : t("resultsSoon")}
                   </p>
                 </div>
-                {/* Send them to the alerts page, carrying the search term to prefill. */}
-                <Button asChild>
-                  <Link
-                    href={
-                      alertTitle
-                        ? `/account/alerts?title=${encodeURIComponent(alertTitle)}`
-                        : "/account/alerts"
-                    }
-                  >
-                    {tAlerts("searchCta")}
-                  </Link>
-                </Button>
+                {/* Send them to the alerts page, carrying the search term to
+                    prefill. Logged-out users get the auth sheet in place. */}
+                <AlertsCta
+                  size="default"
+                  href={
+                    alertTitle
+                      ? `/account/alerts?title=${encodeURIComponent(alertTitle)}`
+                      : "/account/alerts"
+                  }
+                >
+                  {tAlerts("searchCta")}
+                </AlertsCta>
               </div>
             )}
           </div>

@@ -24,7 +24,14 @@ export function logSearch(term: string): void {
   const t = term.trim().replace(/\s+/g, " ");
   if (t.length < 2 || t.length > 100) return;
   const supabase = createClient();
-  void supabase
+  // supabase-js builders are lazy — the request only fires when .then()/await
+  // is called. Kick it off fire-and-forget and swallow any error (offline,
+  // pre-migration, etc.).
+  supabase
     .from("search_events")
-    .insert({ term: t, client_id: browserId() });
+    .insert({ term: t, client_id: browserId() })
+    .then(
+      () => {},
+      () => {},
+    );
 }
