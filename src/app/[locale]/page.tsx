@@ -102,6 +102,8 @@ export default async function HomePage({
           listings={under5}
           accent="buy"
         />
+        <PopularSearches />
+
         <BookShelf
           title={t("fictionShelf")}
           href="/search?genre=fiction"
@@ -114,6 +116,19 @@ export default async function HomePage({
           listings={toSwap}
           accent="swap"
         />
+
+        {/* Email alert band */}
+        <section className="flex flex-col items-start gap-4 rounded-xl border border-border bg-secondary px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <div className="max-w-lg">
+            <h2 className="text-xl font-bold text-brand-dark">
+              {t("alertTitle")}
+            </h2>
+            <p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
+          </div>
+          <Button asChild size="lg">
+            <Link href="/account/alerts">{t("alertCta")}</Link>
+          </Button>
+        </section>
         <BookShelf
           title={t("nonfictionShelf")}
           href="/search?genre=nonfiction"
@@ -129,20 +144,6 @@ export default async function HomePage({
 
         <WhyTiraji />
         <HowItWorks />
-        <PopularSearches />
-
-        {/* Email alert band */}
-        <section className="flex flex-col items-start gap-4 rounded-xl border border-border bg-secondary px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10">
-          <div className="max-w-lg">
-            <h2 className="text-xl font-bold text-brand-dark">
-              {t("alertTitle")}
-            </h2>
-            <p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
-          </div>
-          <Button asChild size="lg">
-            <Link href="/account/alerts">{t("alertCta")}</Link>
-          </Button>
-        </section>
       </div>
     </div>
   );

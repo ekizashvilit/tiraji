@@ -2,9 +2,13 @@ import { getTranslations } from "next-intl/server";
 import { Search } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
+import { getPopularSearches } from "@/lib/popular";
 
-// Common Georgian authors / titles (same in both locales — used as search queries).
-const TAGS = [
+const MAX_TAGS = 10;
+
+// Seed terms shown before real search data accumulates (and to top up the list
+// when there aren't yet MAX_TAGS real ones). Same in both locales.
+const SEED = [
   "ვეფხისტყაოსანი",
   "ნოდარ დუმბაძე",
   "დათა თუთაშხია",
@@ -20,13 +24,26 @@ const TAGS = [
 export async function PopularSearches() {
   const t = await getTranslations("home");
 
+  // Real searches first; fill any remaining slots with seed terms (deduped
+  // case-insensitively) so the section is never empty or short.
+  const real = await getPopularSearches(MAX_TAGS);
+  const seen = new Set(real.map((term) => term.toLowerCase()));
+  const tags = [...real];
+  for (const seed of SEED) {
+    if (tags.length >= MAX_TAGS) break;
+    if (!seen.has(seed.toLowerCase())) {
+      tags.push(seed);
+      seen.add(seed.toLowerCase());
+    }
+  }
+
   return (
     <section>
       <h2 className="caps mb-5 text-lg font-bold sm:text-xl">
         {t("popularTitle").toUpperCase()}
       </h2>
       <div className="flex flex-wrap gap-2.5">
-        {TAGS.map((tag) => (
+        {tags.map((tag) => (
           <Link
             key={tag}
             href={`/search?q=${encodeURIComponent(tag)}`}

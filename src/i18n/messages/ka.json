@@ -46,8 +46,8 @@
     "categoriesTitle": "კატეგორიები",
     "forSaleTitle": "იყიდება",
     "under5Title": "წიგნები 5₾-მდე",
-    "toSwapTitle": "გასაცვლელი",
-    "freeTitle": "უფასოდ",
+    "toSwapTitle": "იცვლება",
+    "freeTitle": "ჩუქდება",
     "recentTitle": "ბოლოს დამატებული",
     "byAuthorTitle": "{author} - წიგნები",
     "emptyRecent": "ჯერ წიგნები არ არის დამატებული. იყავი პირველი!",
@@ -74,7 +74,7 @@
       "s3t": "შეხვდი და გაცვალე",
       "s3d": "აიღე შენი წიგნი. გინდა თავად გაყიდო? დაამატე შენი წიგნიც."
     },
-    "popularTitle": "პოპულარული ძებნები",
+    "popularTitle": "რას ეძებენ ყველაზე ხშირად",
     "fictionShelf": "მხატვრული ლიტერატურა",
     "nonfictionShelf": "არამხატვრული"
   },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
+import { logSearch } from "@/lib/log-search";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +21,17 @@ export function HeroSearch() {
     e.preventDefault();
     // Each field scopes to its own column: author→author, title→title,
     // keyword→general search. Only non-empty fields go into the URL.
+    const a = author.trim();
+    const ti = title.trim();
+    const k = keyword.trim();
+    // Log each field's term separately so popularity aggregates cleanly.
+    if (a) logSearch(a);
+    if (ti) logSearch(ti);
+    if (k) logSearch(k);
     const params = new URLSearchParams();
-    if (author.trim()) params.set("author", author.trim());
-    if (title.trim()) params.set("title", title.trim());
-    if (keyword.trim()) params.set("q", keyword.trim());
+    if (a) params.set("author", a);
+    if (ti) params.set("title", ti);
+    if (k) params.set("q", k);
     const qs = params.toString();
     router.push(qs ? `/search?${qs}` : "/search");
   }

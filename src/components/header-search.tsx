@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { ListingType } from "@/lib/supabase/types";
 import { formatLari } from "@/lib/listings-format";
+import { logSearch } from "@/lib/log-search";
 import { cn } from "@/lib/utils";
 
 type Suggestion = {
@@ -86,6 +87,7 @@ export function HeaderSearch({ className }: { className?: string }) {
 
   function goToSearch(term: string) {
     setOpen(false);
+    if (term) logSearch(term);
     router.push(term ? `/search?q=${encodeURIComponent(term)}` : "/search");
   }
 

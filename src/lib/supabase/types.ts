@@ -107,6 +107,13 @@ export type ReportRow = {
   created_at: Timestamp;
 }
 
+export type SearchEventRow = {
+  id: string;
+  term: string;
+  client_id: string | null;
+  created_at: Timestamp;
+}
+
 export type GenreRow = {
   id: number;
   slug: string;
@@ -177,6 +184,11 @@ export type Database = {
       >;
       favorites: Table<FavoriteRow, Omit<FavoriteRow, "id" | "created_at">>;
       reports: Table<ReportRow, Omit<ReportRow, "id" | "created_at">>;
+      search_events: Table<
+        SearchEventRow,
+        Omit<SearchEventRow, "id" | "created_at" | "client_id"> &
+          Partial<Pick<SearchEventRow, "client_id">>
+      >;
       genres: Table<GenreRow>;
     };
     Views: {
@@ -217,6 +229,10 @@ export type Database = {
           p_has_photo?: boolean | null;
         };
         Returns: unknown;
+      };
+      popular_searches: {
+        Args: { p_limit?: number | null; p_days?: number | null };
+        Returns: { term: string; hits: number }[];
       };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       admin_dashboard_stats: { Args: Record<string, never>; Returns: unknown };
