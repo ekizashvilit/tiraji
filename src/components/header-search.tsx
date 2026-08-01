@@ -7,11 +7,8 @@ import { Loader2, Search, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { ListingType } from "@/lib/supabase/types";
+import { formatLari } from "@/lib/listings-format";
 import { cn } from "@/lib/utils";
-
-function lari(price: number): string {
-  return `₾${Number.isInteger(price) ? price : price.toFixed(2)}`;
-}
 
 type Suggestion = {
   id: string;
@@ -50,14 +47,12 @@ export function HeaderSearch({ className }: { className?: string }) {
   const query = q.trim();
   const active = open && query.length >= 2;
 
-  // Debounced suggestion fetch.
+  // Debounced suggestion fetch. The loading flag and the sub-2-char reset are
+  // both driven from the input's onChange handler, so this effect only ever
+  // sets state asynchronously (never synchronously in its body, which would
+  // cascade an extra render).
   useEffect(() => {
-    if (query.length < 2) {
-      setResults(null);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (query.length < 2) return;
     const handle = setTimeout(async () => {
       const supabase = createClient();
       const { data } = await supabase.rpc("search_listings", {
@@ -97,7 +92,7 @@ export function HeaderSearch({ className }: { className?: string }) {
   function tag(s: Suggestion) {
     if (s.listing_type === "swap") return tc("swap");
     if (s.listing_type === "giveaway") return tc("free");
-    return s.price != null ? lari(s.price) : "";
+    return s.price != null ? formatLari(s.price) : "";
   }
 
   return (
@@ -114,8 +109,16 @@ export function HeaderSearch({ className }: { className?: string }) {
           type="search"
           value={q}
           onChange={(e) => {
-            setQ(e.target.value);
+            const value = e.target.value;
+            setQ(value);
             setOpen(true);
+            // Drive loading/reset from the event so the debounced fetch effect
+            // never sets state synchronously. Below the 2-char minimum we clear
+            // stale suggestions; at/above it we show the loading state until the
+            // debounce resolves.
+            const longEnough = value.trim().length >= 2;
+            setLoading(longEnough);
+            if (!longEnough) setResults(null);
           }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
@@ -130,6 +133,7 @@ export function HeaderSearch({ className }: { className?: string }) {
             onClick={() => {
               setQ("");
               setResults(null);
+              setLoading(false);
               setOpen(false);
               inputRef.current?.focus();
             }}

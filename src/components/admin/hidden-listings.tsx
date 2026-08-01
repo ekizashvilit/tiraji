@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ListingType } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export type HiddenItem = {
   id: string;
@@ -24,7 +25,9 @@ export type HiddenItem = {
 // this panel a hidden listing would have no route back to visible.
 export function HiddenListings({ items }: { items: HiddenItem[] }) {
   const t = useTranslations("admin");
+  const tc = useTranslations("common");
   const router = useRouter();
+  const confirm = useConfirm();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -41,9 +44,20 @@ export function HiddenListings({ items }: { items: HiddenItem[] }) {
   }
 
   async function remove(item: HiddenItem) {
-    if (!window.confirm(t("deleteConfirm"))) return;
+    if (
+      !(await confirm({
+        title: t("deleteConfirm"),
+        confirmLabel: tc("delete"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(item.id);
-    const { error } = await supabase.from("listings").delete().eq("id", item.id);
+    const { error } = await supabase
+      .from("listings")
+      .delete()
+      .eq("id", item.id);
     setBusyId(null);
     if (error) return toast.error(t("actionError"));
     toast.success(t("deleted"));
@@ -78,7 +92,10 @@ export function HiddenListings({ items }: { items: HiddenItem[] }) {
                 />
               ) : (
                 <div className="grid h-full place-items-center">
-                  <BookMarked className="size-6 text-muted-foreground" aria-hidden />
+                  <BookMarked
+                    className="size-6 text-muted-foreground"
+                    aria-hidden
+                  />
                 </div>
               )}
             </div>

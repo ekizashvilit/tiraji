@@ -3,11 +3,10 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getGenres } from "@/lib/genres";
+import { SELLABLE_TYPES } from "@/lib/listing-constants";
 import { PageHeader } from "@/components/page-header";
 import { SellForm } from "@/components/sell/sell-form";
 import type { ListingType } from "@/lib/supabase/types";
-
-const TYPES: ListingType[] = ["sale", "swap", "giveaway"];
 
 export default async function SellPage({
   params,
@@ -35,7 +34,7 @@ export default async function SellPage({
   ]);
 
   const { type } = await searchParams;
-  const defaultType: ListingType = TYPES.includes(type as ListingType)
+  const defaultType: ListingType = SELLABLE_TYPES.includes(type as ListingType)
     ? (type as ListingType)
     : "sale";
 
@@ -44,10 +43,7 @@ export default async function SellPage({
       <PageHeader
         title={t("sellTitle")}
         lede={t("sellLede")}
-        crumbs={[
-          { label: tNav("home"), href: "/" },
-          { label: t("sellTitle") },
-        ]}
+        crumbs={[{ label: tNav("home"), href: "/" }, { label: t("sellTitle") }]}
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <SellForm

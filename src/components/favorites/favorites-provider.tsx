@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -20,7 +26,8 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function useFavorites(): FavoritesContextValue {
   const ctx = useContext(FavoritesContext);
-  if (!ctx) throw new Error("useFavorites must be used within FavoritesProvider");
+  if (!ctx)
+    throw new Error("useFavorites must be used within FavoritesProvider");
   return ctx;
 }
 

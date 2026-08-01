@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 // Saved books whose listing is no longer active (sold, hidden, or deleted) can't
 // be shown — RLS hides non-active listings from non-owners. This clears those
 // dangling favorites in one go. Deletes are RLS-scoped to the current user.
-export function ClearUnavailable({ ids, count }: { ids: string[]; count: number }) {
+export function ClearUnavailable({
+  ids,
+  count,
+}: {
+  ids: string[];
+  count: number;
+}) {
   const t = useTranslations("favorites");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -19,7 +25,10 @@ export function ClearUnavailable({ ids, count }: { ids: string[]; count: number 
   async function clear() {
     setBusy(true);
     const supabase = createClient();
-    const { error } = await supabase.from("favorites").delete().in("listing_id", ids);
+    const { error } = await supabase
+      .from("favorites")
+      .delete()
+      .in("listing_id", ids);
     setBusy(false);
     if (error) {
       toast.error(t("error"));

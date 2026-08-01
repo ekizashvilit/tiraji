@@ -66,9 +66,7 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
         }),
       );
     }
-    toast[error ? "error" : "success"](
-      error ? error.message : t("saved"),
-    );
+    toast[error ? "error" : "success"](error ? error.message : t("saved"));
   }
 
   return (

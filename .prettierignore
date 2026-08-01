@@ -1,0 +1,8 @@
+node_modules
+.next
+package-lock.json
+tsconfig.tsbuildinfo
+next-env.d.ts
+public
+# SQL migrations and Deno edge functions are managed by the Supabase CLI.
+supabase

@@ -18,71 +18,71 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EXACT: string[] = [
-	// English
-	"fuck",
-	"fucking",
-	"fucker",
-	"motherfucker",
-	"shit",
-	"bullshit",
-	"bitch",
-	"asshole",
-	"cunt",
-	"dick",
-	"prick",
-	"pussy",
-	"slut",
-	"whore",
-	"bastard",
-	"wanker",
-	"twat",
-	// Georgian (starter — please curate/extend)
-	"ყლე",
-	"ყლეა",
-	"ბოზი",
-	"ბოზები",
-	"მუტელი",
-	"ძუკნა",
-	"მოვტყან",
-	"ტყნაური",
+  // English
+  "fuck",
+  "fucking",
+  "fucker",
+  "motherfucker",
+  "shit",
+  "bullshit",
+  "bitch",
+  "asshole",
+  "cunt",
+  "dick",
+  "prick",
+  "pussy",
+  "slut",
+  "whore",
+  "bastard",
+  "wanker",
+  "twat",
+  // Georgian (starter — please curate/extend)
+  "ყლე",
+  "ყლეა",
+  "ბოზი",
+  "ბოზები",
+  "მუტელი",
+  "ძუკნა",
+  "მოვტყან",
+  "ტყნაური",
 ];
 
 const CONTAINS: string[] = [
-	// Unambiguous slurs (matched anywhere). English examples:
-	"nigger",
-	"faggot",
-	"retard",
+  // Unambiguous slurs (matched anywhere). English examples:
+  "nigger",
+  "faggot",
+  "retard",
 ];
 
 const EXACT_SET = new Set(EXACT.map((w) => w.toLowerCase()));
 const CONTAINS_LC = CONTAINS.map((w) => w.toLowerCase());
 
 function normalize(text: string): string {
-	// Lowercase and strip Latin diacritics; harmless for Georgian (no diacritics).
-	return text.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  // Lowercase and strip Latin diacritics; harmless for Georgian (no diacritics).
+  return text.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
 }
 
 function tokenize(text: string): string[] {
-	// Split on anything that isn't a letter or number — works for both the Latin
-	// and Georgian alphabets via Unicode property escapes.
-	return normalize(text)
-		.split(/[^\p{L}\p{N}]+/u)
-		.filter(Boolean);
+  // Split on anything that isn't a letter or number — works for both the Latin
+  // and Georgian alphabets via Unicode property escapes.
+  return normalize(text)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
 }
 
 // Returns the first offending term found, or null if the text is clean.
 export function findProfanity(text: string): string | null {
-	if (!text) return null;
-	const norm = normalize(text);
-	for (const bad of CONTAINS_LC) {
-		if (norm.includes(bad)) return bad;
-	}
-	for (const token of tokenize(text)) {
-		if (EXACT_SET.has(token)) return token;
-	}
-	return null;
+  if (!text) return null;
+  const norm = normalize(text);
+  for (const bad of CONTAINS_LC) {
+    if (norm.includes(bad)) return bad;
+  }
+  for (const token of tokenize(text)) {
+    if (EXACT_SET.has(token)) return token;
+  }
+  return null;
 }
 
 export function isClean(text: string): boolean {
-	return findProfanity(text) === null;
+  return findProfanity(text) === null;
 }

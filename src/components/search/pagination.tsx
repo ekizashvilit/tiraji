@@ -36,7 +36,12 @@ export function Pagination({
       aria-label={t("pagination")}
       className="mt-10 flex items-center justify-center gap-1.5"
     >
-      <Arrow href={href(page - 1)} disabled={page <= 1} label={t("prevPage")} dir="left" />
+      <Arrow
+        href={href(page - 1)}
+        disabled={page <= 1}
+        label={t("prevPage")}
+        dir="left"
+      />
 
       {pageList(page, totalPages).map((p, i) =>
         p === "..." ? (
@@ -63,7 +68,12 @@ export function Pagination({
         ),
       )}
 
-      <Arrow href={href(page + 1)} disabled={page >= totalPages} label={t("nextPage")} dir="right" />
+      <Arrow
+        href={href(page + 1)}
+        disabled={page >= totalPages}
+        label={t("nextPage")}
+        dir="right"
+      />
     </nav>
   );
 }

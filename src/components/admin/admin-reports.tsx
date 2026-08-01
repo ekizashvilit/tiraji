@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ListingType, ListingStatus } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 export type ReportItem = {
@@ -30,8 +31,10 @@ export type ReportItem = {
 export function AdminReports({ items }: { items: ReportItem[] }) {
   const t = useTranslations("admin");
   const tStatus = useTranslations("myListings");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const confirm = useConfirm();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -59,7 +62,15 @@ export function AdminReports({ items }: { items: ReportItem[] }) {
   // Permanently delete the listing (cascade removes its reports too).
   async function removeListing(item: ReportItem) {
     if (!item.listing) return;
-    if (!window.confirm(t("deleteConfirm"))) return;
+    if (
+      !(await confirm({
+        title: t("deleteConfirm"),
+        confirmLabel: tc("delete"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(item.id);
     const { error } = await supabase
       .from("listings")

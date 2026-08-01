@@ -52,7 +52,9 @@ export async function fetchConversations(
 
   const ids = convos.map((c) => c.id);
   const otherIds = Array.from(
-    new Set(convos.map((c) => (c.buyer_id === userId ? c.seller_id : c.buyer_id))),
+    new Set(
+      convos.map((c) => (c.buyer_id === userId ? c.seller_id : c.buyer_id)),
+    ),
   );
 
   const [{ data: msgData }, { data: people }] = await Promise.all([
@@ -65,9 +67,9 @@ export async function fetchConversations(
   ]);
   const messages = (msgData as MsgRow[] | null) ?? [];
   const nameById = new Map(
-    ((people as { id: string; display_name: string | null }[] | null) ?? []).map(
-      (p) => [p.id, p.display_name],
-    ),
+    (
+      (people as { id: string; display_name: string | null }[] | null) ?? []
+    ).map((p) => [p.id, p.display_name]),
   );
 
   return convos

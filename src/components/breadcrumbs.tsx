@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
@@ -18,9 +19,10 @@ export function Breadcrumbs({
   // breadcrumb replaces a separate page title.
   emphasizeLast?: boolean;
 }) {
+  const t = useTranslations("common");
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={t("breadcrumb")}
       className={cn(
         "flex items-center gap-1.5 text-sm text-muted-foreground",
         className,
@@ -47,7 +49,9 @@ export function Breadcrumbs({
                 {item.label}
               </span>
             )}
-            {!last && <ChevronRight className="size-3.5 shrink-0" aria-hidden />}
+            {!last && (
+              <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+            )}
           </span>
         );
       })}

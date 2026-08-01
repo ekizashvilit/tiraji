@@ -68,7 +68,13 @@ export function BookGallery({
                   : "border-border hover:border-primary/40",
               )}
             >
-              <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+              <Image
+                src={src}
+                alt=""
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

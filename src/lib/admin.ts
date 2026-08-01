@@ -118,8 +118,8 @@ export async function getAdminListings(opts: {
       .from("public_seller")
       .select("id,display_name")
       .in("id", sellerIds);
-    for (const p of (people as { id: string; display_name: string | null }[] | null) ??
-      []) {
+    for (const p of (people as
+      { id: string; display_name: string | null }[] | null) ?? []) {
       nameById.set(p.id, p.display_name);
     }
   }

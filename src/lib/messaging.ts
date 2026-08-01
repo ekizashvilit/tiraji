@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { fetchConversations, type ConversationSummary } from "@/lib/messaging-shared";
+import {
+  fetchConversations,
+  type ConversationSummary,
+} from "@/lib/messaging-shared";
 
 export type { ConversationSummary };
 

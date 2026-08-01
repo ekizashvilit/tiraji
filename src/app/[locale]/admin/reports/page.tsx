@@ -2,8 +2,14 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { coverUrl } from "@/lib/listings";
-import { AdminReports, type ReportItem } from "@/components/admin/admin-reports";
-import { HiddenListings, type HiddenItem } from "@/components/admin/hidden-listings";
+import {
+  AdminReports,
+  type ReportItem,
+} from "@/components/admin/admin-reports";
+import {
+  HiddenListings,
+  type HiddenItem,
+} from "@/components/admin/hidden-listings";
 import type { ListingType, ListingStatus } from "@/lib/supabase/types";
 
 type ReportRow = {
@@ -64,14 +70,16 @@ export default async function AdminReportsPage({
   }));
 
   const hidden: HiddenItem[] = (
-    (hiddenData as {
-      id: string;
-      title: string;
-      author: string | null;
-      listing_type: ListingType;
-      cover_image_paths: string[];
-      cover_external_url: string | null;
-    }[] | null) ?? []
+    (hiddenData as
+      | {
+          id: string;
+          title: string;
+          author: string | null;
+          listing_type: ListingType;
+          cover_image_paths: string[];
+          cover_external_url: string | null;
+        }[]
+      | null) ?? []
   ).map((l) => ({
     id: l.id,
     title: l.title,

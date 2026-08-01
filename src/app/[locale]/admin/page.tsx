@@ -62,12 +62,36 @@ export default async function AdminDashboardPage({
       <section className="space-y-3">
         <h2 className="text-lg font-bold">{t("listingsBreakdown")}</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <MiniStat label={t("statActive")} value={stats.listings_active} tone="text-buy" />
-          <MiniStat label={t("statHidden")} value={stats.listings_hidden} tone="text-muted-foreground" />
-          <MiniStat label={t("statClosed")} value={stats.listings_closed} tone="text-muted-foreground" />
-          <MiniStat label={t("statSale")} value={stats.listings_sale} icon={<ShoppingBag className="size-4" />} />
-          <MiniStat label={t("statSwap")} value={stats.listings_swap} icon={<ArrowLeftRight className="size-4" />} />
-          <MiniStat label={t("statGiveaway")} value={stats.listings_giveaway} icon={<Gift className="size-4" />} />
+          <MiniStat
+            label={t("statActive")}
+            value={stats.listings_active}
+            tone="text-buy"
+          />
+          <MiniStat
+            label={t("statHidden")}
+            value={stats.listings_hidden}
+            tone="text-muted-foreground"
+          />
+          <MiniStat
+            label={t("statClosed")}
+            value={stats.listings_closed}
+            tone="text-muted-foreground"
+          />
+          <MiniStat
+            label={t("statSale")}
+            value={stats.listings_sale}
+            icon={<ShoppingBag className="size-4" />}
+          />
+          <MiniStat
+            label={t("statSwap")}
+            value={stats.listings_swap}
+            icon={<ArrowLeftRight className="size-4" />}
+          />
+          <MiniStat
+            label={t("statGiveaway")}
+            value={stats.listings_giveaway}
+            icon={<Gift className="size-4" />}
+          />
         </div>
       </section>
 
@@ -91,10 +115,26 @@ export default async function AdminDashboardPage({
       <section className="space-y-3">
         <h2 className="text-lg font-bold">{t("engagement")}</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MiniStat label={t("statBookAlertsShort")} value={stats.alerts_total} icon={<Bell className="size-4" />} />
-          <MiniStat label={t("statFavorites")} value={stats.favorites_total} icon={<Heart className="size-4" />} />
-          <MiniStat label={t("statNew7Users")} value={stats.users_7d} icon={<Users className="size-4" />} />
-          <MiniStat label={t("statToday")} value={stats.listings_today} icon={<BookOpen className="size-4" />} />
+          <MiniStat
+            label={t("statBookAlertsShort")}
+            value={stats.alerts_total}
+            icon={<Bell className="size-4" />}
+          />
+          <MiniStat
+            label={t("statFavorites")}
+            value={stats.favorites_total}
+            icon={<Heart className="size-4" />}
+          />
+          <MiniStat
+            label={t("statNew7Users")}
+            value={stats.users_7d}
+            icon={<Users className="size-4" />}
+          />
+          <MiniStat
+            label={t("statToday")}
+            value={stats.listings_today}
+            icon={<BookOpen className="size-4" />}
+          />
         </div>
       </section>
     </div>
@@ -118,7 +158,9 @@ function StatCard({
         {icon}
         <span className="text-sm font-medium">{label}</span>
       </div>
-      <p className="mt-2 text-3xl font-bold tabular-nums">{value.toLocaleString()}</p>
+      <p className="mt-2 text-3xl font-bold tabular-nums">
+        {value.toLocaleString()}
+      </p>
       {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );

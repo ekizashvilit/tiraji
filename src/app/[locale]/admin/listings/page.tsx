@@ -52,9 +52,16 @@ export default async function AdminListingsPage({
 
   // Build a listings href, keeping the current filters and overriding some.
   const hrefWith = (over: Partial<Record<keyof SP, string | undefined>>) => {
-    const merged = { status: sp.status, type: sp.type, q: sp.q, day: sp.day, ...over };
+    const merged = {
+      status: sp.status,
+      type: sp.type,
+      q: sp.q,
+      day: sp.day,
+      ...over,
+    };
     const p = new URLSearchParams();
-    if (merged.status && merged.status !== "all") p.set("status", merged.status);
+    if (merged.status && merged.status !== "all")
+      p.set("status", merged.status);
     if (merged.type) p.set("type", merged.type);
     if (merged.q) p.set("q", merged.q);
     if (merged.day) p.set("day", merged.day);

@@ -119,7 +119,7 @@ export function HeroCarousel() {
       className="group relative overflow-hidden rounded-2xl"
       role="region"
       aria-roledescription="carousel"
-      aria-label="Promotions"
+      aria-label={t("region")}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -201,7 +201,9 @@ export function HeroCarousel() {
             aria-current={i === index}
             className={cn(
               "h-2.5 rounded-full bg-white transition-all",
-              i === index ? "w-6 opacity-100" : "w-2.5 opacity-50 hover:opacity-80",
+              i === index
+                ? "w-6 opacity-100"
+                : "w-2.5 opacity-50 hover:opacity-80",
             )}
           />
         ))}

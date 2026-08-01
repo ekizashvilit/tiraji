@@ -17,6 +17,7 @@ import { useRouter } from "@/i18n/navigation";
 import { setUserBanned, deleteUser } from "@/lib/admin-actions";
 import type { AdminUser } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 export function AdminUsers({
@@ -27,8 +28,10 @@ export function AdminUsers({
   meId: string;
 }) {
   const t = useTranslations("admin");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const confirm = useConfirm();
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "ka-GE", {
@@ -57,7 +60,16 @@ export function AdminUsers({
 
   async function toggleBan(user: AdminUser) {
     const next = !user.banned;
-    if (next && !window.confirm(t("banConfirm"))) return;
+    if (
+      next &&
+      !(await confirm({
+        title: t("banConfirm"),
+        confirmLabel: t("ban"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(user.id);
     try {
       await setUserBanned(user.id, next);
@@ -71,7 +83,15 @@ export function AdminUsers({
   }
 
   async function remove(user: AdminUser) {
-    if (!window.confirm(t("userDeleteConfirm"))) return;
+    if (
+      !(await confirm({
+        title: t("userDeleteConfirm"),
+        confirmLabel: tc("delete"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(user.id);
     try {
       await deleteUser(user.id);
@@ -138,7 +158,12 @@ export function AdminUsers({
                     </span>
                   )}
                   <span>{t("listingCount", { count: user.listingCount })}</span>
-                  <span>· {t("joined", { date: dateFmt.format(new Date(user.created_at)) })}</span>
+                  <span>
+                    ·{" "}
+                    {t("joined", {
+                      date: dateFmt.format(new Date(user.created_at)),
+                    })}
+                  </span>
                 </p>
               </div>
 

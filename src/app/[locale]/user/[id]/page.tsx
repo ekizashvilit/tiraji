@@ -34,10 +34,13 @@ export default async function UserProfilePage({ params }: Params) {
   const listings = await getListingsBySeller(id);
 
   const name = profile.display_name?.trim() || tBook("sellerFallback");
-  const monthFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "ka-GE", {
-    month: "long",
-    year: "numeric",
-  });
+  const monthFmt = new Intl.DateTimeFormat(
+    locale === "en" ? "en-GB" : "ka-GE",
+    {
+      month: "long",
+      year: "numeric",
+    },
+  );
   const memberSince = monthFmt.format(new Date(profile.created_at));
 
   return (

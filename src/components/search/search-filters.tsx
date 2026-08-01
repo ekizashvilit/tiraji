@@ -8,6 +8,7 @@ import { ArrowUpDown, Check, SlidersHorizontal, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { GenreRow } from "@/lib/supabase/types";
 import type { ListingFacets } from "@/lib/listings";
+import { genreName } from "@/lib/listings-format";
 import { languageLabel } from "@/lib/languages";
 import { cityLabel } from "@/lib/cities";
 import { cn } from "@/lib/utils";
@@ -18,11 +19,6 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
-
-// Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
-function genreName(genre: GenreRow, locale: string): string {
-  return locale === "en" ? genre.name_en : genre.name_ka;
-}
 
 type Props = {
   genres: GenreRow[];
@@ -158,130 +154,130 @@ export function SearchFilters({
   const groups = (
     <div className="space-y-6">
       {showType && (
-          <Group title={t("type")}>
-            <OptionRow
-              label={t("any")}
-              active={valuesOf("type").length === 0}
-              href={hrefWith({ type: null })}
-            />
-            {typeOptions.map((o) => (
-              <OptionRow
-                key={o.value}
-                label={o.label}
-                count={facets.types[o.value]}
-                active={valuesOf("type").includes(o.value)}
-                href={toggleHref("type", o.value)}
-              />
-            ))}
-          </Group>
-        )}
-
-        {showCondition && (
-          <Group title={t("condition")}>
-            <OptionRow
-              label={t("any")}
-              active={valuesOf("condition").length === 0}
-              href={hrefWith({ condition: null })}
-            />
-            {conditionOptions.map((o) => (
-              <OptionRow
-                key={o.value}
-                label={o.label}
-                count={facets.conditions[o.value]}
-                active={valuesOf("condition").includes(o.value)}
-                href={toggleHref("condition", o.value)}
-              />
-            ))}
-          </Group>
-        )}
-
-        {showPrice && (
-          <PriceGroup
-            // Remount when the URL price changes (e.g. "Clear") so the inputs re-seed.
-            key={`${params.get("min") ?? ""}-${params.get("max") ?? ""}`}
-            title={t("price")}
-            minLabel={t("min")}
-            maxLabel={t("max")}
-            applyLabel={t("apply")}
-            min={params.get("min") ?? ""}
-            max={params.get("max") ?? ""}
-            onApply={(min, max) => {
-              // Guard against a reversed range (min 50, max 10) → swap so the
-              // query returns the obvious intended band instead of nothing.
-              let lo = min;
-              let hi = max;
-              if (lo && hi && Number(lo) > Number(hi)) [lo, hi] = [hi, lo];
-              router.push(hrefWith({ min: lo, max: hi }));
-            }}
+        <Group title={t("type")}>
+          <OptionRow
+            label={t("any")}
+            active={valuesOf("type").length === 0}
+            href={hrefWith({ type: null })}
           />
-        )}
-
-        {showGenre && (
-          <Group title={t("genre")}>
+          {typeOptions.map((o) => (
             <OptionRow
-              label={t("any")}
-              active={valuesOf("genre").length === 0}
-              href={hrefWith({ genre: null })}
+              key={o.value}
+              label={o.label}
+              count={facets.types[o.value]}
+              active={valuesOf("type").includes(o.value)}
+              href={toggleHref("type", o.value)}
             />
-            {genreOptions.map((g) => (
-              <OptionRow
-                key={g.id}
-                label={genreName(g, locale)}
-                count={facets.genres[g.id]}
-                active={valuesOf("genre").includes(g.slug)}
-                href={toggleHref("genre", g.slug)}
-              />
-            ))}
-          </Group>
-        )}
+          ))}
+        </Group>
+      )}
 
-        {showLanguage && (
-          <Group title={t("language")}>
+      {showCondition && (
+        <Group title={t("condition")}>
+          <OptionRow
+            label={t("any")}
+            active={valuesOf("condition").length === 0}
+            href={hrefWith({ condition: null })}
+          />
+          {conditionOptions.map((o) => (
             <OptionRow
-              label={t("any")}
-              active={valuesOf("language").length === 0}
-              href={hrefWith({ language: null })}
+              key={o.value}
+              label={o.label}
+              count={facets.conditions[o.value]}
+              active={valuesOf("condition").includes(o.value)}
+              href={toggleHref("condition", o.value)}
             />
-            {languageOptions.map((l) => (
-              <OptionRow
-                key={l}
-                label={languageLabel(l, locale)}
-                count={facets.languages[l]}
-                active={valuesOf("language").includes(l)}
-                href={toggleHref("language", l)}
-              />
-            ))}
-          </Group>
-        )}
+          ))}
+        </Group>
+      )}
 
-        {showCity && (
-          <Group title={t("city")}>
-            <OptionRow
-              label={t("any")}
-              active={valuesOf("city").length === 0}
-              href={hrefWith({ city: null })}
-            />
-            {cityOptions.map((c) => (
-              <OptionRow
-                key={c}
-                label={cityLabel(c, locale)}
-                count={facets.cities[c]}
-                active={valuesOf("city").includes(c)}
-                href={toggleHref("city", c)}
-              />
-            ))}
-          </Group>
-        )}
+      {showPrice && (
+        <PriceGroup
+          // Remount when the URL price changes (e.g. "Clear") so the inputs re-seed.
+          key={`${params.get("min") ?? ""}-${params.get("max") ?? ""}`}
+          title={t("price")}
+          minLabel={t("min")}
+          maxLabel={t("max")}
+          applyLabel={t("apply")}
+          min={params.get("min") ?? ""}
+          max={params.get("max") ?? ""}
+          onApply={(min, max) => {
+            // Guard against a reversed range (min 50, max 10) → swap so the
+            // query returns the obvious intended band instead of nothing.
+            let lo = min;
+            let hi = max;
+            if (lo && hi && Number(lo) > Number(hi)) [lo, hi] = [hi, lo];
+            router.push(hrefWith({ min: lo, max: hi }));
+          }}
+        />
+      )}
 
-        {showPhoto && (
-          <Group title={t("photo")}>
+      {showGenre && (
+        <Group title={t("genre")}>
+          <OptionRow
+            label={t("any")}
+            active={valuesOf("genre").length === 0}
+            href={hrefWith({ genre: null })}
+          />
+          {genreOptions.map((g) => (
             <OptionRow
-              label={t("hasPhoto")}
-              active={params.get("photo") === "1"}
-              href={hrefWith({ photo: params.get("photo") === "1" ? null : "1" })}
+              key={g.id}
+              label={genreName(g, locale)}
+              count={facets.genres[g.id]}
+              active={valuesOf("genre").includes(g.slug)}
+              href={toggleHref("genre", g.slug)}
             />
-          </Group>
-        )}
+          ))}
+        </Group>
+      )}
+
+      {showLanguage && (
+        <Group title={t("language")}>
+          <OptionRow
+            label={t("any")}
+            active={valuesOf("language").length === 0}
+            href={hrefWith({ language: null })}
+          />
+          {languageOptions.map((l) => (
+            <OptionRow
+              key={l}
+              label={languageLabel(l, locale)}
+              count={facets.languages[l]}
+              active={valuesOf("language").includes(l)}
+              href={toggleHref("language", l)}
+            />
+          ))}
+        </Group>
+      )}
+
+      {showCity && (
+        <Group title={t("city")}>
+          <OptionRow
+            label={t("any")}
+            active={valuesOf("city").length === 0}
+            href={hrefWith({ city: null })}
+          />
+          {cityOptions.map((c) => (
+            <OptionRow
+              key={c}
+              label={cityLabel(c, locale)}
+              count={facets.cities[c]}
+              active={valuesOf("city").includes(c)}
+              href={toggleHref("city", c)}
+            />
+          ))}
+        </Group>
+      )}
+
+      {showPhoto && (
+        <Group title={t("photo")}>
+          <OptionRow
+            label={t("hasPhoto")}
+            active={params.get("photo") === "1"}
+            href={hrefWith({ photo: params.get("photo") === "1" ? null : "1" })}
+          />
+        </Group>
+      )}
     </div>
   );
 
@@ -312,7 +308,10 @@ export function SearchFilters({
             {/* Centered visual (icon + current sort); the native select sits on
                 top, transparent, so the mobile picker still opens. */}
             <div className="pointer-events-none flex items-center justify-center gap-2 py-3 text-sm font-semibold">
-              <ArrowUpDown className="h-4 w-4 text-muted-foreground" aria-hidden />
+              <ArrowUpDown
+                className="h-4 w-4 text-muted-foreground"
+                aria-hidden
+              />
               {t(SORT_LABEL_KEY[params.get("sort") ?? defaultSort])}
             </div>
             <select
@@ -368,14 +367,22 @@ export function SearchFilters({
               </SheetClose>
             </div>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{groups}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+            {groups}
+          </div>
         </SheetContent>
       </Sheet>
     </div>
   );
 }
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="border-t border-border pt-4 first:border-t-0 first:pt-0">
       <h3 className="mb-2 text-sm font-bold">{title}</h3>

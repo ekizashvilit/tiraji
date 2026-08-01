@@ -64,11 +64,18 @@ export default async function AccountPage({
           <div className="flex items-start gap-3">
             <Bell className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
             <div>
-              <p className="font-semibold text-foreground">{tAlerts("pageTitle")}</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">{tAlerts("pageLede")}</p>
+              <p className="font-semibold text-foreground">
+                {tAlerts("pageTitle")}
+              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {tAlerts("pageLede")}
+              </p>
             </div>
           </div>
-          <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+          <ChevronRight
+            className="size-5 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
         </Link>
       </div>
     </>

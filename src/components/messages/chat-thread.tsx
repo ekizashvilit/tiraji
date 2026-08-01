@@ -206,7 +206,9 @@ export function ChatThread({
                   <span
                     className={cn(
                       "mt-0.5 block text-[0.7rem]",
-                      mine ? "text-primary-foreground/70" : "text-muted-foreground",
+                      mine
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground",
                     )}
                   >
                     {timeFmt.format(new Date(m.created_at))}

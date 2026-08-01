@@ -14,7 +14,8 @@ const PHONE_EMAIL_DOMAIN = "phone.tiraji.local";
 export function normalizeGeorgianPhone(input: string): string | null {
   let d = input.replace(/\D/g, "");
   if (d.startsWith("00")) d = d.slice(2);
-  if (d.startsWith("995")) d = d.slice(3); // drop country code
+  if (d.startsWith("995"))
+    d = d.slice(3); // drop country code
   else if (d.startsWith("0")) d = d.slice(1); // drop trunk 0
   // Georgian mobile numbers: 9 digits starting with 5.
   if (!/^5\d{8}$/.test(d)) return null;

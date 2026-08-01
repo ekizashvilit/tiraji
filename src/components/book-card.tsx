@@ -94,7 +94,9 @@ function PriceOrTag({
           {t("wanted")}
         </span>
         {listing.price != null && (
-          <span className="text-sm font-bold text-price">{formatLari(listing.price)}</span>
+          <span className="text-sm font-bold text-price">
+            {formatLari(listing.price)}
+          </span>
         )}
       </div>
     );
@@ -116,11 +118,13 @@ function PriceOrTag({
   // "Negotiable" (ფასი შეთანხმებით) means the price is by agreement — there's no
   // fixed number, so it replaces the price rather than sitting alongside it.
   if (listing.is_negotiable || listing.price == null) {
-    return <p className="text-sm font-semibold text-muted-foreground">{t("negotiable")}</p>;
+    return (
+      <p className="text-sm font-semibold text-muted-foreground">
+        {t("negotiable")}
+      </p>
+    );
   }
   return (
-    <p className="text-sm font-bold text-price">
-      {formatLari(listing.price)}
-    </p>
+    <p className="text-sm font-bold text-price">{formatLari(listing.price)}</p>
   );
 }

@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ListingType, ListingStatus } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 export type MyListing = {
@@ -27,7 +28,9 @@ export type MyListing = {
 export function MyListingsList({ items }: { items: MyListing[] }) {
   const t = useTranslations("myListings");
   const tCard = useTranslations("card");
+  const tc = useTranslations("common");
   const router = useRouter();
+  const confirm = useConfirm();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -47,13 +50,24 @@ export function MyListingsList({ items }: { items: MyListing[] }) {
   }
 
   async function remove(item: MyListing) {
-    if (!window.confirm(t("deleteConfirm"))) return;
+    if (
+      !(await confirm({
+        title: t("deleteConfirm"),
+        confirmLabel: t("delete"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(item.id);
     // Remove the uploaded cover files first so they don't orphan in storage.
     if (item.cover_image_paths.length) {
       await supabase.storage.from("covers").remove(item.cover_image_paths);
     }
-    const { error } = await supabase.from("listings").delete().eq("id", item.id);
+    const { error } = await supabase
+      .from("listings")
+      .delete()
+      .eq("id", item.id);
     setBusyId(null);
     if (error) {
       toast.error(t("actionError"));
@@ -106,7 +120,10 @@ export function MyListingsList({ items }: { items: MyListing[] }) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate font-semibold">{item.title}</p>
-                <StatusBadge status={item.status} label={t(`status_${item.status}`)} />
+                <StatusBadge
+                  status={item.status}
+                  label={t(`status_${item.status}`)}
+                />
               </div>
               {item.author && (
                 <p className="truncate text-sm text-muted-foreground">
@@ -121,12 +138,7 @@ export function MyListingsList({ items }: { items: MyListing[] }) {
             <div className="flex shrink-0 items-center gap-2">
               {/* Wanted posts have no rich edit form yet — manage via close/delete. */}
               {item.listing_type !== "wanted" && (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                >
+                <Button asChild variant="outline" size="sm" className="gap-1.5">
                   <Link href={`/my-listings/${item.id}/edit`}>
                     <Pencil className="size-4" aria-hidden />
                     {t("edit")}
@@ -211,7 +223,9 @@ function PriceOrTag({
     return (
       <span className="font-medium text-primary">
         {tCard("wanted")}
-        {item.price != null && <span className="ml-1.5 font-bold text-price">{`₾${item.price}`}</span>}
+        {item.price != null && (
+          <span className="ml-1.5 font-bold text-price">{`₾${item.price}`}</span>
+        )}
       </span>
     );
   }
@@ -223,7 +237,11 @@ function PriceOrTag({
   }
   // "Negotiable" means price by agreement — no fixed number, so it replaces the price.
   if (item.is_negotiable || item.price == null) {
-    return <span className="font-semibold text-muted-foreground">{tCard("negotiable")}</span>;
+    return (
+      <span className="font-semibold text-muted-foreground">
+        {tCard("negotiable")}
+      </span>
+    );
   }
   return <span className="font-bold text-price">{`₾${item.price}`}</span>;
 }

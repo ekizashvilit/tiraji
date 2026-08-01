@@ -12,7 +12,13 @@ import { isClean } from "@/lib/profanity";
 import { useRouter } from "@/i18n/navigation";
 import { CITIES, cityLabel } from "@/lib/cities";
 import { LANGUAGES, languageLabel } from "@/lib/languages";
-import type { GenreRow, ListingType, BookCondition } from "@/lib/supabase/types";
+import { coverPathUrl, genreName } from "@/lib/listings-format";
+import { SELLABLE_TYPES, BOOK_CONDITIONS } from "@/lib/listing-constants";
+import type {
+  GenreRow,
+  ListingType,
+  BookCondition,
+} from "@/lib/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,9 +27,18 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-const TYPES: ListingType[] = ["sale", "swap", "giveaway"];
-const CONDITIONS: BookCondition[] = ["new", "like_new", "good", "worn"];
 const MAX_PHOTOS = 3;
+// Reject obviously-wrong files before compression/upload. This mirrors the
+// server-side bucket limits (migration 0012) so the user gets instant feedback;
+// the bucket constraints remain the real enforcement.
+const ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+];
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024; // pre-compression ceiling
 
 // Fields the form can edit on an existing listing.
 export type EditableListing = {
@@ -40,15 +55,6 @@ export type EditableListing = {
   genre_id: number | null;
   cover_image_paths: string[];
 };
-
-// Inlined (can't import from @/lib/genres — it pulls in the server Supabase client).
-function genreName(genre: GenreRow, locale: string): string {
-  return locale === "en" ? genre.name_en : genre.name_ka;
-}
-
-function publicCoverUrl(path: string): string {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/covers/${path}`;
-}
 
 // A photo is either already uploaded (has a storage path) or newly picked (a File).
 type Photo =
@@ -97,7 +103,7 @@ export function SellForm({
     listing?.cover_image_paths.map((path) => ({
       kind: "existing" as const,
       path,
-      url: publicCoverUrl(path),
+      url: coverPathUrl(path),
     })) ?? [],
   );
 
@@ -114,12 +120,20 @@ export function SellForm({
       return;
     }
 
+    // Drop unsupported types / oversized files up front (before compression).
+    const candidates = files.slice(0, room);
+    const valid = candidates.filter(
+      (f) => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_UPLOAD_BYTES,
+    );
+    if (valid.length < candidates.length) toast.error(t("photoInvalid"));
+    if (!valid.length) return;
+
     // Screen each photo for explicit content before it's added (and later
     // uploaded). Runs entirely in the browser via NSFWJS.
     setChecking(true);
     const accepted: Photo[] = [];
     let rejected = 0;
-    for (const file of files.slice(0, room)) {
+    for (const file of valid) {
       let safe = true;
       try {
         safe = (await checkImageIsSafe(file)).safe;
@@ -258,10 +272,11 @@ export function SellForm({
       <div className="space-y-2">
         <Label>{t("type")}</Label>
         <div className="grid grid-cols-3 gap-2">
-          {TYPES.map((type) => (
+          {SELLABLE_TYPES.map((type) => (
             <button
               key={type}
               type="button"
+              aria-pressed={listingType === type}
               onClick={() => setListingType(type)}
               className={cn(
                 "rounded-lg border px-3 py-3 text-[0.95rem] font-semibold transition-colors",
@@ -312,7 +327,7 @@ export function SellForm({
             className="h-11"
           >
             <option value="">{t("conditionPlaceholder")}</option>
-            {CONDITIONS.map((c) => (
+            {BOOK_CONDITIONS.map((c) => (
               <option key={c} value={c}>
                 {t(`cond_${c}`)}
               </option>
@@ -430,11 +445,7 @@ export function SellForm({
               className="relative size-24 overflow-hidden rounded-lg border border-border bg-muted"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.url}
-                alt=""
-                className="size-full object-cover"
-              />
+              <img src={photo.url} alt="" className="size-full object-cover" />
               <button
                 type="button"
                 onClick={() => removePhoto(i)}
@@ -449,7 +460,9 @@ export function SellForm({
             <label
               className={cn(
                 "grid size-24 place-items-center gap-1 rounded-lg border border-dashed border-border p-2 text-center leading-tight text-muted-foreground",
-                checking ? "cursor-wait opacity-70" : "cursor-pointer hover:bg-muted",
+                checking
+                  ? "cursor-wait opacity-70"
+                  : "cursor-pointer hover:bg-muted",
               )}
             >
               {checking ? (

@@ -7,10 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { BookGrid } from "@/components/book-grid";
 import { ClearUnavailable } from "@/components/favorites/clear-unavailable";
 import { Button } from "@/components/ui/button";
-import type { ListingCard } from "@/lib/listings";
-
-const CARD_COLUMNS =
-  "id,title,author,price,is_negotiable,listing_type,city,cover_image_paths,cover_external_url";
+import { CARD_COLUMNS, type ListingCard } from "@/lib/listings-format";
 
 type FavRow = { listing_id: string; listings: ListingCard | null };
 
@@ -40,11 +37,13 @@ export default async function SavedPage({
     .select(`listing_id, created_at, listings (${CARD_COLUMNS})`)
     .order("created_at", { ascending: false });
 
-  const rows = ((data ?? []) as unknown as FavRow[]);
+  const rows = (data ?? []) as unknown as FavRow[];
   const listings = rows
     .map((r) => r.listings)
     .filter((l): l is ListingCard => l != null);
-  const unavailable = rows.filter((r) => r.listings == null).map((r) => r.listing_id);
+  const unavailable = rows
+    .filter((r) => r.listings == null)
+    .map((r) => r.listing_id);
 
   const isEmpty = listings.length === 0 && unavailable.length === 0;
 

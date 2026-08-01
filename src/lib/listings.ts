@@ -8,55 +8,18 @@ import type {
   GenreRow,
   PublicSellerRow,
 } from "@/lib/supabase/types";
+import { CARD_COLUMNS, type ListingCard } from "@/lib/listings-format";
 
-// Minimal shape used by cards/shelves/grids.
-export type ListingCard = {
-  id: string;
-  title: string;
-  author: string | null;
-  price: number | null;
-  is_negotiable: boolean;
-  listing_type: ListingType;
-  city: string | null;
-  cover_image_paths: string[];
-  cover_external_url: string | null;
-};
-
-const CARD_COLUMNS =
-  "id,title,author,price,is_negotiable,listing_type,city,cover_image_paths,cover_external_url";
-
-// Public URL for a listing's cover: first uploaded photo, else the external fallback.
-export function coverUrl(listing: {
-  cover_image_paths: string[];
-  cover_external_url: string | null;
-}): string | null {
-  if (listing.cover_image_paths?.length) {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return `${base}/storage/v1/object/public/covers/${listing.cover_image_paths[0]}`;
-  }
-  return listing.cover_external_url ?? null;
-}
-
-// Public URLs for every one of a listing's photos (for the detail gallery).
-// Uploaded photos win; otherwise the single external fallback, if any.
-export function coverUrls(listing: {
-  cover_image_paths: string[];
-  cover_external_url: string | null;
-}): string[] {
-  if (listing.cover_image_paths?.length) {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return listing.cover_image_paths.map(
-      (p) => `${base}/storage/v1/object/public/covers/${p}`,
-    );
-  }
-  return listing.cover_external_url ? [listing.cover_external_url] : [];
-}
-
-// Format a price in Georgian lari.
-export function formatLari(price: number): string {
-  const n = Number.isInteger(price) ? price : price.toFixed(2);
-  return `₾${n}`;
-}
+// Client-safe presentation helpers live in listings-format so Client Components
+// can import them too; re-exported here for the many server-side importers.
+export {
+  coverUrl,
+  coverUrls,
+  coverPathUrl,
+  formatLari,
+  CARD_COLUMNS,
+  type ListingCard,
+} from "@/lib/listings-format";
 
 export async function getRecentListings(limit = 12): Promise<ListingCard[]> {
   const supabase = await createClient();
@@ -199,7 +162,8 @@ export async function getSimilarListings(opts: {
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 12);
   if (opts.genreId != null) query = query.eq("genre_id", opts.genreId);
-  if (opts.excludeSellerId) query = query.neq("seller_id", opts.excludeSellerId);
+  if (opts.excludeSellerId)
+    query = query.neq("seller_id", opts.excludeSellerId);
   const { data } = await query;
   return (data as ListingCard[]) ?? [];
 }
@@ -319,7 +283,9 @@ export type ListingFacets = {
 // group is counted with all OTHER active filters applied but its own excluded
 // (standard "exclude-self" faceting), so a group still shows the alternatives
 // you could switch to. No row cap — counts stay correct at any scale.
-export async function getListingFacets(f: ListingFilters = {}): Promise<ListingFacets> {
+export async function getListingFacets(
+  f: ListingFilters = {},
+): Promise<ListingFacets> {
   const supabase = await createClient();
   const { data } = await supabase.rpc("listing_facets", {
     q: f.q ?? null,

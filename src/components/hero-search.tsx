@@ -26,9 +26,27 @@ export function HeroSearch() {
   }
 
   const fields = [
-    { id: "author", label: t("fAuthor"), ph: t("fAuthorPh"), value: author, set: setAuthor },
-    { id: "title", label: t("fTitle"), ph: t("fTitlePh"), value: title, set: setTitle },
-    { id: "keyword", label: t("fKeyword"), ph: t("fKeywordPh"), value: keyword, set: setKeyword },
+    {
+      id: "author",
+      label: t("fAuthor"),
+      ph: t("fAuthorPh"),
+      value: author,
+      set: setAuthor,
+    },
+    {
+      id: "title",
+      label: t("fTitle"),
+      ph: t("fTitlePh"),
+      value: title,
+      set: setTitle,
+    },
+    {
+      id: "keyword",
+      label: t("fKeyword"),
+      ph: t("fKeywordPh"),
+      value: keyword,
+      set: setKeyword,
+    },
   ];
 
   return (

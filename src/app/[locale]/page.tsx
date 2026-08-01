@@ -10,88 +10,140 @@ import { WhyTiraji } from "@/components/home/why-tiraji";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { PopularSearches } from "@/components/home/popular-searches";
 import {
-	getRecentListings,
-	getListingsByType,
-	getListingsByGenre,
-	getListingsUnderPrice,
-	getTopAuthorListings,
+  getRecentListings,
+  getListingsByType,
+  getListingsByGenre,
+  getListingsUnderPrice,
+  getTopAuthorListings,
 } from "@/lib/listings";
 import { getGenres } from "@/lib/genres";
 
-export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
-	const { locale } = await params;
-	setRequestLocale(locale);
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
 
-	const genres = await getGenres();
-	const fictionId = genres.find((g) => g.slug === "fiction")?.id;
-	const nonfictionId = genres.find((g) => g.slug === "nonfiction")?.id;
+  const genres = await getGenres();
+  const fictionId = genres.find((g) => g.slug === "fiction")?.id;
+  const nonfictionId = genres.find((g) => g.slug === "nonfiction")?.id;
 
-	const [recent, forSale, under5, topAuthor, toSwap, free, fiction, nonfiction] =
-		await Promise.all([
-			getRecentListings(12),
-			getListingsByType("sale", 12),
-			getListingsUnderPrice(5, 12),
-			getTopAuthorListings(12),
-			getListingsByType("swap", 12),
-			getListingsByType("giveaway", 12),
-			fictionId ? getListingsByGenre(fictionId, 12) : Promise.resolve([]),
-			nonfictionId ? getListingsByGenre(nonfictionId, 12) : Promise.resolve([]),
-		]);
+  const [
+    recent,
+    forSale,
+    under5,
+    topAuthor,
+    toSwap,
+    free,
+    fiction,
+    nonfiction,
+  ] = await Promise.all([
+    getRecentListings(12),
+    getListingsByType("sale", 12),
+    getListingsUnderPrice(5, 12),
+    getTopAuthorListings(12),
+    getListingsByType("swap", 12),
+    getListingsByType("giveaway", 12),
+    fictionId ? getListingsByGenre(fictionId, 12) : Promise.resolve([]),
+    nonfictionId ? getListingsByGenre(nonfictionId, 12) : Promise.resolve([]),
+  ]);
 
-	const t = await getTranslations("home");
+  const t = await getTranslations("home");
 
-	return (
-		<div>
-			{/* Promotional banner slider */}
-			<section className="mx-auto max-w-6xl px-4 pb-8">
-				<HeroCarousel />
-			</section>
+  return (
+    <div>
+      {/* Promotional banner slider */}
+      <section className="mx-auto max-w-6xl px-4 pb-8">
+        <HeroCarousel />
+      </section>
 
-			<section className="mx-auto max-w-6xl px-4 pb-14">
-				<HeroSearch />
-			</section>
+      <section className="mx-auto max-w-6xl px-4 pb-14">
+        <HeroSearch />
+      </section>
 
-			{/* Content */}
-			<div className="mx-auto max-w-6xl space-y-14 px-4 pb-16">
-				<BookShelf title={t("recentTitle")} href="/buy" listings={recent} accent="buy" priority />
+      {/* Content */}
+      <div className="mx-auto max-w-6xl space-y-14 px-4 pb-16">
+        <BookShelf
+          title={t("recentTitle")}
+          href="/buy"
+          listings={recent}
+          accent="buy"
+          priority
+        />
 
-				{topAuthor && topAuthor.listings.length > 0 && (
-					<BookShelf
-						title={t("byAuthorTitle", { author: topAuthor.author })}
-						href={`/search?q=${encodeURIComponent(topAuthor.author)}`}
-						listings={topAuthor.listings}
-						accent="buy"
-					/>
-				)}
+        {topAuthor && topAuthor.listings.length > 0 && (
+          <BookShelf
+            title={t("byAuthorTitle", { author: topAuthor.author })}
+            href={`/search?q=${encodeURIComponent(topAuthor.author)}`}
+            listings={topAuthor.listings}
+            accent="buy"
+          />
+        )}
 
-				{/* Browse by category */}
-				<section className="space-y-4">
-					<h2 className="caps text-lg font-bold sm:text-xl">{t("categoriesTitle").toUpperCase()}</h2>
-					<CategoryTiles genres={genres} locale={locale} />
-				</section>
+        {/* Browse by category */}
+        <section className="space-y-4">
+          <h2 className="caps text-lg font-bold sm:text-xl">
+            {t("categoriesTitle").toUpperCase()}
+          </h2>
+          <CategoryTiles genres={genres} locale={locale} />
+        </section>
 
-				<BookShelf title={t("forSaleTitle")} href="/buy" listings={forSale} accent="buy" />
-				<BookShelf title={t("under5Title")} href="/buy?max=5" listings={under5} accent="buy" />
-				<BookShelf title={t("fictionShelf")} href="/search?genre=fiction" listings={fiction} accent="buy" />
-				<BookShelf title={t("toSwapTitle")} href="/swap" listings={toSwap} accent="swap" />
-				<BookShelf title={t("nonfictionShelf")} href="/search?genre=nonfiction" listings={nonfiction} accent="buy" />
-				<BookShelf title={t("freeTitle")} href="/giveaway" listings={free} accent="give" />
+        <BookShelf
+          title={t("forSaleTitle")}
+          href="/buy"
+          listings={forSale}
+          accent="buy"
+        />
+        <BookShelf
+          title={t("under5Title")}
+          href="/buy?max=5"
+          listings={under5}
+          accent="buy"
+        />
+        <BookShelf
+          title={t("fictionShelf")}
+          href="/search?genre=fiction"
+          listings={fiction}
+          accent="buy"
+        />
+        <BookShelf
+          title={t("toSwapTitle")}
+          href="/swap"
+          listings={toSwap}
+          accent="swap"
+        />
+        <BookShelf
+          title={t("nonfictionShelf")}
+          href="/search?genre=nonfiction"
+          listings={nonfiction}
+          accent="buy"
+        />
+        <BookShelf
+          title={t("freeTitle")}
+          href="/giveaway"
+          listings={free}
+          accent="give"
+        />
 
-				<WhyTiraji />
-				<HowItWorks />
-				<PopularSearches />
+        <WhyTiraji />
+        <HowItWorks />
+        <PopularSearches />
 
-				{/* Email alert band */}
-				<section className="flex flex-col items-start gap-4 rounded-xl border border-border bg-secondary px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10">
-					<div className="max-w-lg">
-						<h2 className="text-xl font-bold text-brand-dark">{t("alertTitle")}</h2>
-						<p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
-					</div>
-					<Button asChild size="lg">
-						<Link href="/account/alerts">{t("alertCta")}</Link>
-					</Button>
-				</section>
-			</div>
-		</div>
-	);
+        {/* Email alert band */}
+        <section className="flex flex-col items-start gap-4 rounded-xl border border-border bg-secondary px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <div className="max-w-lg">
+            <h2 className="text-xl font-bold text-brand-dark">
+              {t("alertTitle")}
+            </h2>
+            <p className="mt-2 text-muted-foreground">{t("alertDesc")}</p>
+          </div>
+          <Button asChild size="lg">
+            <Link href="/account/alerts">{t("alertCta")}</Link>
+          </Button>
+        </section>
+      </div>
+    </div>
+  );
 }

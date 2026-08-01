@@ -83,7 +83,10 @@ export function AlertsManager({
   return (
     <div className="space-y-8">
       {/* Add */}
-      <form onSubmit={onAdd} className="rounded-xl border border-border bg-card p-5">
+      <form
+        onSubmit={onAdd}
+        className="rounded-xl border border-border bg-card p-5"
+      >
         <p className="font-semibold text-foreground">{t("addTitle")}</p>
         <p className="mt-1 text-sm text-muted-foreground">{t("promptBody")}</p>
 
@@ -139,9 +142,15 @@ export function AlertsManager({
                 className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
               >
                 <div className="min-w-0">
-                  {a.title && <p className="truncate font-medium text-foreground">{a.title}</p>}
+                  {a.title && (
+                    <p className="truncate font-medium text-foreground">
+                      {a.title}
+                    </p>
+                  )}
                   {a.author && (
-                    <p className="truncate text-sm text-muted-foreground">{a.author}</p>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {a.author}
+                    </p>
                   )}
                 </div>
                 <button

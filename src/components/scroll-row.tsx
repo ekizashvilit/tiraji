@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -30,7 +31,9 @@ export function ScrollRow({
   const [fade, setFade] = useState(true);
   // Vertical span of the card's cover image, so the buttons sit over the
   // covers (like a carousel) rather than the whole card incl. the text.
-  const [cover, setCover] = useState<{ top: number; height: number } | null>(null);
+  const [cover, setCover] = useState<{ top: number; height: number } | null>(
+    null,
+  );
 
   const onSelect = useCallback(() => {
     if (!embla) return;
@@ -58,8 +61,13 @@ export function ScrollRow({
 
   useEffect(() => {
     if (!embla) return;
-    onSelect();
-    measure();
+    // Defer the first sync to the next frame so it doesn't setState
+    // synchronously inside the effect body (which cascades an extra render);
+    // the layout is also settled by then, making the cover measurement exact.
+    const raf = requestAnimationFrame(() => {
+      onSelect();
+      measure();
+    });
     embla.on("select", onSelect);
     embla.on("scroll", onSelect);
     embla.on("reInit", () => {
@@ -68,6 +76,7 @@ export function ScrollRow({
     });
     window.addEventListener("resize", measure);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
     };
   }, [embla, onSelect, measure]);
@@ -100,8 +109,12 @@ export function ScrollRow({
         </div>
       </div>
 
-      {canLeft && <ArrowButton side="left" top={buttonTop} onClick={() => page(-1)} />}
-      {canRight && <ArrowButton side="right" top={buttonTop} onClick={() => page(1)} />}
+      {canLeft && (
+        <ArrowButton side="left" top={buttonTop} onClick={() => page(-1)} />
+      )}
+      {canRight && (
+        <ArrowButton side="right" top={buttonTop} onClick={() => page(1)} />
+      )}
     </div>
   );
 }
@@ -115,12 +128,13 @@ function ArrowButton({
   top: number | undefined;
   onClick: () => void;
 }) {
+  const t = useTranslations("common");
   const Icon = side === "left" ? ChevronLeft : ChevronRight;
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={side === "left" ? "Previous" : "Next"}
+      aria-label={t(side === "left" ? "previous" : "next")}
       style={top != null ? { top } : undefined}
       className={cn(
         "absolute z-10 hidden size-10 -translate-y-1/2 place-items-center rounded-full border border-border bg-background text-primary shadow-md transition hover:bg-accent md:grid",

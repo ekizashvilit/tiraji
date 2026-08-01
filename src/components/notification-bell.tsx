@@ -6,9 +6,18 @@ import { Loader2, MessageCircle } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ConversationList } from "@/components/messages/conversation-list";
-import { fetchConversations, type ConversationSummary } from "@/lib/messaging-shared";
+import {
+  fetchConversations,
+  type ConversationSummary,
+} from "@/lib/messaging-shared";
 import { useUnreadCount } from "@/lib/use-unread";
 
 // Header messages button: opens a slide-in inbox sheet (rather than navigating
@@ -74,11 +83,17 @@ export function NotificationBell() {
         <div className="flex-1 overflow-y-auto p-4">
           {convos === null ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden />
+              <Loader2
+                className="size-6 animate-spin text-muted-foreground"
+                aria-hidden
+              />
             </div>
           ) : convos.length === 0 ? (
             <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">
-              <MessageCircle className="h-10 w-10 text-muted-foreground" aria-hidden />
+              <MessageCircle
+                className="h-10 w-10 text-muted-foreground"
+                aria-hidden
+              />
               <p className="max-w-sm text-muted-foreground">{tc("empty")}</p>
             </div>
           ) : (

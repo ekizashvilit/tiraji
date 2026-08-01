@@ -36,7 +36,10 @@ export default async function MessagesPage({
       <div className="mx-auto max-w-6xl px-4 py-8">
         {conversations.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">
-            <MessageCircle className="h-10 w-10 text-muted-foreground" aria-hidden />
+            <MessageCircle
+              className="h-10 w-10 text-muted-foreground"
+              aria-hidden
+            />
             <p className="max-w-sm text-muted-foreground">{t("empty")}</p>
           </div>
         ) : (

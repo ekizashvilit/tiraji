@@ -10,7 +10,9 @@ import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AdminListing } from "@/lib/admin";
 import type { ListingType, ListingStatus } from "@/lib/supabase/types";
+import { formatLari } from "@/lib/listings-format";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 const TYPE_KEY: Record<ListingType, string> = {
@@ -32,16 +34,14 @@ const STATUS_TONE: Record<ListingStatus, string> = {
   hidden: "bg-muted text-muted-foreground",
 };
 
-function lari(price: number): string {
-  return `₾${Number.isInteger(price) ? price : price.toFixed(2)}`;
-}
-
 export function AdminListings({ items }: { items: AdminListing[] }) {
   const t = useTranslations("admin");
   const tType = useTranslations("filters");
   const tStatus = useTranslations("myListings");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
+  const confirm = useConfirm();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -85,9 +85,20 @@ export function AdminListings({ items }: { items: AdminListing[] }) {
   }
 
   async function remove(item: AdminListing) {
-    if (!window.confirm(t("deleteConfirm"))) return;
+    if (
+      !(await confirm({
+        title: t("deleteConfirm"),
+        confirmLabel: tc("delete"),
+        cancelLabel: tc("cancel"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusyId(item.id);
-    const { error } = await supabase.from("listings").delete().eq("id", item.id);
+    const { error } = await supabase
+      .from("listings")
+      .delete()
+      .eq("id", item.id);
     setBusyId(null);
     if (error) return toast.error(t("actionError"));
     toast.success(t("deleted"));
@@ -110,7 +121,7 @@ export function AdminListings({ items }: { items: AdminListing[] }) {
           item.listing_type === "sale"
             ? item.is_negotiable || item.price == null
               ? null
-              : lari(item.price)
+              : formatLari(item.price)
             : null;
         const dayKey = item.created_at.slice(0, 10);
         const prevKey = i > 0 ? items[i - 1].created_at.slice(0, 10) : null;
@@ -121,96 +132,98 @@ export function AdminListings({ items }: { items: AdminListing[] }) {
                 {dayLabel(dayKey)}
               </li>
             )}
-          <li
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 sm:flex-nowrap"
-          >
-            <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-              {item.cover ? (
-                <Image
-                  src={item.cover}
-                  alt={item.title}
-                  fill
-                  sizes="48px"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="grid h-full place-items-center">
-                  <BookMarked className="size-5 text-muted-foreground" aria-hidden />
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/book/${item.id}`}
-                  className="truncate font-semibold hover:underline"
-                >
-                  {item.title}
-                </Link>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
-                    STATUS_TONE[item.status],
-                  )}
-                >
-                  {tStatus(STATUS_KEY[item.status])}
-                </span>
+            <li className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 sm:flex-nowrap">
+              <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+                {item.cover ? (
+                  <Image
+                    src={item.cover}
+                    alt={item.title}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="grid h-full place-items-center">
+                    <BookMarked
+                      className="size-5 text-muted-foreground"
+                      aria-hidden
+                    />
+                  </div>
+                )}
               </div>
-              <p className="truncate text-sm text-muted-foreground">
-                {[item.author, item.sellerName && `· ${item.sellerName}`]
-                  .filter(Boolean)
-                  .join(" ")}
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {tType(TYPE_KEY[item.listing_type])}
-                {price && <> · {price}</>} · {dateFmt.format(new Date(item.created_at))}
-              </p>
-            </div>
 
-            <div className="flex shrink-0 items-center gap-2">
-              {item.status === "hidden" ? (
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/book/${item.id}`}
+                    className="truncate font-semibold hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
+                      STATUS_TONE[item.status],
+                    )}
+                  >
+                    {tStatus(STATUS_KEY[item.status])}
+                  </span>
+                </div>
+                <p className="truncate text-sm text-muted-foreground">
+                  {[item.author, item.sellerName && `· ${item.sellerName}`]
+                    .filter(Boolean)
+                    .join(" ")}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {tType(TYPE_KEY[item.listing_type])}
+                  {price && <> · {price}</>} ·{" "}
+                  {dateFmt.format(new Date(item.created_at))}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {item.status === "hidden" ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={busy}
+                    onClick={() => setStatus(item, "active")}
+                  >
+                    {busy ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Eye className="size-4" aria-hidden />
+                    )}
+                    {t("unhide")}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={busy}
+                    onClick={() => setStatus(item, "hidden")}
+                  >
+                    {busy ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <EyeOff className="size-4" aria-hidden />
+                    )}
+                    {t("hide")}
+                  </Button>
+                )}
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
+                  variant="destructive"
+                  size="icon-sm"
+                  aria-label={t("deleteListing")}
                   disabled={busy}
-                  onClick={() => setStatus(item, "active")}
+                  onClick={() => remove(item)}
                 >
-                  {busy ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Eye className="size-4" aria-hidden />
-                  )}
-                  {t("unhide")}
+                  <Trash2 className="size-4" aria-hidden />
                 </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  disabled={busy}
-                  onClick={() => setStatus(item, "hidden")}
-                >
-                  {busy ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                  ) : (
-                    <EyeOff className="size-4" aria-hidden />
-                  )}
-                  {t("hide")}
-                </Button>
-              )}
-              <Button
-                variant="destructive"
-                size="icon-sm"
-                aria-label={t("deleteListing")}
-                disabled={busy}
-                onClick={() => remove(item)}
-              >
-                <Trash2 className="size-4" aria-hidden />
-              </Button>
-            </div>
-          </li>
+              </div>
+            </li>
           </Fragment>
         );
       })}

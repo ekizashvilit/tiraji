@@ -2,13 +2,20 @@
 // Covers both listings.city and profiles.city.
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+const H = {
+  apikey: KEY,
+  Authorization: `Bearer ${KEY}`,
+  "Content-Type": "application/json",
+};
 
 // Georgian (and a few English) legacy names → canonical slug.
 const MAP = {
-  თბილისი: "tbilisi", Tbilisi: "tbilisi",
-  ბათუმი: "batumi", Batumi: "batumi",
-  ქუთაისი: "kutaisi", Kutaisi: "kutaisi",
+  თბილისი: "tbilisi",
+  Tbilisi: "tbilisi",
+  ბათუმი: "batumi",
+  Batumi: "batumi",
+  ქუთაისი: "kutaisi",
+  Kutaisi: "kutaisi",
   რუსთავი: "rustavi",
   გორი: "gori",
   ზუგდიდი: "zugdidi",
@@ -31,6 +38,8 @@ for (const table of ["listings", "profiles"]) {
         body: JSON.stringify({ city: to }),
       },
     );
-    console.log(`${table}: ${from} → ${to}: ${res.ok ? "ok" : `FAILED ${res.status} ${await res.text()}`}`);
+    console.log(
+      `${table}: ${from} → ${to}: ${res.ok ? "ok" : `FAILED ${res.status} ${await res.text()}`}`,
+    );
   }
 }

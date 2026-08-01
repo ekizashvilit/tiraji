@@ -146,7 +146,11 @@ export function WantedForm({ genres }: { genres: GenreRow[] }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="w-city">{tf("city")}</Label>
-          <Select id="w-city" value={city} onChange={(e) => setCity(e.target.value)}>
+          <Select
+            id="w-city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          >
             <option value="">{tf("any")}</option>
             {CITIES.map((c) => (
               <option key={c.code} value={c.code}>
@@ -157,7 +161,11 @@ export function WantedForm({ genres }: { genres: GenreRow[] }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="w-genre">{tf("genre")}</Label>
-          <Select id="w-genre" value={genre} onChange={(e) => setGenre(e.target.value)}>
+          <Select
+            id="w-genre"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+          >
             <option value="">{tf("any")}</option>
             {genres.map((g) => (
               <option key={g.id} value={g.id}>
@@ -181,7 +189,9 @@ export function WantedForm({ genres }: { genres: GenreRow[] }) {
 
       {/* Visibility choice */}
       <fieldset className="space-y-2">
-        <legend className="mb-1 text-sm font-bold">{t("visibilityLabel")}</legend>
+        <legend className="mb-1 text-sm font-bold">
+          {t("visibilityLabel")}
+        </legend>
         {(["public", "private"] as Visibility[]).map((v) => (
           <label
             key={v}
@@ -212,7 +222,12 @@ export function WantedForm({ genres }: { genres: GenreRow[] }) {
         ))}
       </fieldset>
 
-      <Button type="submit" size="lg" className="w-full gap-2 sm:w-auto" disabled={saving}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full gap-2 sm:w-auto"
+        disabled={saving}
+      >
         {saving && <Loader2 className="size-4 animate-spin" aria-hidden />}
         {t("submit")}
       </Button>

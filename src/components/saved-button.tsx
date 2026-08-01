@@ -20,10 +20,16 @@ export function SavedButton() {
       size="icon"
       className="relative size-9 rounded-full text-muted-foreground hover:bg-transparent hover:text-foreground"
     >
-      <Link href="/saved" aria-label={t("title")}>
+      <Link
+        href="/saved"
+        aria-label={count > 0 ? t("titleWithCount", { count }) : t("title")}
+      >
         <Heart className="size-5" />
         {count > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background">
+          <span
+            aria-hidden
+            className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background"
+          >
             {count > 9 ? "9+" : count}
           </span>
         )}

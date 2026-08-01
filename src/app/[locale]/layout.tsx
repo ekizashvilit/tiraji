@@ -4,10 +4,10 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { firago, notoGeorgian } from "@/app/fonts";
-import { Providers } from "@/app/providers";
 import { PublicChrome } from "@/components/public-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSheetProvider } from "@/components/auth/auth-sheet";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { ChatDockProvider } from "@/components/messages/chat-dock";
 import { FavoritesProvider } from "@/components/favorites/favorites-provider";
 import { createClient } from "@/lib/supabase/server";
@@ -22,7 +22,12 @@ export const metadata: Metadata = {
     "Tiraji — buy, swap and give away second-hand, out-of-print and old books in Georgia.",
   // iOS Safari auto-links things that look like phone numbers/dates/addresses,
   // mutating the DOM before hydration and causing attribute mismatches. Disable it.
-  formatDetection: { telephone: false, date: false, address: false, email: false },
+  formatDetection: {
+    telephone: false,
+    date: false,
+    address: false,
+    email: false,
+  },
 };
 
 // Lock zoom to 1x so iOS never auto-zooms when a small (<16px) input is
@@ -61,7 +66,11 @@ export default async function LocaleLayout({
   let favoriteIds: string[] = [];
   if (user) {
     const [profileRes, favRes] = await Promise.all([
-      supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .single(),
       supabase.from("favorites").select("listing_id"),
     ]);
     displayName = profileRes.data?.display_name ?? null;
@@ -77,7 +86,7 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider>
-          <Providers>
+          <ConfirmProvider>
             <AuthSheetProvider>
               <FavoritesProvider
                 initialUserId={user?.id ?? null}
@@ -93,8 +102,8 @@ export default async function LocaleLayout({
                 </ChatDockProvider>
               </FavoritesProvider>
             </AuthSheetProvider>
-            <Toaster />
-          </Providers>
+          </ConfirmProvider>
+          <Toaster />
         </NextIntlClientProvider>
       </body>
     </html>

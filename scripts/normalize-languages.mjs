@@ -1,7 +1,11 @@
 // One-off: convert legacy book_language display strings to stable codes.
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+const H = {
+  apikey: KEY,
+  Authorization: `Bearer ${KEY}`,
+  "Content-Type": "application/json",
+};
 
 const MAP = {
   English: "en",
@@ -20,5 +24,7 @@ for (const [from, to] of Object.entries(MAP)) {
       body: JSON.stringify({ book_language: to }),
     },
   );
-  console.log(`${from} → ${to}: ${res.ok ? "ok" : `FAILED ${res.status} ${await res.text()}`}`);
+  console.log(
+    `${from} → ${to}: ${res.ok ? "ok" : `FAILED ${res.status} ${await res.text()}`}`,
+  );
 }
