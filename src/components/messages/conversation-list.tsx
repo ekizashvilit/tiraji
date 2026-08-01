@@ -7,10 +7,13 @@ import { Link } from "@/i18n/navigation";
 import { caps } from "@/lib/caps";
 
 // The inbox list. Each row opens the conversation on its own full page.
+// `onNavigate` fires on click so a host (e.g. the header sheet) can close.
 export function ConversationList({
   conversations,
+  onNavigate,
 }: {
   conversations: ConversationSummary[];
+  onNavigate?: () => void;
 }) {
   const t = useTranslations("chat");
   const locale = useLocale();
@@ -26,6 +29,7 @@ export function ConversationList({
         <li key={c.id}>
           <Link
             href={`/messages/${c.id}`}
+            onClick={onNavigate}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/50"
           >
             <div className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary text-brand-dark">

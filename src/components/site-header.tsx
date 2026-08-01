@@ -93,7 +93,7 @@ export function SiteHeader({
 								<SavedButton />
 							</div>
 						)}
-						<div className="hidden md:block md:ml-2">
+						<div className={cn("hidden md:block", signedIn && "md:ml-2")}>
 							<UserMenu initialUser={initialUser} initialDisplayName={initialDisplayName} />
 						</div>
 						<MobileMenu initialUser={initialUser} initialDisplayName={initialDisplayName} />
