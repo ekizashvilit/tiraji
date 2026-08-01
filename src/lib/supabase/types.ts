@@ -1,7 +1,7 @@
 // Hand-maintained to match supabase/migrations/*.sql.
 // Regenerate with the Supabase CLI later: `supabase gen types typescript`.
 
-export type ListingType = "sale" | "swap" | "giveaway";
+export type ListingType = "sale" | "swap" | "giveaway" | "wanted";
 export type BookCondition = "new" | "like_new" | "good" | "worn";
 export type ListingStatus = "active" | "closed" | "hidden";
 

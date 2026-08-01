@@ -1,0 +1,21 @@
+-- ---------------------------------------------------------------------------
+-- "Wanted" listings — books people are looking for
+--
+-- Adds a fourth listing_type, 'wanted'. A wanted post is a normal listings row
+-- (seller_id = the requester) so it reuses browse, the detail page, cards and
+-- in-app messaging for free. Semantics differ slightly:
+--   * price          = optional "willing to pay" (null = open to offers)
+--   * condition/photos are unused
+--   * contact flow reverses — someone who HAS the book messages the requester
+--
+-- Wanted posts are shown ONLY in the /wanted section: they are excluded from
+-- normal search, the homepage shelves and the book-alert scanner (see 0011 and
+-- the app code).
+--
+-- NOTE: Postgres forbids USING a new enum value in the same transaction it is
+-- added, so this file only adds the value. The functions that reference
+-- 'wanted' live in 0011 — apply this file first, then 0011.
+-- Idempotent — safe to re-run.
+-- ---------------------------------------------------------------------------
+
+alter type public.listing_type add value if not exists 'wanted';

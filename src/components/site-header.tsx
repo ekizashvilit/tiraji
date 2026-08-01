@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeftRight, BookOpen, Gift, Plus, ShoppingBag } from "lucide-react";
+import { ArrowLeftRight, BookMarked, BookOpen, Gift, Plus, ShoppingBag } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -18,6 +18,7 @@ const SECTIONS = [
 	{ href: "/buy", key: "buy", icon: ShoppingBag },
 	{ href: "/swap", key: "swap", icon: ArrowLeftRight },
 	{ href: "/giveaway", key: "giveaway", icon: Gift },
+	{ href: "/wanted", key: "wanted", icon: BookMarked },
 ] as const;
 
 export function SiteHeader({

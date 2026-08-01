@@ -37,7 +37,8 @@ export default async function EditListingPage({
     getGenres(),
   ]);
 
-  if (!listing) {
+  // Wanted posts aren't editable through the sell form; send them back.
+  if (!listing || listing.listing_type === "wanted") {
     redirect({ href: "/my-listings", locale });
   }
 

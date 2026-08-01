@@ -51,6 +51,8 @@ Deno.serve(async (req) => {
     .select("id")
     .is("alerts_notified_at", null)
     .eq("status", "active")
+    // Wanted posts are requests, not books on offer — never alert-match them.
+    .neq("listing_type", "wanted")
     .order("created_at", { ascending: true })
     .limit(MAX_LISTINGS_PER_RUN);
 

@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { ListingType } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
 
 function lari(price: number): string {
@@ -16,7 +17,9 @@ type Suggestion = {
   id: string;
   title: string;
   author: string | null;
-  listing_type: "sale" | "swap" | "giveaway";
+  // Suggestions never include 'wanted' (search_listings excludes it), but the
+  // RPC's row type is the full ListingType, so widen to match.
+  listing_type: ListingType;
   price: number | null;
 };
 
@@ -33,6 +36,7 @@ export function HeaderSearch({ className }: { className?: string }) {
   // effect so the first client render matches the server (no hydration mismatch).
   const [placeholder, setPlaceholder] = useState(t("searchPlaceholder"));
   const boxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -106,6 +110,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         className="flex w-full items-stretch overflow-hidden rounded-md border border-input bg-background focus-within:border-primary"
       >
         <input
+          ref={inputRef}
           type="search"
           value={q}
           onChange={(e) => {
@@ -118,6 +123,21 @@ export function HeaderSearch({ className }: { className?: string }) {
           autoComplete="off"
           className="h-9 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground md:h-11 md:px-4 md:text-[0.95rem] [&::-webkit-search-cancel-button]:hidden"
         />
+        {q && (
+          <button
+            type="button"
+            aria-label={tCommon("clear")}
+            onClick={() => {
+              setQ("");
+              setResults(null);
+              setOpen(false);
+              inputRef.current?.focus();
+            }}
+            className="grid w-9 place-items-center text-muted-foreground transition-colors hover:text-foreground md:w-10"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        )}
         <button
           type="submit"
           aria-label={t("searchButton")}

@@ -64,6 +64,7 @@ export async function getRecentListings(limit = 12): Promise<ListingCard[]> {
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .order("created_at", { ascending: false })
     .limit(limit);
   return (data as ListingCard[]) ?? [];
@@ -93,6 +94,7 @@ export async function getListingsBySeller(
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .eq("seller_id", sellerId)
     .order("created_at", { ascending: false });
   return (data as ListingCard[]) ?? [];
@@ -109,6 +111,7 @@ export async function getTopAuthorListings(
     .from("listings")
     .select("author")
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .not("author", "is", null);
 
   const counts = new Map<string, number>();
@@ -131,6 +134,7 @@ export async function getTopAuthorListings(
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .eq("author", top)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -169,6 +173,7 @@ export async function getSellerOtherListings(
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .eq("seller_id", sellerId)
     .neq("id", excludeId)
     .order("created_at", { ascending: false })
@@ -189,6 +194,7 @@ export async function getSimilarListings(opts: {
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .neq("id", opts.excludeId)
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 12);
@@ -207,6 +213,7 @@ export async function getListingsByGenre(
     .from("listings")
     .select(CARD_COLUMNS)
     .eq("status", "active")
+    .neq("listing_type", "wanted")
     .eq("genre_id", genreId)
     .order("created_at", { ascending: false })
     .limit(limit);

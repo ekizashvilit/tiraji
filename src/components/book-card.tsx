@@ -81,6 +81,19 @@ function PriceOrTag({
   listing: ListingCard;
   t: (key: string) => string;
 }) {
+  if (listing.listing_type === "wanted") {
+    // Books people are looking for — price (if any) is what they'll pay.
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="inline-block rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+          {t("wanted")}
+        </span>
+        {listing.price != null && (
+          <span className="text-sm font-bold text-price">{formatLari(listing.price)}</span>
+        )}
+      </div>
+    );
+  }
   if (listing.listing_type === "swap") {
     return (
       <span className="inline-block rounded bg-swap/10 px-1.5 py-0.5 text-xs font-medium text-swap">

@@ -17,6 +17,7 @@ const TYPE_KEY: Record<ListingType, string> = {
   sale: "typeSale",
   swap: "typeSwap",
   giveaway: "typeGiveaway",
+  wanted: "typeWanted",
 };
 
 const STATUS_KEY: Record<ListingStatus, string> = {

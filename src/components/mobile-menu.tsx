@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { BookMarked, Check, Globe, LogOut, Menu, MessageCircle, Plus, Shield, UserRound } from "lucide-react";
+import { BookMarked, Check, Globe, LogOut, Menu, MessageCircle, Plus, Search, Shield, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -22,6 +22,7 @@ const LOCALE_NAMES: Record<string, string> = { ka: "ქართული", en: 
 export function MobileMenu({ initialUser = null, initialDisplayName = null }: { initialUser?: MinimalUser | null; initialDisplayName?: string | null }) {
 	const t = useTranslations("auth");
 	const tNav = useTranslations("nav");
+	const tw = useTranslations("wanted");
 	const locale = useLocale();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -107,6 +108,21 @@ export function MobileMenu({ initialUser = null, initialDisplayName = null }: { 
 					<DropdownMenuItem onClick={openAuth} className={itemCls}>
 						<Plus className="size-4.5" />
 						{tNav("sell")}
+					</DropdownMenuItem>
+				)}
+
+				{/* Post a wanted book — same auth-gated pattern as List a book. */}
+				{user ? (
+					<DropdownMenuItem asChild className={itemCls}>
+						<Link href="/wanted/new">
+							<Search className="size-4.5" />
+							{tw("postCta")}
+						</Link>
+					</DropdownMenuItem>
+				) : (
+					<DropdownMenuItem onClick={openAuth} className={itemCls}>
+						<Search className="size-4.5" />
+						{tw("postCta")}
 					</DropdownMenuItem>
 				)}
 

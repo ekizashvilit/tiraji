@@ -17,10 +17,14 @@ export function ContactSeller({
   listingId,
   sellerId,
   phone,
+  wanted = false,
 }: {
   listingId: string;
   sellerId: string;
   phone: string | null;
+  // On a "wanted" post the roles reverse: the viewer HAS the book and is
+  // reaching out to the requester, so the button reads differently.
+  wanted?: boolean;
 }) {
   const t = useTranslations("book");
   const { openAuth } = useAuthSheet();
@@ -104,7 +108,7 @@ export function ContactSeller({
         ) : (
           <MessageCircle className="size-4" aria-hidden />
         )}
-        {t("messageSeller")}
+        {wanted ? t("iHaveThisBook") : t("messageSeller")}
       </Button>
     </div>
   );

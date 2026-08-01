@@ -30,6 +30,12 @@ const SECTION: Record<ListingType, { href: string; navKey: string; typeKey: stri
 		typeKey: "typeGiveaway",
 		pill: "bg-give/10 text-give",
 	},
+	wanted: {
+		href: "/wanted",
+		navKey: "wanted",
+		typeKey: "typeWanted",
+		pill: "bg-primary/10 text-primary",
+	},
 };
 
 const CONDITION_KEY: Record<BookCondition, string> = {
@@ -172,7 +178,7 @@ export default async function BookPage({ params }: Params) {
 						{conditionLabel && <p className="text-sm text-muted-foreground">{conditionLabel}</p>}
 
 						<div className="mt-3">
-							<PriceBlock listing={listing} tCard={tCard} />
+							<PriceBlock listing={listing} tCard={tCard} tBook={t} />
 						</div>
 
 						<div className="mt-4">
@@ -185,7 +191,12 @@ export default async function BookPage({ params }: Params) {
 									{t("editListing")}
 								</Link>
 							) : (
-								<ContactSeller listingId={listing.id} sellerId={listing.seller_id} phone={phone} />
+								<ContactSeller
+									listingId={listing.id}
+									sellerId={listing.seller_id}
+									phone={phone}
+									wanted={listing.listing_type === "wanted"}
+								/>
 							)}
 						</div>
 					</div>
@@ -217,8 +228,9 @@ export default async function BookPage({ params }: Params) {
 				</div>
 			)}
 
-			{/* More from this seller */}
-			{sellerOther.length > 0 && (
+			{/* More from this seller (not shown on wanted posts — the "seller" is
+			    the requester, so their for-sale books here would be confusing) */}
+			{listing.listing_type !== "wanted" && sellerOther.length > 0 && (
 				<div className="mt-12">
 					<BookShelf title={t("moreFromSeller")} href={`/user/${listing.seller_id}`} listings={sellerOther} />
 				</div>
@@ -237,10 +249,23 @@ export default async function BookPage({ params }: Params) {
 function PriceBlock({
 	listing,
 	tCard,
+	tBook,
 }: {
 	listing: { listing_type: ListingType; price: number | null; is_negotiable: boolean };
 	tCard: (key: string) => string;
+	tBook: (key: string) => string;
 }) {
+	if (listing.listing_type === "wanted") {
+		// Price here means "willing to pay" — optional.
+		return listing.price != null ? (
+			<div>
+				<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tBook("willingToPay")}</p>
+				<p className="text-3xl font-bold text-price">{formatLari(listing.price)}</p>
+			</div>
+		) : (
+			<p className="text-xl font-semibold text-muted-foreground">{tBook("openToOffers")}</p>
+		);
+	}
 	if (listing.listing_type === "swap") {
 		return <span className="inline-flex rounded-lg bg-swap/10 px-3 py-1.5 text-lg font-semibold text-swap">{tCard("swap")}</span>;
 	}

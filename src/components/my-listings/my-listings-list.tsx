@@ -119,17 +119,20 @@ export function MyListingsList({ items }: { items: MyListing[] }) {
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-              >
-                <Link href={`/my-listings/${item.id}/edit`}>
-                  <Pencil className="size-4" aria-hidden />
-                  {t("edit")}
-                </Link>
-              </Button>
+              {/* Wanted posts have no rich edit form yet — manage via close/delete. */}
+              {item.listing_type !== "wanted" && (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                >
+                  <Link href={`/my-listings/${item.id}/edit`}>
+                    <Pencil className="size-4" aria-hidden />
+                    {t("edit")}
+                  </Link>
+                </Button>
+              )}
               {item.status === "active" ? (
                 <Button
                   variant="outline"
@@ -204,6 +207,14 @@ function PriceOrTag({
   item: MyListing;
   tCard: (key: string) => string;
 }) {
+  if (item.listing_type === "wanted") {
+    return (
+      <span className="font-medium text-primary">
+        {tCard("wanted")}
+        {item.price != null && <span className="ml-1.5 font-bold text-price">{`₾${item.price}`}</span>}
+      </span>
+    );
+  }
   if (item.listing_type === "swap") {
     return <span className="font-medium text-swap">{tCard("swap")}</span>;
   }

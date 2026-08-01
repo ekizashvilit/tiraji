@@ -8,6 +8,7 @@
 		"buy": "Buy",
 		"swap": "Swap",
 		"giveaway": "Give away",
+		"wanted": "Wanted",
 		"sell": "List a book",
 		"messages": "Messages",
 		"menu": "Menu",
@@ -95,12 +96,14 @@
 		"viewAll": "View all",
 		"pagination": "Pagination",
 		"prevPage": "Previous page",
-		"nextPage": "Next page"
+		"nextPage": "Next page",
+		"clear": "Clear"
 	},
 	"card": {
 		"swap": "Swap",
 		"free": "Free",
-		"negotiable": "Negotiable"
+		"negotiable": "Negotiable",
+		"wanted": "Wanted"
 	},
 	"filters": {
 		"title": "Filters",
@@ -119,6 +122,7 @@
 		"typeSale": "For sale",
 		"typeSwap": "Swap",
 		"typeGiveaway": "Give away",
+		"typeWanted": "Wanted",
 		"condNew": "New",
 		"condLikeNew": "Like new",
 		"condGood": "Good",
@@ -151,6 +155,8 @@
 		"searchResultsLede": "All listings - for sale, to swap and free.",
 		"buyTitle": "Books for sale",
 		"buyLede": "Buy second-hand books from other readers.",
+		"wantedTitle": "Wanted books",
+		"wantedLede": "Books other readers are looking for — offer one you have.",
 		"swapTitle": "Books to swap",
 		"swapLede": "Trade books you've read for new ones.",
 		"giveTitle": "Free books",
@@ -245,6 +251,29 @@
 		"removed": "Alert removed",
 		"removeError": "Couldn't remove the alert. Please try again."
 	},
+	"wanted": {
+		"postCta": "Post a wanted book",
+		"postTitle": "Post a wanted book",
+		"postLede": "Tell readers which book you're after — someone who has it can reach you.",
+		"titleLabel": "Book title",
+		"titlePlaceholder": "e.g. The Knight in the Panther's Skin",
+		"titleRequired": "Please enter the book title.",
+		"authorLabel": "Author",
+		"authorPlaceholder": "e.g. Rustaveli",
+		"priceLabel": "Willing to pay (₾, optional)",
+		"pricePlaceholder": "e.g. 15",
+		"descLabel": "Notes (optional)",
+		"descPlaceholder": "Edition, condition, or anything else you're looking for.",
+		"visibilityLabel": "Who can see this?",
+		"publicLabel": "Public — post to the Wanted board",
+		"publicHint": "Shown to everyone; someone who has the book can message you.",
+		"privateLabel": "Private — just email me",
+		"privateHint": "Not shown anywhere. We'll email you if it's listed for sale.",
+		"submit": "Post request",
+		"savedPublic": "Your wanted book is posted.",
+		"savedPrivate": "You'll be emailed when it's listed.",
+		"saveError": "Couldn't save. Please try again."
+	},
 	"sell": {
 		"type": "What are you listing?",
 		"type_sale": "For sale",
@@ -316,6 +345,9 @@
 		"similar": "You might also like",
 		"showPhone": "Show phone number",
 		"messageSeller": "Message seller",
+		"iHaveThisBook": "I have this book",
+		"willingToPay": "Willing to pay",
+		"openToOffers": "Open to offers",
 		"messagingSoon": "In-app messaging is coming soon - please use the phone number for now.",
 		"messageError": "Couldn't open the chat. Please try again.",
 		"editListing": "Edit this listing",

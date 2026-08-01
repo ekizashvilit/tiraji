@@ -28,7 +28,7 @@ export function LanguageSwitcher() {
 				<Button
 					type="button"
 					variant="ghost"
-					className="h-11 gap-1.5 px-0 font-medium cursor-pointer hover:bg-transparent hover:text-inherit aria-expanded:bg-transparent aria-expanded:text-inherit"
+					className="h-11 gap-1.5 px-0 font-medium text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
 					aria-label="Language"
 				>
 					<Globe className="size-5" />

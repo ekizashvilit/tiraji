@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BookMarked, LogOut, MessageCircle, Shield, UserRound } from "lucide-react";
+import { BookMarked, LogOut, MessageCircle, Search, Shield, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -24,6 +24,7 @@ export function UserMenu({
 	onNavigate?: () => void;
 }) {
 	const t = useTranslations("auth");
+	const tw = useTranslations("wanted");
 	const router = useRouter();
 	const { openAuth } = useAuthSheet();
 	// Seed from the server so the avatar is correct on first paint — no flash.
@@ -125,7 +126,7 @@ export function UserMenu({
 					onNavigate?.();
 					openAuth();
 				}}
-				className="h-11 gap-1.5 px-0 cursor-pointer hover:bg-transparent hover:text-inherit"
+				className="h-11 gap-1.5 px-0 text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground"
 			>
 				<UserRound className="size-5" />
 				{t("signIn")}
@@ -168,6 +169,12 @@ export function UserMenu({
 					<Link href="/my-listings">
 						<BookMarked className="size-4.5" />
 						{t("myListings")}
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
+					<Link href="/wanted/new">
+						<Search className="size-4.5" />
+						{tw("postCta")}
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
