@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import {
+  BookMarked,
   BookOpen,
   ChevronLeft,
   ChevronRight,
@@ -18,9 +20,14 @@ type Slide = {
   href: string;
   gradient: string;
   Icon: typeof BookOpen;
+  // Drop a banner image in public/banners/ and set its path here (e.g.
+  // "/banners/buy.jpg") to replace the gradient/text placeholder with artwork.
+  // The whole banner links to `href` either way.
+  image?: string;
 };
 
-// Promotional banners — swap these for real campaign banners later.
+// Homepage banners. Each links to a marketplace section. Until real banner
+// artwork is added (set `image` above), a gradient + text placeholder shows.
 const SLIDES: Slide[] = [
   {
     key: "b1",
@@ -39,6 +46,12 @@ const SLIDES: Slide[] = [
     href: "/giveaway",
     gradient: "linear-gradient(120deg,#7a3d06 0%,#d97706 60%,#f0a53d 100%)",
     Icon: Gift,
+  },
+  {
+    key: "b4",
+    href: "/wanted",
+    gradient: "linear-gradient(120deg,#4c1d95 0%,#7c3aed 60%,#a78bfa 100%)",
+    Icon: BookMarked,
   },
 ];
 
@@ -80,13 +93,20 @@ export function HeroCarousel() {
     movedRef.current = false;
     startXRef.current = e.clientX;
     setDragging(true);
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    // NB: don't capture the pointer here — capturing on pointer-down retargets
+    // the follow-up click to this element, so a plain click on a banner link
+    // would never navigate. We capture below, only once a real drag begins.
   }
 
   function onPointerMove(e: React.PointerEvent) {
     if (!draggingRef.current) return;
     const dx = e.clientX - startXRef.current;
-    if (Math.abs(dx) > 6) movedRef.current = true;
+    if (Math.abs(dx) > 6 && !movedRef.current) {
+      movedRef.current = true;
+      // A drag (not a click) has started — capture now so it tracks the pointer
+      // even if it leaves the carousel.
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    }
     dragXRef.current = dx;
     setDragPx(dx);
   }
@@ -146,28 +166,44 @@ export function HeroCarousel() {
             className="w-full shrink-0"
             aria-hidden={i !== index}
           >
-            <div
-              className="relative flex h-60 items-center overflow-hidden px-6 text-white sm:h-72 sm:px-14"
-              style={{ backgroundImage: s.gradient }}
+            {/* The entire banner is the link to its section. */}
+            <Link
+              href={s.href}
+              tabIndex={i === index ? 0 : -1}
+              aria-label={t(`${s.key}Title`)}
+              draggable={false}
+              className="relative flex h-60 items-center overflow-hidden px-6 text-white outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/60 sm:h-72 sm:px-14"
+              style={s.image ? undefined : { backgroundImage: s.gradient }}
             >
-              <s.Icon
-                className="pointer-events-none absolute -bottom-8 -right-6 h-56 w-56 opacity-10 sm:h-64 sm:w-64"
-                aria-hidden
-              />
-              <div className="relative max-w-lg space-y-3 sm:space-y-4">
-                <h2 className="text-2xl font-bold leading-tight sm:text-4xl">
-                  {t(`${s.key}Title`)}
-                </h2>
-                <p className="text-white/85 sm:text-lg">{t(`${s.key}Text`)}</p>
-                <Link
-                  href={s.href}
-                  tabIndex={i === index ? 0 : -1}
-                  className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-bold text-brand-dark shadow-sm transition-colors hover:bg-white/90"
-                >
-                  {t(`${s.key}Cta`)}
-                </Link>
-              </div>
-            </div>
+              {s.image ? (
+                <Image
+                  src={s.image}
+                  alt=""
+                  fill
+                  priority={i === 0}
+                  sizes="(max-width: 1152px) 100vw, 1152px"
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  <s.Icon
+                    className="pointer-events-none absolute -bottom-8 -right-6 h-56 w-56 opacity-10 sm:h-64 sm:w-64"
+                    aria-hidden
+                  />
+                  <div className="relative max-w-lg space-y-3 sm:space-y-4">
+                    <h2 className="text-2xl font-bold leading-tight sm:text-4xl">
+                      {t(`${s.key}Title`)}
+                    </h2>
+                    <p className="text-white/85 sm:text-lg">
+                      {t(`${s.key}Text`)}
+                    </p>
+                    <span className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-bold text-brand-dark shadow-sm">
+                      {t(`${s.key}Cta`)}
+                    </span>
+                  </div>
+                </>
+              )}
+            </Link>
           </div>
         ))}
       </div>

@@ -186,6 +186,8 @@ export type Database = {
       search_listings: {
         Args: {
           q?: string | null;
+          p_author?: string | null;
+          p_title?: string | null;
           p_types?: ListingType[] | null;
           p_conditions?: BookCondition[] | null;
           p_languages?: string[] | null;
@@ -203,6 +205,8 @@ export type Database = {
       listing_facets: {
         Args: {
           q?: string | null;
+          p_author?: string | null;
+          p_title?: string | null;
           p_types?: ListingType[] | null;
           p_conditions?: BookCondition[] | null;
           p_languages?: string[] | null;

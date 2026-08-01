@@ -234,6 +234,10 @@ export const PAGE_SIZE = 24;
 // are arrays (OR within a group); price and hasPhoto are plain filters.
 export type ListingFilters = {
   q?: string;
+  // Field-scoped text search (homepage "Search for a book" box). `q` is the
+  // general keyword; author/title match only their own column.
+  author?: string;
+  title?: string;
   types?: ListingType[];
   conditions?: BookCondition[];
   genres?: number[];
@@ -251,6 +255,10 @@ export async function searchListings(
   const supabase = await createClient();
   const { data } = await supabase.rpc("search_listings", {
     q: params.q ?? null,
+    // Only sent when used, so browse/keyword search stays compatible with the
+    // pre-0013 RPC signature (author/title scoping needs migration 0013).
+    ...(params.author ? { p_author: params.author } : {}),
+    ...(params.title ? { p_title: params.title } : {}),
     p_types: params.types ?? null,
     p_conditions: params.conditions ?? null,
     p_languages: params.languages ?? null,
@@ -289,6 +297,8 @@ export async function getListingFacets(
   const supabase = await createClient();
   const { data } = await supabase.rpc("listing_facets", {
     q: f.q ?? null,
+    ...(f.author ? { p_author: f.author } : {}),
+    ...(f.title ? { p_title: f.title } : {}),
     p_types: f.types ?? null,
     p_conditions: f.conditions ?? null,
     p_languages: f.languages ?? null,

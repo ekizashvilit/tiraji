@@ -18,11 +18,14 @@ export function HeroSearch() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const q = [title, author, keyword]
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .join(" ");
-    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+    // Each field scopes to its own column: author→author, title→title,
+    // keyword→general search. Only non-empty fields go into the URL.
+    const params = new URLSearchParams();
+    if (author.trim()) params.set("author", author.trim());
+    if (title.trim()) params.set("title", title.trim());
+    if (keyword.trim()) params.set("q", keyword.trim());
+    const qs = params.toString();
+    router.push(qs ? `/search?${qs}` : "/search");
   }
 
   const fields = [

@@ -14,6 +14,8 @@ import type { ListingType, BookCondition } from "@/lib/supabase/types";
 
 type SearchParams = {
   q?: string;
+  author?: string;
+  title?: string;
   type?: string;
   genre?: string;
   city?: string;
@@ -52,6 +54,8 @@ export default async function SearchPage({
 
   const filters = {
     q: sp.q,
+    author: sp.author,
+    title: sp.title,
     types: list(sp.type) as ListingType[] | undefined,
     conditions: list(sp.condition) as BookCondition[] | undefined,
     genres: genreIds?.length ? genreIds : undefined,
@@ -61,6 +65,11 @@ export default async function SearchPage({
     maxPrice: sp.max ? Number(sp.max) : undefined,
     hasPhoto: sp.photo === "1" ? true : undefined,
   };
+
+  // A single term for the results header / empty state, whichever field the
+  // user searched by. Alerts prefill a wanted-book title, so prefer title/keyword.
+  const term = sp.q || sp.title || sp.author;
+  const alertTitle = sp.title || sp.q;
 
   const page = Math.max(1, Number(sp.page) || 1);
   const [facets, listings] = await Promise.all([
@@ -100,12 +109,12 @@ export default async function SearchPage({
           <div className="min-w-0">
             <div className="mb-5 hidden flex-wrap items-center justify-between gap-3 border-b border-border pb-4 lg:flex">
               <p className="text-sm text-muted-foreground">
-                {sp.q ? (
+                {term ? (
                   <>
                     <span className="font-semibold text-foreground">
                       {tf("results", { count: facets.total })}
                     </span>{" "}
-                    · {t("searchingFor", { query: sp.q })}
+                    · {t("searchingFor", { query: term })}
                   </>
                 ) : (
                   <span className="font-semibold text-foreground">
@@ -129,8 +138,8 @@ export default async function SearchPage({
                 />
                 <div>
                   <p className="max-w-sm text-muted-foreground">
-                    {sp.q
-                      ? t("noResultsFor", { query: sp.q })
+                    {term
+                      ? t("noResultsFor", { query: term })
                       : t("resultsSoon")}
                   </p>
                 </div>
@@ -138,8 +147,8 @@ export default async function SearchPage({
                 <Button asChild>
                   <Link
                     href={
-                      sp.q
-                        ? `/account/alerts?title=${encodeURIComponent(sp.q)}`
+                      alertTitle
+                        ? `/account/alerts?title=${encodeURIComponent(alertTitle)}`
                         : "/account/alerts"
                     }
                   >
