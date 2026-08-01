@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import {
   BookMarked,
   Check,
-  Globe,
   Heart,
   LogOut,
   Menu,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { Flag } from "@/components/flag";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { useAuthSheet } from "@/components/auth/auth-sheet";
@@ -124,7 +124,7 @@ export function MobileMenu({
             onClick={() => router.replace({ pathname, query }, { locale: l })}
             className={cn(itemCls, l === locale && "font-medium text-primary")}
           >
-            <Globe className="size-4.5" />
+            <Flag locale={l} />
             {LOCALE_NAMES[l] ?? l}
             {l === locale && <Check className="ml-auto size-4.5" />}
           </DropdownMenuItem>

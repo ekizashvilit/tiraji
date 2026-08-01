@@ -24,7 +24,7 @@ export function SavedButton() {
         href="/saved"
         aria-label={count > 0 ? t("titleWithCount", { count }) : t("title")}
       >
-        <Heart className="size-5" />
+        <Heart className="size-5.5" />
         {count > 0 && (
           <span
             aria-hidden

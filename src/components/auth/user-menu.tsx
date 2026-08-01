@@ -97,7 +97,7 @@ export function UserMenu({
         aria-label={t("signIn")}
         className="rounded-full text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground"
       >
-        <UserRound className="size-5" />
+        <UserRound className="size-5.5" />
       </Button>
     );
   }

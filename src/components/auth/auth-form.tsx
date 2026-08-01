@@ -177,7 +177,6 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
         <h2 className="text-xl font-bold">
           {mode === "register" ? t("registerTitle") : t("signInTitle")}
         </h2>
-        <p className="text-sm text-muted-foreground">{t("loginLede")}</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
@@ -232,7 +231,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={t("passwordPlaceholder")}
+              placeholder="••••••••"
               className="h-12 bg-background pr-12 text-base"
             />
             <button

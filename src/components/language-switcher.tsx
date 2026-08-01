@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Flag } from "@/components/flag";
 import { cn } from "@/lib/utils";
 
 const NAMES: Record<string, string> = { ka: "ქართული", en: "English" };
@@ -37,7 +38,7 @@ export function LanguageSwitcher() {
           className="size-9 rounded-full text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
           aria-label={t("language")}
         >
-          <Globe className="size-4.5" />
+          <Globe className="size-5.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={12} className="w-44 p-1.5">
@@ -50,6 +51,7 @@ export function LanguageSwitcher() {
               l === locale && "font-medium text-primary",
             )}
           >
+            <Flag locale={l} />
             {NAMES[l] ?? l}
             {l === locale && <Check className="ml-auto size-4.5" />}
           </DropdownMenuItem>
