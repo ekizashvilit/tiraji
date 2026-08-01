@@ -9,6 +9,7 @@ import { PublicChrome } from "@/components/public-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSheetProvider } from "@/components/auth/auth-sheet";
 import { ChatDockProvider } from "@/components/messages/chat-dock";
+import { FavoritesProvider } from "@/components/favorites/favorites-provider";
 import { createClient } from "@/lib/supabase/server";
 import "@/app/globals.css";
 
@@ -57,13 +58,14 @@ export default async function LocaleLayout({
   } = await supabase.auth.getUser();
 
   let displayName: string | null = null;
+  let favoriteIds: string[] = [];
   if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", user.id)
-      .single();
-    displayName = data?.display_name ?? null;
+    const [profileRes, favRes] = await Promise.all([
+      supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+      supabase.from("favorites").select("listing_id"),
+    ]);
+    displayName = profileRes.data?.display_name ?? null;
+    favoriteIds = (favRes.data ?? []).map((r) => r.listing_id);
   }
 
   const initialUser = user ? { email: user.email ?? null } : null;
@@ -77,14 +79,19 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Providers>
             <AuthSheetProvider>
-              <ChatDockProvider>
-                <PublicChrome
-                  initialUser={initialUser}
-                  initialDisplayName={displayName}
-                >
-                  {children}
-                </PublicChrome>
-              </ChatDockProvider>
+              <FavoritesProvider
+                initialUserId={user?.id ?? null}
+                initialIds={favoriteIds}
+              >
+                <ChatDockProvider>
+                  <PublicChrome
+                    initialUser={initialUser}
+                    initialDisplayName={displayName}
+                  >
+                    {children}
+                  </PublicChrome>
+                </ChatDockProvider>
+              </FavoritesProvider>
             </AuthSheetProvider>
             <Toaster />
           </Providers>

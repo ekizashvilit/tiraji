@@ -17,6 +17,7 @@ import type { ListingType, BookCondition } from "@/lib/supabase/types";
 import { BookGallery } from "@/components/book/book-gallery";
 import { ContactSeller } from "@/components/book/contact-seller";
 import { ReportButton } from "@/components/book/report-button";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 
 type Params = { params: Promise<{ locale: string; id: string }> };
 
@@ -197,6 +198,11 @@ export default async function BookPage({ params }: Params) {
 									phone={phone}
 									wanted={listing.listing_type === "wanted"}
 								/>
+							)}
+							{!isOwner && listing.listing_type !== "wanted" && (
+								<div className="mt-3 flex justify-center">
+									<FavoriteButton variant="inline" listingId={listing.id} />
+								</div>
 							)}
 						</div>
 					</div>

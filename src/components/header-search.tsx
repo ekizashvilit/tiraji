@@ -121,7 +121,7 @@ export function HeaderSearch({ className }: { className?: string }) {
           placeholder={placeholder}
           aria-label={t("searchPlaceholder")}
           autoComplete="off"
-          className="h-9 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground md:h-11 md:px-4 md:text-[0.95rem] [&::-webkit-search-cancel-button]:hidden"
+          className="h-9 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground md:h-10 md:px-4 md:text-[0.95rem] [&::-webkit-search-cancel-button]:hidden"
         />
         {q && (
           <button
@@ -133,7 +133,7 @@ export function HeaderSearch({ className }: { className?: string }) {
               setOpen(false);
               inputRef.current?.focus();
             }}
-            className="grid w-9 place-items-center text-muted-foreground transition-colors hover:text-foreground md:w-10"
+            className="grid w-9 place-items-center text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -141,7 +141,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         <button
           type="submit"
           aria-label={t("searchButton")}
-          className="grid w-10 place-items-center bg-brand-dark text-white transition-colors hover:bg-brand-dark/90 md:w-12"
+          className="grid w-10 place-items-center bg-brand-dark text-white transition-colors hover:bg-brand-dark/90 md:w-11"
         >
           <Search className="h-4 w-4 md:h-4.5 md:w-4.5" aria-hidden />
         </button>

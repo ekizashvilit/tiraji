@@ -11,6 +11,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { UserMenu } from "@/components/auth/user-menu";
 import { MobileMenu } from "@/components/mobile-menu";
 import { HeaderSearch } from "@/components/header-search";
+import { SavedButton } from "@/components/saved-button";
+import { NotificationBell } from "@/components/notification-bell";
 import { cn } from "@/lib/utils";
 import { caps } from "@/lib/caps";
 
@@ -80,11 +82,18 @@ export function SiteHeader({
 
 					<HeaderSearch className="flex flex-1" />
 
-					<div className="flex items-center gap-2 md:gap-4">
+					<div className="flex items-center">
+						{/* Saved + notifications are personal — only for signed-in users. */}
 						<div className="hidden md:block">
 							<LanguageSwitcher />
 						</div>
-						<div className="hidden md:block">
+						{signedIn && (
+							<div className="hidden md:flex md:items-center">
+								<NotificationBell />
+								<SavedButton />
+							</div>
+						)}
+						<div className="hidden md:block md:ml-2">
 							<UserMenu initialUser={initialUser} initialDisplayName={initialDisplayName} />
 						</div>
 						<MobileMenu initialUser={initialUser} initialDisplayName={initialDisplayName} />

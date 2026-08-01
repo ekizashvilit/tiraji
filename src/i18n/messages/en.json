@@ -216,7 +216,8 @@
 		"admin": "Admin",
 		"error": "Something went wrong. Please try again.",
 		"signInRequired": "Please sign in to continue.",
-		"signIn": "Sign in"
+		"signIn": "Sign in",
+		"saved": "Saved"
 	},
 	"account": {
 		"title": "My account",
@@ -456,5 +457,16 @@
 		"close": "Close",
 		"openFull": "Open full view",
 		"sendError": "Message couldn't be sent. Please try again."
+	},
+	"favorites": {
+		"title": "Saved books",
+		"lede": "Books you've saved to come back to later.",
+		"save": "Save",
+		"saved": "Saved",
+		"empty": "You haven't saved any books yet.",
+		"emptyCta": "Browse books",
+		"error": "Something went wrong. Please try again.",
+		"unavailableNote": "{count, plural, one {# saved book is no longer available.} other {# saved books are no longer available.}}",
+		"clearUnavailable": "Remove"
 	}
 }

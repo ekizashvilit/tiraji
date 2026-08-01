@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { coverUrl, formatLari, type ListingCard } from "@/lib/listings";
 import { spineFor } from "@/lib/spine";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,10 @@ export function BookCard({
       )}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-md border border-border bg-muted">
+        {/* Wanted posts are requests, not items to save. */}
+        {listing.listing_type !== "wanted" && (
+          <FavoriteButton listingId={listing.id} />
+        )}
         {cover ? (
           <Image
             src={cover}

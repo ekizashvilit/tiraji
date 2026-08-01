@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { BookMarked, Check, Globe, LogOut, Menu, MessageCircle, Plus, Search, Shield, UserRound } from "lucide-react";
+import { BookMarked, Check, Globe, Heart, LogOut, Menu, MessageCircle, Plus, Search, Shield, UserRound } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -141,6 +141,12 @@ export function MobileMenu({ initialUser = null, initialDisplayName = null }: { 
 							<Link href="/my-listings">
 								<BookMarked className="size-4.5" />
 								{t("myListings")}
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild className={itemCls}>
+							<Link href="/saved">
+								<Heart className="size-4.5" />
+								{t("saved")}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild className={itemCls}>

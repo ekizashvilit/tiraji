@@ -11,7 +11,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils";
 
 const NAMES: Record<string, string> = { ka: "ქართული", en: "English" };
-const LABELS: Record<string, string> = { ka: "ქარ", en: "ENG" };
 
 export function LanguageSwitcher() {
 	const locale = useLocale();
@@ -28,11 +27,11 @@ export function LanguageSwitcher() {
 				<Button
 					type="button"
 					variant="ghost"
-					className="h-11 gap-1.5 px-0 font-medium text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
+					size="icon"
+					className="size-9 rounded-full text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
 					aria-label="Language"
 				>
-					<Globe className="size-5" />
-					{LABELS[locale]}
+					<Globe className="size-4.5" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" sideOffset={12} className="w-44 p-1.5">
