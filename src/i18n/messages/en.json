@@ -227,7 +227,8 @@
     "error": "Something went wrong. Please try again.",
     "signInRequired": "Please sign in to continue.",
     "signIn": "Sign in",
-    "saved": "Saved"
+    "saved": "Saved",
+    "fieldRequired": "This field is required."
   },
   "account": {
     "title": "My account",
@@ -241,7 +242,15 @@
     "showPhoneHint": "If on, buyers can see your number. Otherwise they'll reach you through in-app messages.",
     "save": "Save",
     "saving": "Saving…",
-    "saved": "Profile saved"
+    "saved": "Profile saved",
+    "deleteTitle": "Delete account",
+    "deleteHint": "Permanently delete your account and all your listings, messages and saved books. This cannot be undone.",
+    "deleteButton": "Delete account",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmBody": "This permanently removes your profile, listings, messages and saved books. This can't be undone.",
+    "deleting": "Deleting…",
+    "deleted": "Your account has been deleted.",
+    "deleteError": "Couldn't delete your account. Please try again."
   },
   "alerts": {
     "pageTitle": "Book alerts",
@@ -480,5 +489,101 @@
     "error": "Something went wrong. Please try again.",
     "unavailableNote": "{count, plural, one {# saved book is no longer available.} other {# saved books are no longer available.}}",
     "clearUnavailable": "Remove"
+  },
+  "legal": {
+    "updated": "Last updated: August 2026",
+    "termsLede": "How Tiraji works and what we ask of everyone who uses it.",
+    "termsIntro": "Welcome to Tiraji. These simple rules explain how the platform works and what we expect from everyone who uses it. By using Tiraji, you agree to them.",
+    "termsSections": [
+      {
+        "heading": "What Tiraji is",
+        "body": [
+          "Tiraji is a free, non-commercial platform that helps readers in Georgia sell, swap, and give away second-hand books. We simply connect people who love books — we are not a shop and we don't sell books ourselves."
+        ]
+      },
+      {
+        "heading": "How it works",
+        "body": [
+          "To list a book, create a free account. Add a title, author, photos and details, and choose whether you want to sell, swap, or give it away.",
+          "Other readers find your book through search or browsing, and reach you through in-app messages — or your phone number, if you choose to show it. You arrange the meet-up, the price, and the hand-over directly between yourselves."
+        ]
+      },
+      {
+        "heading": "Your responsibilities",
+        "body": [
+          "Keep your listings honest and accurate. Only list books you actually own and are allowed to pass on. Treat other members with respect in messages, and don't post anything unlawful, offensive, or misleading."
+        ]
+      },
+      {
+        "heading": "Deals happen between users",
+        "body": [
+          "Tiraji is not a party to any deal. We don't handle payments, delivery, or guarantees, and we can't promise the condition of a book, that a meet-up will happen, or that a deal will go smoothly — that's between the buyer and the seller. For your safety, please meet in public places."
+        ]
+      },
+      {
+        "heading": "What's not allowed",
+        "body": [
+          "No spam or duplicate listings, no counterfeit or illegal items, no harassment, and nothing other than books. Accounts that break these rules may be limited or removed."
+        ]
+      },
+      {
+        "heading": "Reports and moderation",
+        "body": [
+          "Every listing has a “Report” button. We review reports and may hide or remove listings, or restrict accounts, to keep the platform useful and friendly for everyone."
+        ]
+      },
+      {
+        "heading": "A non-commercial project",
+        "body": [
+          "Tiraji is run by a single developer as a hobby, at no cost to you. It is provided “as is”, without any warranty, and features may change or pause at any time. If you have a problem with a listing or a user, please use the report button."
+        ]
+      }
+    ],
+    "privacyLede": "What we keep, and how your information stays protected.",
+    "privacyIntro": "Your privacy matters. Tiraji collects as little information as possible, never sells your data, and shows no ads. This page explains what we keep and how it's protected.",
+    "privacySections": [
+      {
+        "heading": "What we collect",
+        "body": [
+          "Only what's needed to run the marketplace: your email address (for signing in), a display name and city, and any listings or messages you create. You can optionally add a phone number. That's it — no tracking for advertising."
+        ]
+      },
+      {
+        "heading": "How we use it",
+        "body": [
+          "To let you sign in, publish listings, and message other members. If you subscribe to a book alert, we use your email once to tell you when a matching book is posted. We never use your details for advertising."
+        ]
+      },
+      {
+        "heading": "What others can see",
+        "body": [
+          "Other members see only your public profile: your display name, your city, and your active listings. Your phone number is shown only if you choose to show it. Your email address is always private and is never displayed to anyone."
+        ]
+      },
+      {
+        "heading": "How your data is protected",
+        "body": [
+          "Your data is stored on Supabase, a secure hosting service, and guarded by database-level access rules so people can only see what they're allowed to. Private messages are visible only to you and the person you're talking to, and connections to the site are encrypted."
+        ]
+      },
+      {
+        "heading": "Alerts and notifications",
+        "body": [
+          "We only email you about things you asked for: a book you subscribed to, or a new message. You can unsubscribe or delete your alerts at any time from your account."
+        ]
+      },
+      {
+        "heading": "You're in control",
+        "body": [
+          "You can edit or delete your listings, alerts, and profile whenever you like. Deleting your account removes your personal data from the platform."
+        ]
+      },
+      {
+        "heading": "We don't sell data",
+        "body": [
+          "Because Tiraji is a free, non-commercial project, there are no ads and no data sales. Your information is used only to make the marketplace work."
+        ]
+      }
+    ]
   }
 }

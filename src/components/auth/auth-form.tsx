@@ -18,6 +18,15 @@ import { cn } from "@/lib/utils";
 type Mode = "signin" | "register";
 type Method = "phone" | "email";
 
+// Per-field validation messages; `form` covers whole-form errors (captcha,
+// server responses) shown above the submit button.
+type FieldErrors = {
+  identifier?: string;
+  password?: string;
+  confirm?: string;
+  form?: string;
+};
+
 const MIN_PASSWORD = 8;
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -35,7 +44,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [sent, setSent] = useState(false);
 
   // Cloudflare Turnstile: token is single-use, so we reset the widget after
@@ -58,21 +67,18 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   // Resolve the entered identifier to the email Supabase authenticates against.
-  // Returns null (and sets an error) when the input is invalid.
-  function resolveEmail(): { email: string; phone: string | null } | null {
+  // Returns an `error` message (for the identifier field) when it's invalid.
+  function resolveEmail():
+    | { email: string; phone: string | null }
+    | { error: string } {
     if (method === "phone") {
       const phone = normalizeGeorgianPhone(identifier);
-      if (!phone) {
-        setError(t("invalidPhone"));
-        return null;
-      }
+      if (!phone) return { error: t("invalidPhone") };
       return { email: phoneToEmail(phone), phone };
     }
     const email = identifier.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError(t("invalidEmail"));
-      return null;
-    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return { error: t("invalidEmail") };
     return { email, phone: null };
   }
 
@@ -85,26 +91,43 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
 
-    const resolved = resolveEmail();
-    if (!resolved) return;
-    const { email, phone } = resolved;
+    // Validate every field up front so each input can show its own message,
+    // rather than bailing on the first problem or relying on native popups.
+    const next: FieldErrors = {};
+    let resolved: { email: string; phone: string | null } | null = null;
+
+    if (!identifier.trim()) {
+      next.identifier = t("fieldRequired");
+    } else {
+      const r = resolveEmail();
+      if ("error" in r) next.identifier = r.error;
+      else resolved = r;
+    }
+
+    if (!password) {
+      next.password = t("fieldRequired");
+    } else if (mode === "register" && password.length < MIN_PASSWORD) {
+      next.password = t("weakPassword");
+    }
 
     if (mode === "register") {
-      if (password.length < MIN_PASSWORD) {
-        setError(t("weakPassword"));
-        return;
-      }
-      if (password !== confirm) {
-        setError(t("passwordMismatch"));
-        return;
-      }
+      if (!confirm) next.confirm = t("fieldRequired");
+      else if (password && password !== confirm)
+        next.confirm = t("passwordMismatch");
     }
+
+    if (Object.keys(next).length > 0) {
+      setErrors(next);
+      return;
+    }
+    setErrors({});
+    // resolved is guaranteed set here: identifier passed validation above.
+    const { email, phone } = resolved!;
 
     const captcha = captchaOptions();
     if (captcha === "missing") {
-      setError(t("captchaRequired"));
+      setErrors({ form: t("captchaRequired") });
       return;
     }
 
@@ -123,7 +146,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
       });
       resetCaptcha();
       if (error) {
-        setError(mapError(error.message));
+        setErrors({ form: mapError(error.message) });
         setLoading(false);
         return;
       }
@@ -131,7 +154,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
       if (!data.session) {
         setLoading(false);
         if (method === "email") setSent(true);
-        else setError(t("phoneSignupFailed"));
+        else setErrors({ form: t("phoneSignupFailed") });
         return;
       }
     } else {
@@ -142,7 +165,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
       });
       resetCaptcha();
       if (error) {
-        setError(mapError(error.message));
+        setErrors({ form: mapError(error.message) });
         setLoading(false);
         return;
       }
@@ -179,7 +202,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
         </h2>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {/* Phone / Email method */}
         <Segmented
           options={[
@@ -190,7 +213,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
           onChange={(v) => {
             setMethod(v as Method);
             setIdentifier("");
-            setError(null);
+            setErrors({});
           }}
         />
 
@@ -203,20 +226,23 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
             type={method === "phone" ? "tel" : "email"}
             inputMode={method === "phone" ? "tel" : "email"}
             autoComplete={method === "phone" ? "tel" : "email"}
-            required
+            aria-invalid={!!errors.identifier}
+            aria-describedby={errors.identifier ? "identifier-error" : undefined}
             value={identifier}
-            onChange={(e) =>
+            onChange={(e) => {
               setIdentifier(
                 method === "phone"
                   ? e.target.value.replace(/[^\d+ ]/g, "")
                   : e.target.value,
-              )
-            }
+              );
+              setErrors((prev) => ({ ...prev, identifier: undefined }));
+            }}
             placeholder={
               method === "phone" ? t("phonePlaceholder") : t("emailPlaceholder")
             }
             className="h-12 bg-background text-base"
           />
+          <FieldError id="identifier-error" message={errors.identifier} />
         </div>
 
         <div className="space-y-2">
@@ -228,9 +254,13 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
               autoComplete={
                 mode === "register" ? "new-password" : "current-password"
               }
-              required
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? "password-error" : undefined}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrors((prev) => ({ ...prev, password: undefined }));
+              }}
               placeholder="••••••••"
               className="h-12 bg-background pr-12 text-base"
             />
@@ -247,7 +277,8 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
               )}
             </button>
           </div>
-          {mode === "register" && (
+          <FieldError id="password-error" message={errors.password} />
+          {mode === "register" && !errors.password && (
             <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
           )}
         </div>
@@ -260,9 +291,13 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
                 id="confirm"
                 type={showConfirm ? "text" : "password"}
                 autoComplete="new-password"
-                required
+                aria-invalid={!!errors.confirm}
+                aria-describedby={errors.confirm ? "confirm-error" : undefined}
                 value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
+                onChange={(e) => {
+                  setConfirm(e.target.value);
+                  setErrors((prev) => ({ ...prev, confirm: undefined }));
+                }}
                 placeholder={t("confirmPlaceholder")}
                 className="h-12 bg-background pr-12 text-base"
               />
@@ -279,6 +314,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
                 )}
               </button>
             </div>
+            <FieldError id="confirm-error" message={errors.confirm} />
           </div>
         )}
 
@@ -293,7 +329,9 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
           />
         )}
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {errors.form && (
+          <p className="text-sm text-destructive">{errors.form}</p>
+        )}
 
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -331,7 +369,7 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
           type="button"
           onClick={() => {
             setMode(mode === "signin" ? "register" : "signin");
-            setError(null);
+            setErrors({});
           }}
           className="font-semibold text-primary hover:underline"
         >
@@ -339,6 +377,16 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
         </button>
       </p>
     </div>
+  );
+}
+
+// Inline, per-field validation message shown directly beneath an input.
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} className="text-sm text-destructive">
+      {message}
+    </p>
   );
 }
 

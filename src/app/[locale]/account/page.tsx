@@ -5,6 +5,7 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/account/profile-form";
+import { DeleteAccount } from "@/components/account/delete-account";
 import type { ProfileRow } from "@/lib/supabase/types";
 
 export default async function AccountPage({
@@ -77,6 +78,8 @@ export default async function AccountPage({
             aria-hidden
           />
         </Link>
+
+        <DeleteAccount />
       </div>
     </>
   );
