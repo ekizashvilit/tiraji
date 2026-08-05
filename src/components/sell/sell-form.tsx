@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
-import { checkImageIsSafe } from "@/lib/nsfw";
 import { isClean } from "@/lib/profanity";
 import { useRouter } from "@/i18n/navigation";
 import { CITIES, cityLabel } from "@/lib/cities";
 import { LANGUAGES, languageLabel } from "@/lib/languages";
-import { coverPathUrl, genreName } from "@/lib/listings-format";
+import { genreName } from "@/lib/listings-format";
 import { SELLABLE_TYPES, BOOK_CONDITIONS } from "@/lib/listing-constants";
 import type {
   GenreRow,
@@ -25,20 +23,9 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { usePhotos } from "@/components/sell/use-photos";
+import { PhotoGrid } from "@/components/sell/photo-grid";
 import { cn } from "@/lib/utils";
-
-const MAX_PHOTOS = 3;
-// Reject obviously-wrong files before compression/upload. This mirrors the
-// server-side bucket limits (migration 0012) so the user gets instant feedback;
-// the bucket constraints remain the real enforcement.
-const ACCEPTED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/avif",
-];
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024; // pre-compression ceiling
 
 // Fields the form can edit on an existing listing.
 export type EditableListing = {
@@ -55,11 +42,6 @@ export type EditableListing = {
   genre_id: number | null;
   cover_image_paths: string[];
 };
-
-// A photo is either already uploaded (has a storage path) or newly picked (a File).
-type Photo =
-  | { kind: "existing"; path: string; url: string }
-  | { kind: "new"; file: File; url: string };
 
 export function SellForm({
   genres,
@@ -99,68 +81,11 @@ export function SellForm({
   const [genreId, setGenreId] = useState(
     listing?.genre_id != null ? String(listing.genre_id) : "",
   );
-  const [photos, setPhotos] = useState<Photo[]>(
-    listing?.cover_image_paths.map((path) => ({
-      kind: "existing" as const,
-      path,
-      url: coverPathUrl(path),
-    })) ?? [],
+  const { photos, checking, full, addPhotos, removePhoto, upload } = usePhotos(
+    listing?.cover_image_paths ?? [],
   );
 
   const [submitting, setSubmitting] = useState(false);
-  const [checking, setChecking] = useState(false);
-
-  async function onAddPhotos(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = ""; // allow re-selecting the same file
-    if (!files.length) return;
-    const room = MAX_PHOTOS - photos.length;
-    if (room <= 0) {
-      toast.error(t("photosMax", { max: MAX_PHOTOS }));
-      return;
-    }
-
-    // Drop unsupported types / oversized files up front (before compression).
-    const candidates = files.slice(0, room);
-    const valid = candidates.filter(
-      (f) => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_UPLOAD_BYTES,
-    );
-    if (valid.length < candidates.length) toast.error(t("photoInvalid"));
-    if (!valid.length) return;
-
-    // Screen each photo for explicit content before it's added (and later
-    // uploaded). Runs entirely in the browser via NSFWJS.
-    setChecking(true);
-    const accepted: Photo[] = [];
-    let rejected = 0;
-    for (const file of valid) {
-      let safe = true;
-      try {
-        safe = (await checkImageIsSafe(file)).safe;
-      } catch {
-        // If the model can't load, don't block the seller — the report button
-        // and admin queue remain as a fallback.
-        safe = true;
-      }
-      if (!safe) {
-        rejected++;
-        continue;
-      }
-      accepted.push({ kind: "new", file, url: URL.createObjectURL(file) });
-    }
-    setChecking(false);
-
-    if (rejected > 0) toast.error(t("photoRejected"));
-    if (accepted.length) setPhotos((prev) => [...prev, ...accepted]);
-  }
-
-  function removePhoto(index: number) {
-    setPhotos((prev) => {
-      const photo = prev[index];
-      if (photo.kind === "new") URL.revokeObjectURL(photo.url);
-      return prev.filter((_, i) => i !== index);
-    });
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -190,33 +115,15 @@ export function SellForm({
     }
 
     // Upload only the newly-added photos; existing ones keep their paths.
-    const newPaths: string[] = [];
+    let coverPaths: string[];
+    let retainedPaths: string[];
     try {
-      for (const photo of photos) {
-        if (photo.kind !== "new") continue;
-        const compressed = await imageCompression(photo.file, {
-          maxSizeMB: 0.6,
-          maxWidthOrHeight: 1600,
-          useWebWorker: true,
-        });
-        const ext = (photo.file.name.split(".").pop() || "jpg").toLowerCase();
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("covers")
-          .upload(path, compressed, { contentType: compressed.type });
-        if (uploadError) throw uploadError;
-        newPaths.push(path);
-      }
+      ({ coverPaths, retainedPaths } = await upload(supabase, user.id));
     } catch {
       setSubmitting(false);
       toast.error(t("errorUpload"));
       return;
     }
-
-    const retainedPaths = photos
-      .filter((p) => p.kind === "existing")
-      .map((p) => (p as { path: string }).path);
-    const coverPaths = [...retainedPaths, ...newPaths];
 
     const fields = {
       listing_type: listingType,
@@ -438,52 +345,13 @@ export function SellForm({
       <div className="space-y-2">
         <Label>{t("photos")}</Label>
         <p className="text-sm text-muted-foreground">{t("photosHint")}</p>
-        <div className="mt-2 flex flex-wrap gap-3">
-          {photos.map((photo, i) => (
-            <div
-              key={photo.url}
-              className="relative size-24 overflow-hidden rounded-lg border border-border bg-muted"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt="" className="size-full object-cover" />
-              <button
-                type="button"
-                onClick={() => removePhoto(i)}
-                aria-label={t("removePhoto")}
-                className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-foreground/70 text-white hover:bg-foreground"
-              >
-                <X className="size-3.5" aria-hidden />
-              </button>
-            </div>
-          ))}
-          {photos.length < MAX_PHOTOS && (
-            <label
-              className={cn(
-                "grid size-24 place-items-center gap-1 rounded-lg border border-dashed border-border p-2 text-center leading-tight text-muted-foreground",
-                checking
-                  ? "cursor-wait opacity-70"
-                  : "cursor-pointer hover:bg-muted",
-              )}
-            >
-              {checking ? (
-                <Loader2 className="size-6 animate-spin" aria-hidden />
-              ) : (
-                <ImagePlus className="size-6" aria-hidden />
-              )}
-              <span className="text-xs">
-                {checking ? t("checkingPhoto") : t("addPhotos")}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={checking}
-                onChange={onAddPhotos}
-                className="sr-only"
-              />
-            </label>
-          )}
-        </div>
+        <PhotoGrid
+          photos={photos}
+          checking={checking}
+          full={full}
+          onAdd={addPhotos}
+          onRemove={removePhoto}
+        />
       </div>
 
       <Button type="submit" size="lg" disabled={submitting} className="gap-2">
