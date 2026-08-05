@@ -24,13 +24,13 @@ export function ConversationList({
   });
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="space-y-2">
       {conversations.map((c) => (
         <li key={c.id}>
           <Link
             href={`/messages/${c.id}`}
             onClick={onNavigate}
-            className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/50"
+            className="flex w-full items-center gap-3 rounded-xl bg-card px-4 py-3.5 text-left shadow-sm ring-1 ring-border/60 transition-colors hover:bg-accent/50 hover:ring-border"
           >
             <div className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary text-brand-dark">
               {caps((c.otherName || t("someone")).charAt(0))}

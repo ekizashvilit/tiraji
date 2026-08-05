@@ -65,7 +65,7 @@ export function NotificationBell() {
           aria-label={tc("title")}
           className="relative size-9 rounded-full text-muted-foreground hover:bg-transparent hover:text-foreground"
         >
-          <MessageCircle className="size-5.5" />
+          <MessageCircle className="size-5" />
           {unread > 0 && (
             <span
               className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background"

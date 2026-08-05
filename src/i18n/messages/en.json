@@ -492,96 +492,209 @@
   },
   "legal": {
     "updated": "Last updated: August 2026",
-    "termsLede": "How Tiraji works and what we ask of everyone who uses it.",
-    "termsIntro": "Welcome to Tiraji. These simple rules explain how the platform works and what we expect from everyone who uses it. By using Tiraji, you agree to them.",
+    "termsIntro": "By using the Platform, the user confirms that they have read, understand, and agree to these Terms & Conditions.",
     "termsSections": [
       {
-        "heading": "What Tiraji is",
+        "heading": "1. Definitions",
         "body": [
-          "Tiraji is a free, non-commercial platform that helps readers in Georgia sell, swap, and give away second-hand books. We simply connect people who love books — we are not a shop and we don't sell books ourselves."
+          "In these Terms of Use, the following terms have the meanings set out below:",
+          [
+            "“Tiraji” or “the Platform” — the website that allows users to post listings to sell, swap, or give away second-hand books.",
+            "“User” — any person who uses the Platform.",
+            "“Account” — the profile created by a user upon registration.",
+            "“Listing” — information about a book published by a user.",
+            "“Transaction” — an agreement between users to sell, swap, or give away a book."
+          ]
         ]
       },
       {
-        "heading": "How it works",
+        "heading": "2. General Provisions",
         "body": [
-          "To list a book, create a free account. Add a title, author, photos and details, and choose whether you want to sell, swap, or give it away.",
-          "Other readers find your book through search or browsing, and reach you through in-app messages — or your phone number, if you choose to show it. You arrange the meet-up, the price, and the hand-over directly between yourselves."
+          "2.1. These Terms govern the use of the Platform.",
+          "2.2. By using the Platform, the user confirms that they have read, understand, and agree to these Terms.",
+          "2.3. If the user does not agree to the Terms, they must stop using the Platform."
         ]
       },
       {
-        "heading": "Your responsibilities",
+        "heading": "3. Purpose of the Platform",
         "body": [
-          "Keep your listings honest and accurate. Only list books you actually own and are allowed to pass on. Treat other members with respect in messages, and don't post anything unlawful, offensive, or misleading."
+          "3.1. Tiraji is a non-commercial online platform that connects users with one another to sell, swap, and give away second-hand books.",
+          "3.2. The Platform provides only the technical means for communication between users and for posting listings. The Platform is not a party to any sale, swap, or gift transaction concerning a book, and assumes no responsibility for relationships arising between users."
         ]
       },
       {
-        "heading": "Deals happen between users",
+        "heading": "4. User Account",
         "body": [
-          "Tiraji is not a party to any deal. We don't handle payments, delivery, or guarantees, and we can't promise the condition of a book, that a meet-up will happen, or that a deal will go smoothly — that's between the buyer and the seller. For your safety, please meet in public places."
+          "4.1. Registration is required to post a listing.",
+          "4.2. The user must provide accurate and complete information.",
+          "4.3. The user is responsible for the security of their own account and for all actions carried out through it."
         ]
       },
       {
-        "heading": "What's not allowed",
+        "heading": "5. Posting Listings",
         "body": [
-          "No spam or duplicate listings, no counterfeit or illegal items, no harassment, and nothing other than books. Accounts that break these rules may be limited or removed."
+          "5.1. A user may post only a listing that concerns a book.",
+          "5.2. A listing must contain complete, accurate, and non-misleading information about the book, including, where possible, the book's title, author, actual condition, photographs (if available), and other material information.",
+          "5.3. The user confirms that:",
+          [
+            "the book belongs to them, or they have the lawful right to transfer it;",
+            "the listing does not infringe the rights of any third party;",
+            "the information provided in the listing corresponds to reality."
+          ]
         ]
       },
       {
-        "heading": "Reports and moderation",
+        "heading": "6. Prohibited Conduct",
         "body": [
-          "Every listing has a “Report” button. We review reports and may hide or remove listings, or restrict accounts, to keep the platform useful and friendly for everyone."
+          "The user is prohibited from:",
+          [
+            "posting items or services other than books;",
+            "spreading false, misleading, or incomplete information;",
+            "repeatedly publishing the same listing for the purpose of spam;",
+            "insulting, harassing, threatening, or discriminating against another user;",
+            "using the Platform for unlawful purposes or purposes contrary to the legislation of Georgia;",
+            "attempting to disrupt the technical operation of the Platform or to breach its security."
+          ]
         ]
       },
       {
-        "heading": "A non-commercial project",
+        "heading": "7. Transactions Between Users",
         "body": [
-          "Tiraji is run by a single developer as a hobby, at no cost to you. It is provided “as is”, without any warranty, and features may change or pause at any time. If you have a problem with a listing or a user, please use the report button."
+          "7.1. All transactions are concluded directly between users.",
+          "7.2. The Platform does not process payments, does not arrange delivery, and is not a party to any transaction.",
+          "7.3. The Platform bears no responsibility for:",
+          [
+            "the accuracy of information provided by users;",
+            "the condition of a book;",
+            "the performance of a transaction;",
+            "disputes relating to payments or delivery."
+          ],
+          "7.4. The user independently decides whether to enter into a transaction and bears full responsibility for their own actions."
+        ]
+      },
+      {
+        "heading": "8. Moderation, Complaints, and Breach of Terms",
+        "body": [
+          "8.1. A user may, using the relevant feature on the Platform, report a listing or a user that, in their assessment, breaches these Terms or applicable law.",
+          "8.2. The Platform is entitled, on its own initiative or on the basis of a received complaint, to review a listing or a user's conduct.",
+          "8.3. If the Platform establishes, or has reasonable grounds to believe, that these Terms, applicable law, or the rights of third parties have been breached, it is entitled, taking the circumstances into account, to take one or more of the following measures:",
+          [
+            "require correction of the listing or information;",
+            "temporarily hide or delete the listing;",
+            "temporarily restrict the user's access to certain Platform features;",
+            "temporarily suspend or permanently delete the user's account."
+          ],
+          "8.4. In cases of urgent or obvious breach, the Platform may take these measures without prior warning.",
+          "8.5. The Platform's moderation does not amount to prior review of every listing or user activity, nor confirmation of their lawfulness.",
+          "8.6. The Platform reviews complaints at its own discretion and on the basis of available information. The Platform is not obliged to take any specific measure on each complaint or to inform the user of the outcome of the review."
+        ]
+      },
+      {
+        "heading": "9. Confidentiality",
+        "body": [
+          "9.1. The collection, use, storage, and protection of the user's personal data is governed by a separate document — the Privacy Policy, available on the “Confidentiality” page. By using the Platform, the user confirms that they have read that policy."
+        ]
+      },
+      {
+        "heading": "10. Limitation of Liability",
+        "body": [
+          "10.1. Tiraji is a non-commercial project and is available to users free of charge.",
+          "10.2. The Platform is not obliged to review in advance every listing or other content posted by users, and does not guarantee that they fully comply with applicable law, these Terms, or the actual circumstances.",
+          "10.3. To the maximum extent permitted by law, the Platform does not guarantee its uninterrupted or error-free operation.",
+          "10.4. The Platform is not liable for any direct or indirect damage that may arise from the use of, or inability to use, the Platform."
+        ]
+      },
+      {
+        "heading": "11. Changes to the Terms",
+        "body": [
+          "The Platform may change or update these Terms at any time. The updated version takes effect from the moment it is published on the Platform, unless otherwise specified."
+        ]
+      },
+      {
+        "heading": "12. Contact",
+        "body": [
+          "12.1. For questions, complaints, or matters related to these Terms, the user may contact us at the following email address: [email to be added]."
         ]
       }
     ],
-    "privacyLede": "What we keep, and how your information stays protected.",
-    "privacyIntro": "Your privacy matters. Tiraji collects as little information as possible, never sells your data, and shows no ads. This page explains what we keep and how it's protected.",
+    "privacyIntro": "This Privacy Policy sets out how the “Tiraji” platform collects, uses, stores, and protects the user's personal data. By using the Platform, the user confirms that they have read this policy.",
     "privacySections": [
       {
-        "heading": "What we collect",
+        "heading": "Data we collect",
         "body": [
-          "Only what's needed to run the marketplace: your email address (for signing in), a display name and city, and any listings or messages you create. You can optionally add a phone number. That's it — no tracking for advertising."
+          "The Platform collects only the data necessary for its operation, including:",
+          [
+            "email address;",
+            "name or username;",
+            "city (where provided);",
+            "phone number (only if the user wishes);",
+            "listings published by the user;",
+            "messages sent through the Platform;",
+            "book alert subscription information."
+          ]
         ]
       },
       {
-        "heading": "How we use it",
+        "heading": "How we use data",
         "body": [
-          "To let you sign in, publish listings, and message other members. If you subscribe to a book alert, we use your email once to tell you when a matching book is posted. We never use your details for advertising."
+          "Personal data is used only for the following purposes:",
+          [
+            "user authentication and account management;",
+            "publishing and administering listings;",
+            "enabling communication between users;",
+            "sending messages requested by the user;",
+            "ensuring the security and proper operation of the Platform;",
+            "fulfilling obligations provided for by applicable law."
+          ],
+          "The Platform does not use the user's personal data for direct marketing or targeted advertising, except where the user has separately given consent to this."
         ]
       },
       {
-        "heading": "What others can see",
+        "heading": "Visibility to other users",
         "body": [
-          "Other members see only your public profile: your display name, your city, and your active listings. Your phone number is shown only if you choose to show it. Your email address is always private and is never displayed to anyone."
+          "The following may be available to other users:",
+          [
+            "the user's name;",
+            "city (where provided);",
+            "active listings;",
+            "phone number, only if the user chooses to display it."
+          ],
+          "The email address is not available to other users."
         ]
       },
       {
-        "heading": "How your data is protected",
+        "heading": "Data protection",
         "body": [
-          "Your data is stored on Supabase, a secure hosting service, and guarded by database-level access rules so people can only see what they're allowed to. Private messages are visible only to you and the person you're talking to, and connections to the site are encrypted."
+          "The Platform implements reasonable technical and organizational measures to protect the user's personal data. Data is stored on Supabase infrastructure and protected by appropriate authentication and access-control mechanisms."
         ]
       },
       {
-        "heading": "Alerts and notifications",
+        "heading": "Sharing with third parties",
         "body": [
-          "We only email you about things you asked for: a book you subscribed to, or a new message. You can unsubscribe or delete your alerts at any time from your account."
+          "The Platform does not sell or transfer the user's personal data to third parties, except:",
+          [
+            "with the user's consent;",
+            "to technical service providers necessary for the operation of the service;",
+            "in cases provided for by the legislation of Georgia, or on the basis of a lawful request from an authorized state body."
+          ]
         ]
       },
       {
-        "heading": "You're in control",
+        "heading": "Your rights",
         "body": [
-          "You can edit or delete your listings, alerts, and profile whenever you like. Deleting your account removes your personal data from the platform."
+          "The user has the right to:",
+          [
+            "change or update their profile information;",
+            "delete listings;",
+            "manage subscriptions;",
+            "request deletion of their account and personal data, unless there is a legal obligation to retain them."
+          ]
         ]
       },
       {
-        "heading": "We don't sell data",
+        "heading": "Changes to this policy",
         "body": [
-          "Because Tiraji is a free, non-commercial project, there are no ads and no data sales. Your information is used only to make the marketplace work."
+          "The Platform may update this Privacy Policy at any time. The updated version takes effect from the moment it is published on the Platform."
         ]
       }
     ]

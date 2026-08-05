@@ -38,7 +38,7 @@ export function LanguageSwitcher() {
           className="size-9 rounded-full text-muted-foreground cursor-pointer hover:bg-transparent hover:text-foreground aria-expanded:bg-transparent aria-expanded:text-foreground"
           aria-label={t("language")}
         >
-          <Globe className="size-5.5" />
+          <Globe className="size-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={12} className="w-44 p-1.5">
