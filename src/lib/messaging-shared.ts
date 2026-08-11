@@ -87,5 +87,8 @@ export async function fetchConversations(
         unread: mine.filter((m) => m.sender_id !== userId && !m.read_at).length,
       };
     })
+    // Opening a chat creates the conversation row before anyone types; hide the
+    // empty ones so the inbox only lists chats that actually have a message.
+    .filter((c) => c.lastAt !== null)
     .sort((a, b) => (b.lastAt ?? "").localeCompare(a.lastAt ?? ""));
 }
