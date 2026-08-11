@@ -81,14 +81,16 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
           <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
           <p className="text-lg">{t("resetEmailSent")}</p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={onBack}
-          className="flex w-full items-center justify-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          className="w-full"
         >
           <ArrowLeft className="size-4" aria-hidden />
           {t("backToSignIn")}
-        </button>
+        </Button>
       </div>
     );
   }

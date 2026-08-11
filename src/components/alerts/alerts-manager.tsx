@@ -131,7 +131,7 @@ export function AlertsManager({
             {t("empty")}
           </p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="max-h-96 divide-y divide-border overflow-y-auto pr-1">
             {alerts.map((a) => (
               <li
                 key={a.id}

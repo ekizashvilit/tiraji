@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // Presentational building blocks for the filter sidebar/sheet. Kept apart from
@@ -118,12 +119,13 @@ export function PriceGroup({
             className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary"
           />
         </div>
-        <button
+        <Button
           type="submit"
-          className="h-10 w-full rounded-md bg-secondary px-3 text-sm font-semibold hover:bg-accent"
+          variant="secondary"
+          className="w-full font-semibold"
         >
           {applyLabel}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -95,13 +95,15 @@ export function ResetPasswordForm({
         <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
           <p className="text-lg">{t("resetLinkInvalid")}</p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={onRequestNewLink}
-          className="w-full text-sm font-medium text-primary hover:underline"
+          className="w-full"
         >
           {t("requestNewLink")}
-        </button>
+        </Button>
       </div>
     );
   }

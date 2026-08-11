@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import type { ThreadMessage } from "@/lib/messaging";
+import { Button } from "@/components/ui/button";
 import { ChatThread } from "@/components/messages/chat-thread";
 
 type ChatDockContextValue = {
@@ -148,13 +149,9 @@ function ChatDockWindow({
         ) : failed ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <p className="text-sm text-muted-foreground">{t("sendError")}</p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-            >
+            <Button type="button" onClick={onClose}>
               {t("close")}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center">

@@ -31,7 +31,7 @@ export function PageHeader({
             <>
               <h1 className="mt-6 text-2xl font-bold sm:text-3xl">{title}</h1>
               {lede && (
-                <p className="mt-1 max-w-xl text-sm text-muted-foreground sm:text-base">
+                <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
                   {lede}
                 </p>
               )}

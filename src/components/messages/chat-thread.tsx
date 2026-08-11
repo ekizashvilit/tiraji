@@ -8,6 +8,7 @@ import { ChevronLeft, Maximize2, SendHorizontal, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
 import type { ThreadMessage } from "@/lib/messaging";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // A single conversation view with realtime updates and a composer. Rendered two
@@ -238,14 +239,15 @@ export function ChatThread({
           placeholder={t("placeholder")}
           className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-border bg-background px-3.5 py-2.5 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
-        <button
+        <Button
           type="submit"
+          size="icon-lg"
           disabled={!body.trim() || sending}
           aria-label={t("send")}
-          className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50"
+          className="rounded-xl"
         >
           <SendHorizontal className="size-5" aria-hidden />
-        </button>
+        </Button>
       </form>
     </div>
   );
