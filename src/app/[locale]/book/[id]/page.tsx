@@ -220,7 +220,9 @@ export default async function BookPage({ params }: Params) {
             {memberSince && (
               <p>
                 {caps(t("memberSinceLabel"))}:{" "}
-                <span className="text-foreground">{memberSince}</span>
+                <span className="text-foreground">
+                  {t("memberSinceValue", { date: memberSince })}
+                </span>
               </p>
             )}
           </div>
@@ -228,7 +230,14 @@ export default async function BookPage({ params }: Params) {
 
         {/* Buy box */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="relative rounded-xl border border-border bg-card p-4">
+            {!isOwner && listing.listing_type !== "wanted" && (
+              <FavoriteButton
+                variant="inline"
+                listingId={listing.id}
+                className="absolute right-4 top-4"
+              />
+            )}
             {listing.status !== "active" && (
               <p className="mb-3 rounded-lg bg-muted px-3 py-2 text-sm font-medium text-muted-foreground">
                 {t("closedNotice")}
@@ -260,11 +269,6 @@ export default async function BookPage({ params }: Params) {
                   phone={phone}
                   wanted={listing.listing_type === "wanted"}
                 />
-              )}
-              {!isOwner && listing.listing_type !== "wanted" && (
-                <div className="mt-3 flex justify-center">
-                  <FavoriteButton variant="inline" listingId={listing.id} />
-                </div>
               )}
             </div>
           </div>

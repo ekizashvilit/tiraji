@@ -360,6 +360,7 @@
     "memberSince": "Member since {date}",
     "sellerLabel": "Seller",
     "memberSinceLabel": "Member since",
+    "memberSinceValue": "{date}",
     "viewSellerItems": "View this seller's listings",
     "aboutItem": "About this book",
     "moreFromSeller": "More from this seller",

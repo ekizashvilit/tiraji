@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Loader2, Search, X } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { ListingType } from "@/lib/supabase/types";
-import { formatLari } from "@/lib/listings-format";
+import { coverUrl, formatLari } from "@/lib/listings-format";
 import { logSearch } from "@/lib/log-search";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ type Suggestion = {
   // RPC's row type is the full ListingType, so widen to match.
   listing_type: ListingType;
   price: number | null;
+  cover: string | null;
 };
 
 export function HeaderSearch({ className }: { className?: string }) {
@@ -67,6 +69,7 @@ export function HeaderSearch({ className }: { className?: string }) {
           author: d.author,
           listing_type: d.listing_type,
           price: d.price,
+          cover: coverUrl(d),
         })),
       );
       setLoading(false);
@@ -169,10 +172,21 @@ export function HeaderSearch({ className }: { className?: string }) {
                     onClick={() => goToSearch(s.title)}
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-accent"
                   >
-                    <Search
-                      className="h-4 w-4 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
+                    <span className="relative h-12 w-9 shrink-0 overflow-hidden rounded bg-secondary">
+                      {s.cover ? (
+                        <Image
+                          src={s.cover}
+                          alt=""
+                          fill
+                          sizes="36px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center text-muted-foreground">
+                          <Search className="h-4 w-4" aria-hidden />
+                        </span>
+                      )}
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">
                         {s.title}
