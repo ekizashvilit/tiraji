@@ -56,7 +56,7 @@ export default async function SavedPage({
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
         {isEmpty ? (
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card/60 px-6 py-16 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-xl bg-card/60 px-6 py-16 text-center">
             <Heart className="h-10 w-10 text-muted-foreground" aria-hidden />
             <p className="max-w-sm text-muted-foreground">{t("empty")}</p>
             <Button asChild size="lg">

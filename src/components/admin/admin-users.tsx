@@ -2,9 +2,13 @@
 
 import { Fragment, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { AlertDialog } from "radix-ui";
 import { toast } from "sonner";
 import {
   Ban,
+  Check,
+  Copy,
+  KeyRound,
   Loader2,
   MapPin,
   RotateCcw,
@@ -14,7 +18,11 @@ import {
 } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
-import { setUserBanned, deleteUser } from "@/lib/admin-actions";
+import {
+  setUserBanned,
+  deleteUser,
+  resetUserPassword,
+} from "@/lib/admin-actions";
 import type { AdminUser } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -33,6 +41,11 @@ export function AdminUsers({
   const router = useRouter();
   const confirm = useConfirm();
   const [busyId, setBusyId] = useState<string | null>(null);
+  // The generated temp password to show after a reset (dialog is open while set).
+  const [reset, setReset] = useState<{ name: string; password: string } | null>(
+    null,
+  );
+  const [copied, setCopied] = useState(false);
 
   const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "ka-GE", {
     day: "numeric",
@@ -82,6 +95,39 @@ export function AdminUsers({
     }
   }
 
+  async function resetPassword(user: AdminUser) {
+    const name = user.displayName || t("unnamedUser");
+    if (
+      !(await confirm({
+        title: t("resetPasswordConfirm"),
+        description: t("resetPasswordConfirmBody"),
+        confirmLabel: t("resetPassword"),
+        cancelLabel: tc("cancel"),
+      }))
+    )
+      return;
+    setBusyId(user.id);
+    try {
+      const password = await resetUserPassword(user.id);
+      setCopied(false);
+      setReset({ name, password });
+    } catch {
+      toast.error(t("actionError"));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function copyPassword() {
+    if (!reset) return;
+    try {
+      await navigator.clipboard.writeText(reset.password);
+      setCopied(true);
+    } catch {
+      toast.error(t("actionError"));
+    }
+  }
+
   async function remove(user: AdminUser) {
     if (
       !(await confirm({
@@ -113,6 +159,7 @@ export function AdminUsers({
   }
 
   return (
+    <>
     <ul className="space-y-3">
       {items.map((user, i) => {
         const busy = busyId === user.id;
@@ -185,6 +232,16 @@ export function AdminUsers({
                   {user.banned ? t("unban") : t("ban")}
                 </Button>
                 <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={t("resetPassword")}
+                  title={t("resetPassword")}
+                  disabled={busy || isSelf}
+                  onClick={() => resetPassword(user)}
+                >
+                  <KeyRound className="size-4" aria-hidden />
+                </Button>
+                <Button
                   variant="destructive"
                   size="icon-sm"
                   aria-label={t("deleteUser")}
@@ -199,5 +256,51 @@ export function AdminUsers({
         );
       })}
     </ul>
+
+      <AlertDialog.Root
+        open={!!reset}
+        onOpenChange={(next) => {
+          if (!next) setReset(null);
+        }}
+      >
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-background p-6 shadow-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+            <AlertDialog.Title className="text-lg font-semibold text-foreground">
+              {t("resetPasswordDone")}
+            </AlertDialog.Title>
+
+            <div className="mt-4 flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
+              <code className="flex-1 select-all px-2 font-mono text-lg tracking-wide text-foreground">
+                {reset?.password}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={copyPassword}
+              >
+                {copied ? (
+                  <Check className="size-4" aria-hidden />
+                ) : (
+                  <Copy className="size-4" aria-hidden />
+                )}
+                {copied ? t("copied") : t("copyPassword")}
+              </Button>
+            </div>
+
+            <AlertDialog.Description className="mt-3 text-sm text-muted-foreground">
+              {t("resetPasswordHint", { name: reset?.name ?? "" })}
+            </AlertDialog.Description>
+
+            <div className="mt-6 flex justify-end">
+              <AlertDialog.Action asChild>
+                <Button size="sm">{tc("close")}</Button>
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
+    </>
   );
 }

@@ -81,16 +81,12 @@ export function AlertsManager({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="grid gap-8 lg:grid-cols-2 lg:gap-0">
       {/* Add */}
-      <form
-        onSubmit={onAdd}
-        className="rounded-xl border border-border bg-card p-5"
-      >
-        <p className="font-semibold text-foreground">{t("addTitle")}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t("promptBody")}</p>
+      <form onSubmit={onAdd} className="lg:pr-12">
+        <p className="text-lg font-bold text-foreground">{t("addTitle")}</p>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="new-alert-title">{t("titleLabel")}</Label>
             <Input
@@ -128,18 +124,18 @@ export function AlertsManager({
       </form>
 
       {/* List */}
-      <div>
+      <div className="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
         <h2 className="mb-3 text-lg font-bold">{t("yourAlerts")}</h2>
         {alerts.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border bg-card px-5 py-10 text-center text-muted-foreground">
+          <p className="px-1 py-10 text-center text-muted-foreground">
             {t("empty")}
           </p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-border">
             {alerts.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
+                className="flex items-center justify-between gap-3 py-3"
               >
                 <div className="min-w-0">
                   {a.title && (

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
@@ -15,12 +15,18 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   FieldError,
+  PasswordInput,
   Segmented,
   GoogleIcon,
 } from "@/components/auth/auth-form-parts";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
 type Mode = "signin" | "register";
 type Method = "phone" | "email";
+// Which panel of the sheet is showing: the sign-in/register form, the
+// forgot-password request, or the set-a-new-password step (recovery link).
+export type AuthPanel = "auth" | "forgot" | "reset";
 
 // Per-field validation messages; `form` covers whole-form errors (captcha,
 // server responses) shown above the submit button.
@@ -35,18 +41,24 @@ const MIN_PASSWORD = 8;
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 // The login/register form used inside the auth sheet. `onSuccess` fires after a
-// successful sign-in/up so the caller can close the sheet.
-export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
+// successful sign-in/up so the caller can close the sheet. `initialPanel` lets
+// the caller open straight into the password-recovery step (from an email link).
+export function AuthForm({
+  onSuccess,
+  initialPanel = "auth",
+}: {
+  onSuccess?: () => void;
+  initialPanel?: AuthPanel;
+}) {
   const t = useTranslations("auth");
   const router = useRouter();
 
+  const [panel, setPanel] = useState<AuthPanel>(initialPanel);
   const [mode, setMode] = useState<Mode>("signin");
   const [method, setMethod] = useState<Method>("phone");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sent, setSent] = useState(false);
@@ -189,6 +201,19 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
     });
   }
 
+  if (panel === "forgot") {
+    return <ForgotPasswordForm onBack={() => setPanel("auth")} />;
+  }
+
+  if (panel === "reset") {
+    return (
+      <ResetPasswordForm
+        onSuccess={onSuccess}
+        onRequestNewLink={() => setPanel("forgot")}
+      />
+    );
+  }
+
   if (sent) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
@@ -244,80 +269,60 @@ export function AuthForm({ onSuccess }: { onSuccess?: () => void }) {
             placeholder={
               method === "phone" ? t("phonePlaceholder") : t("emailPlaceholder")
             }
-            className="h-12 bg-background text-base"
           />
           <FieldError id="identifier-error" message={errors.identifier} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="password">{t("passwordLabel")}</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              type={showPw ? "text" : "password"}
-              autoComplete={
-                mode === "register" ? "new-password" : "current-password"
-              }
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setErrors((prev) => ({ ...prev, password: undefined }));
-              }}
-              placeholder="••••••••"
-              className="h-12 bg-background pr-12 text-base"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw((v) => !v)}
-              aria-label={showPw ? t("hidePassword") : t("showPassword")}
-              className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-            >
-              {showPw ? (
-                <EyeOff className="h-5 w-5" aria-hidden />
-              ) : (
-                <Eye className="h-5 w-5" aria-hidden />
-              )}
-            </button>
-          </div>
+          <PasswordInput
+            id="password"
+            autoComplete={
+              mode === "register" ? "new-password" : "current-password"
+            }
+            invalid={!!errors.password}
+            describedBy={errors.password ? "password-error" : undefined}
+            value={password}
+            onChange={(v) => {
+              setPassword(v);
+              setErrors((prev) => ({ ...prev, password: undefined }));
+            }}
+          />
           <FieldError id="password-error" message={errors.password} />
           {mode === "register" && !errors.password && (
             <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
+          )}
+          {mode === "signin" && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => {
+                  setErrors({});
+                  setPanel("forgot");
+                }}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {t("forgotPassword")}
+              </button>
+            </div>
           )}
         </div>
 
         {mode === "register" && (
           <div className="space-y-2">
             <Label htmlFor="confirm">{t("confirmLabel")}</Label>
-            <div className="relative">
-              <Input
-                id="confirm"
-                type={showConfirm ? "text" : "password"}
-                autoComplete="new-password"
-                aria-invalid={!!errors.confirm}
-                aria-describedby={errors.confirm ? "confirm-error" : undefined}
-                value={confirm}
-                onChange={(e) => {
-                  setConfirm(e.target.value);
-                  setErrors((prev) => ({ ...prev, confirm: undefined }));
-                }}
-                placeholder={t("confirmPlaceholder")}
-                className="h-12 bg-background pr-12 text-base"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm((v) => !v)}
-                aria-label={showConfirm ? t("hidePassword") : t("showPassword")}
-                className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-              >
-                {showConfirm ? (
-                  <EyeOff className="h-5 w-5" aria-hidden />
-                ) : (
-                  <Eye className="h-5 w-5" aria-hidden />
-                )}
-              </button>
-            </div>
+            <PasswordInput
+              id="confirm"
+              autoComplete="new-password"
+              invalid={!!errors.confirm}
+              describedBy={errors.confirm ? "confirm-error" : undefined}
+              value={confirm}
+              onChange={(v) => {
+                setConfirm(v);
+                setErrors((prev) => ({ ...prev, confirm: undefined }));
+              }}
+              placeholder={t("confirmPlaceholder")}
+            />
             <FieldError id="confirm-error" message={errors.confirm} />
           </div>
         )}

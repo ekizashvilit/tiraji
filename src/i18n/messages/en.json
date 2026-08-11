@@ -103,7 +103,8 @@
     "breadcrumb": "Breadcrumb",
     "language": "Language",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "close": "Close"
   },
   "card": {
     "swap": "Swap",
@@ -228,7 +229,22 @@
     "signInRequired": "Please sign in to continue.",
     "signIn": "Sign in",
     "saved": "Saved",
-    "fieldRequired": "This field is required."
+    "fieldRequired": "This field is required.",
+    "forgotPassword": "Forgot password?",
+    "forgotTitle": "Reset your password",
+    "forgotLede": "Enter your email and we'll send you a link to set a new password.",
+    "forgotPhoneHint": "Reset links are sent by email. Accounts created with only a phone number can't be reset here.",
+    "sendResetLink": "Send reset link",
+    "resetEmailSent": "If that email has an account, we've sent a link to reset your password. Check your inbox (and spam).",
+    "backHome": "Back to home",
+    "resetTitle": "Set a new password",
+    "resetLede": "Choose a new password for your account.",
+    "newPasswordLabel": "New password",
+    "updatePassword": "Update password",
+    "passwordUpdated": "Your password has been updated.",
+    "resetLinkInvalid": "This reset link is invalid or has expired. Please request a new one.",
+    "requestNewLink": "Request a new link",
+    "backToSignIn": "Back to sign in"
   },
   "account": {
     "title": "My account",
@@ -250,7 +266,9 @@
     "deleteConfirmBody": "This permanently removes your profile, listings, messages and saved books. This can't be undone.",
     "deleting": "Deleting…",
     "deleted": "Your account has been deleted.",
-    "deleteError": "Couldn't delete your account. Please try again."
+    "deleteError": "Couldn't delete your account. Please try again.",
+    "passwordTitle": "Password",
+    "passwordLede": "Change the password you use to sign in."
   },
   "alerts": {
     "pageTitle": "Book alerts",
@@ -353,7 +371,13 @@
     "deleted": "Listing deleted",
     "closed": "Listing closed",
     "reactivated": "Listing is active again",
-    "actionError": "Something went wrong. Please try again."
+    "actionError": "Something went wrong. Please try again.",
+    "tab_all": "All",
+    "tab_sale": "For sale",
+    "tab_swap": "Swap",
+    "tab_giveaway": "Give away",
+    "tab_wanted": "Wanted",
+    "categoryEmpty": "No books in this category yet."
   },
   "book": {
     "sellerFallback": "Seller",
@@ -460,7 +484,14 @@
     "banned": "User banned",
     "unbanned": "User unbanned",
     "userDeleteConfirm": "Permanently delete this user and all their listings and messages? This can't be undone.",
-    "userDeleted": "User deleted"
+    "userDeleted": "User deleted",
+    "resetPassword": "Reset password",
+    "resetPasswordConfirm": "Reset this user's password?",
+    "resetPasswordConfirmBody": "A new temporary password will be generated for you to pass on to them.",
+    "resetPasswordDone": "Temporary password created",
+    "resetPasswordHint": "Give this to {name} on their verified phone number. Ask them to change it in account settings after signing in.",
+    "copyPassword": "Copy password",
+    "copied": "Copied"
   },
   "profile": {
     "booksTitle": "{count, plural, =0 {Listings} one {# listing} other {# listings}}",

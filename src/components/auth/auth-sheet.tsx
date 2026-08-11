@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { AuthForm } from "@/components/auth/auth-form";
+import { AuthForm, type AuthPanel } from "@/components/auth/auth-form";
 
 type AuthSheetContextValue = {
   open: boolean;
@@ -33,7 +33,17 @@ export function useAuthSheet() {
 
 export function AuthSheetProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const openAuth = useCallback(() => setOpen(true), []);
+  // Which panel the sheet opens into. "reset" is used when arriving from a
+  // password-recovery email link (?auth=recovery).
+  const [panel, setPanel] = useState<AuthPanel>("auth");
+  const openAuth = useCallback(() => {
+    setPanel("auth");
+    setOpen(true);
+  }, []);
+  const openRecovery = useCallback(() => {
+    setPanel("reset");
+    setOpen(true);
+  }, []);
 
   return (
     <AuthSheetContext.Provider value={{ open, setOpen, openAuth }}>
@@ -44,21 +54,33 @@ export function AuthSheetProvider({ children }: { children: React.ReactNode }) {
           {/* Visible headings live in AuthForm; this keeps the dialog accessible. */}
           <SheetTitle className="sr-only">Tiraji</SheetTitle>
           <div className="h-full overflow-y-auto p-6">
-            <AuthForm onSuccess={() => setOpen(false)} />
+            {/* Remount per open so the form always starts on the right panel. */}
+            <AuthForm
+              key={open ? panel : "closed"}
+              initialPanel={panel}
+              onSuccess={() => setOpen(false)}
+            />
           </div>
         </SheetContent>
       </Sheet>
 
       <Suspense fallback={null}>
-        <AuthParamListener onOpen={openAuth} />
+        <AuthParamListener onOpen={openAuth} onRecovery={openRecovery} />
       </Suspense>
     </AuthSheetContext.Provider>
   );
 }
 
 // Opens the sheet (or shows an error toast) in response to a `?auth=` param —
-// used by protected-page redirects and the OAuth callback, then strips it.
-function AuthParamListener({ onOpen }: { onOpen: () => void }) {
+// used by protected-page redirects, the OAuth callback, and the password-reset
+// email link (`auth=recovery`), then strips it.
+function AuthParamListener({
+  onOpen,
+  onRecovery,
+}: {
+  onOpen: () => void;
+  onRecovery: () => void;
+}) {
   const t = useTranslations("auth");
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -69,13 +91,14 @@ function AuthParamListener({ onOpen }: { onOpen: () => void }) {
     if (!auth) return;
 
     if (auth === "error") toast.error(t("error"));
+    else if (auth === "recovery") onRecovery();
     else onOpen();
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete("auth");
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [searchParams, pathname, router, t, onOpen]);
+  }, [searchParams, pathname, router, t, onOpen, onRecovery]);
 
   return null;
 }

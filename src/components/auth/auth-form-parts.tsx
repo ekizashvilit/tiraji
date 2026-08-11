@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Eye, EyeOff } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 // Presentational pieces of the auth form, split out so AuthForm itself stays
@@ -12,6 +17,63 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
     <p id={id} className="text-sm text-destructive">
       {message}
     </p>
+  );
+}
+
+// Password input with a built-in show/hide toggle. Owns its own reveal state and
+// pulls the toggle's aria-label from the shared auth strings, so every password
+// field (sign in/up, reset, change password) looks and behaves identically.
+// Caller still supplies the surrounding <Label>, hint, and <FieldError>.
+export function PasswordInput({
+  id,
+  value,
+  onChange,
+  autoComplete,
+  placeholder = "••••••••",
+  invalid,
+  describedBy,
+  className,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: "new-password" | "current-password";
+  placeholder?: string;
+  invalid?: boolean;
+  describedBy?: string;
+  // Extra classes for the input (e.g. a shorter height to match a given form).
+  className?: string;
+}) {
+  const t = useTranslations("auth");
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={show ? "text" : "password"}
+        autoComplete={autoComplete}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        // Only the right padding for the show/hide button is field-specific; the
+        // rest of the look comes from the shared Input default.
+        className={cn("pr-12", className)}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-label={show ? t("hidePassword") : t("showPassword")}
+        className="absolute right-1 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+      >
+        {show ? (
+          <EyeOff className="h-5 w-5" aria-hidden />
+        ) : (
+          <Eye className="h-5 w-5" aria-hidden />
+        )}
+      </button>
+    </div>
   );
 }
 

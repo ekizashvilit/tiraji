@@ -4,6 +4,7 @@ import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/account/profile-form";
+import { ChangePassword } from "@/components/account/change-password";
 import { DeleteAccount } from "@/components/account/delete-account";
 import type { ProfileRow } from "@/lib/supabase/types";
 
@@ -54,7 +55,10 @@ export default async function AccountPage({
         crumbs={[{ label: tNav("home"), href: "/" }, { label: t("title") }]}
       />
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-        <ProfileForm profile={safeProfile} />
+        <div className="grid gap-8 md:grid-cols-2">
+          <ProfileForm profile={safeProfile} />
+          <ChangePassword />
+        </div>
 
         <DeleteAccount />
       </div>

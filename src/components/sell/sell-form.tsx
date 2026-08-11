@@ -207,7 +207,6 @@ export function SellForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t("titlePlaceholder")}
-          className="h-11 bg-background"
         />
       </div>
 
@@ -219,7 +218,6 @@ export function SellForm({
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
           placeholder={t("authorPlaceholder")}
-          className="h-11 bg-background"
         />
       </div>
 
@@ -311,7 +309,7 @@ export function SellForm({
               onChange={(e) => setPrice(e.target.value)}
               disabled={isNegotiable}
               placeholder={t("pricePlaceholder")}
-              className="h-11 max-w-40 bg-background"
+              className="max-w-40"
             />
           </div>
           <div className="flex items-center justify-between gap-4">

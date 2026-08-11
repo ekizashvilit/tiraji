@@ -1,5 +1,7 @@
 "use server";
 
+import { randomInt } from "node:crypto";
+
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -43,6 +45,32 @@ export async function setUserBanned(userId: string, banned: boolean) {
     ban_duration: banned ? BAN_DURATION : "none",
   });
   if (authErr) throw new Error(authErr.message);
+}
+
+// Unambiguous alphabet (no 0/O/1/l/I) so a temp password is easy to read aloud
+// or text to someone over the phone.
+const TEMP_PW_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+
+function generateTempPassword(length = 10): string {
+  let out = "";
+  for (let i = 0; i < length; i++) out += TEMP_PW_ALPHABET[randomInt(TEMP_PW_ALPHABET.length)];
+  return out;
+}
+
+// Set a fresh, generated password for a user and return it. Phone-only accounts
+// have a synthetic @phone.tiraji.local email the self-serve reset email can't
+// reach, so the admin resets here (after verifying the person controls the
+// number) and reads them the temp password; they change it in-app after signing
+// in. Works for email users too, as a manual fallback.
+export async function resetUserPassword(userId: string): Promise<string> {
+  const meId = await requireAdmin();
+  if (userId === meId) throw new Error("cannot-target-self");
+
+  const password = generateTempPassword();
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(userId, { password });
+  if (error) throw new Error(error.message);
+  return password;
 }
 
 // Permanently delete a user's auth account. FK cascades from auth.users clean up

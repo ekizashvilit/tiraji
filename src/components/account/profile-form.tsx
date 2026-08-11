@@ -77,7 +77,6 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
           id="displayName"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="h-11 bg-background"
         />
       </div>
 
@@ -106,11 +105,10 @@ export function ProfileForm({ profile }: { profile: ProfileRow }) {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder={t("phonePlaceholder")}
-          className="h-11 bg-background"
         />
       </div>
 
-      <div className="flex items-start justify-between gap-4 border-t border-border pt-6">
+      <div className="flex items-start justify-between gap-4 pt-6">
         <div className="space-y-1">
           <Label htmlFor="showPhone" className="text-base">
             {t("showPhone")}

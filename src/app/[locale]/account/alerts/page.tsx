@@ -43,13 +43,14 @@ export default async function AlertsPage({
       <PageHeader
         title={t("pageTitle")}
         lede={t("pageLede")}
+        titleBelowCrumbs
         crumbs={[
           { label: tNav("home"), href: "/" },
           { label: tAccount("title"), href: "/account" },
           { label: t("pageTitle") },
         ]}
       />
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-10">
         <AlertsManager
           initial={(data as Alert[] | null) ?? []}
           defaultTitle={prefillTitle ?? ""}
