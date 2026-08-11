@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, X } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -68,7 +68,7 @@ export function NotificationBell() {
           <MessageCircle className="size-5" />
           {unread > 0 && (
             <span
-              className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background"
+              className="absolute -right-0.5 -top-0.5 grid size-4.5 min-w-4.5 place-items-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold text-primary-foreground ring-2 ring-background"
               aria-label={t("unreadCount", { count: unread })}
             >
               {unread > 9 ? "9+" : unread}
@@ -76,10 +76,22 @@ export function NotificationBell() {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-md">
-        <SheetHeader className="border-b border-border">
-          <SheetTitle>{tc("title")}</SheetTitle>
-        </SheetHeader>
+      <SheetContent
+        side="right"
+        showClose={false}
+        className="w-full gap-0 p-0 sm:max-w-md"
+      >
+        <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
+          <SheetTitle className="text-lg font-semibold">
+            {tc("title")}
+          </SheetTitle>
+          <SheetClose
+            aria-label={tc("close")}
+            className="grid size-8 place-items-center rounded-md text-muted-foreground opacity-70 transition hover:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <X className="size-5" aria-hidden />
+          </SheetClose>
+        </div>
         <div className="flex-1 overflow-y-auto p-4">
           {convos === null ? (
             <div className="flex items-center justify-center py-16">

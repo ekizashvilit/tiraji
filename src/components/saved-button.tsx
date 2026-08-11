@@ -28,7 +28,7 @@ export function SavedButton() {
         {count > 0 && (
           <span
             aria-hidden
-            className="absolute -right-0.5 -top-0.5 grid size-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.7rem] font-semibold text-primary-foreground ring-2 ring-background"
+            className="absolute -right-0.5 -top-0.5 grid size-4.5 min-w-4.5 place-items-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold text-primary-foreground ring-2 ring-background"
           >
             {count > 9 ? "9+" : count}
           </span>
