@@ -39,6 +39,9 @@ export function OptionRow({
     <Link
       href={href}
       scroll={false}
+      // Faceted filter URLs are a crawler trap (combinatorial query params);
+      // keep bots from following them even if they ignore robots.txt.
+      rel="nofollow"
       className={cn(
         "flex items-center gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent",
         active && "font-semibold text-primary",
