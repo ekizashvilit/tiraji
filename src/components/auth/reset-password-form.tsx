@@ -9,7 +9,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { FieldError, PasswordInput } from "@/components/auth/auth-form-parts";
+import { PasswordInput } from "@/components/auth/auth-form-parts";
+import { FieldError } from "@/components/ui/field-error";
 
 const MIN_PASSWORD = 8;
 

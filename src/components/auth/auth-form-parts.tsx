@@ -10,16 +10,6 @@ import { cn } from "@/lib/utils";
 // Presentational pieces of the auth form, split out so AuthForm itself stays
 // focused on auth state, validation, and submission.
 
-// Inline, per-field validation message shown directly beneath an input.
-export function FieldError({ id, message }: { id: string; message?: string }) {
-  if (!message) return null;
-  return (
-    <p id={id} className="text-sm text-destructive">
-      {message}
-    </p>
-  );
-}
-
 // Password input with a built-in show/hide toggle. Owns its own reveal state and
 // pulls the toggle's aria-label from the shared auth strings, so every password
 // field (sign in/up, reset, change password) looks and behaves identically.

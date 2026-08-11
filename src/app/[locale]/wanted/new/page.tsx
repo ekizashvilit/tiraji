@@ -2,7 +2,6 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getGenres } from "@/lib/genres";
 import { PageHeader } from "@/components/page-header";
 import { WantedForm } from "@/components/wanted/wanted-form";
 
@@ -22,7 +21,6 @@ export default async function NewWantedPage({
     redirect({ href: "/?auth=required", locale });
   }
 
-  const genres = await getGenres();
   const t = await getTranslations("wanted");
   const tNav = await getTranslations("nav");
 
@@ -37,8 +35,8 @@ export default async function NewWantedPage({
           { label: t("postTitle") },
         ]}
       />
-      <div className="mx-auto max-w-3xl px-4 py-10">
-        <WantedForm genres={genres} />
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <WantedForm />
       </div>
     </>
   );

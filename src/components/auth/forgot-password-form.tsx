@@ -10,7 +10,7 @@ import { getSiteURL } from "@/lib/site-url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FieldError } from "@/components/auth/auth-form-parts";
+import { FieldError } from "@/components/ui/field-error";
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 

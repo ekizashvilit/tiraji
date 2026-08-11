@@ -14,11 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
-  FieldError,
   PasswordInput,
   Segmented,
   GoogleIcon,
 } from "@/components/auth/auth-form-parts";
+import { FieldError } from "@/components/ui/field-error";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 

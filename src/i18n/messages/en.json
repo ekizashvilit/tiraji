@@ -302,15 +302,12 @@
     "pricePlaceholder": "e.g. 15",
     "descLabel": "Notes (optional)",
     "descPlaceholder": "Edition, condition, or anything else you're looking for.",
-    "visibilityLabel": "Who can see this?",
-    "publicLabel": "Public - post to the Wanted board",
-    "publicHint": "Shown to everyone; someone who has the book can message you.",
-    "privateLabel": "Private - just email me",
-    "privateHint": "Not shown anywhere. We'll email you if it's listed for sale.",
     "submit": "Post request",
     "savedPublic": "Your wanted book is posted.",
-    "savedPrivate": "You'll be emailed when it's listed.",
-    "saveError": "Couldn't save. Please try again."
+    "saveError": "Couldn't save. Please try again.",
+    "authorRequired": "Please enter the author.",
+    "cityRequired": "Please choose a city.",
+    "cityPlaceholder": "Choose a city"
   },
   "sell": {
     "type": "What are you listing?",

@@ -19,6 +19,7 @@ import type {
 } from "@/lib/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FieldError } from "@/components/ui/field-error";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -86,21 +87,25 @@ export function SellForm({
   );
 
   const [submitting, setSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState<string | undefined>();
+  const [formError, setFormError] = useState<string | undefined>();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
     if (!title.trim()) {
-      toast.error(t("errorTitle"));
+      setTitleError(t("errorTitle"));
       return;
     }
+    setTitleError(undefined);
 
     // Screen the free-text fields for offensive language before publishing.
     const text = [title, author, swapWanted].filter(Boolean).join(" ");
     if (!isClean(text)) {
-      toast.error(t("errorProfanity"));
+      setFormError(t("errorProfanity"));
       return;
     }
+    setFormError(undefined);
 
     setSubmitting(true);
     const supabase = createClient();
@@ -174,7 +179,7 @@ export function SellForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="max-w-2xl space-y-8">
+    <form onSubmit={onSubmit} className="max-w-2xl space-y-8" noValidate>
       {/* Listing type */}
       <div className="space-y-2">
         <Label>{t("type")}</Label>
@@ -203,11 +208,16 @@ export function SellForm({
         <Label htmlFor="title">{t("title")}</Label>
         <Input
           id="title"
-          required
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setTitleError(undefined);
+          }}
           placeholder={t("titlePlaceholder")}
+          aria-invalid={!!titleError}
+          aria-describedby={titleError ? "title-error" : undefined}
         />
+        <FieldError id="title-error" message={titleError} />
       </div>
 
       {/* Author */}
@@ -351,6 +361,8 @@ export function SellForm({
           onRemove={removePhoto}
         />
       </div>
+
+      {formError && <p className="text-sm text-destructive">{formError}</p>}
 
       <Button type="submit" size="lg" disabled={submitting} className="gap-2">
         {submitting && <Loader2 className="size-4 animate-spin" aria-hidden />}
