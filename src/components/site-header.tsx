@@ -42,8 +42,8 @@ export function SiteHeader({
   const isHome = pathname === "/";
   const { openAuth } = useAuthSheet();
 
-  // Track sign-in state so "List a book" can open the auth sheet directly for
-  // logged-out users instead of bouncing them through /sell first. Seeded from
+  // Track sign-in state so "Add a book" can open the auth sheet directly for
+  // logged-out users instead of bouncing them through /add first. Seeded from
   // the server-rendered user and kept live via Supabase auth changes.
   const [signedIn, setSignedIn] = useState(!!initialUser);
   useEffect(() => {
@@ -135,7 +135,7 @@ export function SiteHeader({
               {navLinks}
             </div>
             {signedIn ? (
-              <Link href="/sell" className={sellCls}>
+              <Link href="/add" className={sellCls}>
                 <Plus className="h-4 w-4" aria-hidden />
                 {caps(t("sell"))}
               </Link>

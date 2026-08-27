@@ -104,7 +104,7 @@ export function MyListingsList({ items }: { items: MyListing[] }) {
         <BookMarked className="h-10 w-10 text-muted-foreground" aria-hidden />
         <p className="max-w-sm text-muted-foreground">{t("empty")}</p>
         <Button asChild size="lg">
-          <Link href="/sell">{t("emptyCta")}</Link>
+          <Link href="/add">{t("emptyCta")}</Link>
         </Button>
       </div>
     );

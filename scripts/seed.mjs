@@ -22,28 +22,54 @@ const H = {
 };
 
 // title, author, genre slug, type, price (GEL, sale only), city
+//
+// Georgian titles are matched against sulakauri.ge (a Georgian publisher) for
+// real ქართული covers — OpenLibrary/Google Books have essentially no Georgian
+// cover art. Each Georgian title below was verified to resolve to a correct,
+// title-matched cover there; keep new ones to books sulakauri actually sells.
 const BOOKS = [
-  ["ვეფხისტყაოსანი", "შოთა რუსთაველი", "poetry", "sale", 18, "tbilisi"],
-  ["დათა თუთაშხია", "ჭაბუა ამირეჯიბი", "fiction", "sale", 22, "tbilisi"],
-  ["ჯაყოს ხიზნები", "მიხეილ ჯავახიშვილი", "fiction", "sale", 12, "kutaisi"],
-  ["გველის პერანგი", "გრიგოლ რობაქიძე", "fiction", "swap", null, "tbilisi"],
+  ["ვეფხისტყაოსანი", "შოთა რუსთაველი", "poetry", "sale", 25, "tbilisi"],
   [
-    "დიდოსტატის მარჯვენა",
-    "კონსტანტინე გამსახურდია",
+    "დანაშაული და სასჯელი",
+    "ფიოდორ დოსტოევსკი",
     "fiction",
     "sale",
-    15,
-    "batumi",
-  ],
-  ["ადამიანთა შორის", "ნოდარ დუმბაძე", "fiction", "sale", 10, "tbilisi"],
-  [
-    "მე, ბებია, ილიკო და ილარიონი",
-    "ნოდარ დუმბაძე",
-    "fiction",
-    "sale",
-    14,
+    30,
     "tbilisi",
   ],
+  ["მოხუცი და ზღვა", "ერნესტ ჰემინგუეი", "fiction", "sale", 14, "batumi"],
+  ["ალქიმიკოსი", "პაულო კოელიო", "fiction", "sale", 18, "tbilisi"],
+  ["რობინზონ კრუზო", "დანიელ დეფო", "children", "sale", 16, "kutaisi"],
+  [
+    "ტომ სოიერის თავგადასავალი",
+    "მარკ ტვენი",
+    "children",
+    "sale",
+    17,
+    "tbilisi",
+  ],
+  [
+    "პატარა პრინცი",
+    "ანტუან დე სент-ეგზიუპერი",
+    "children",
+    "sale",
+    15,
+    "tbilisi",
+  ],
+  ["იდიოტი", "ფიოდორ დოსტოევსკი", "fiction", "swap", null, "tbilisi"],
+  ["ძმები კარამაზოვები", "ფიოდორ დოსტოევსკი", "fiction", "sale", 35, "batumi"],
+  ["ჯინსების თაობა", "დათო ტურაშვილი", "fiction", "sale", 20, "tbilisi"],
+  ["სანტა ესპერანსა", "აკა მორჩილაძე", "fiction", "sale", 24, "tbilisi"],
+  [
+    "ლიტერატურული ექსპრესი",
+    "ლაშა ბუღაძე",
+    "fiction",
+    "giveaway",
+    null,
+    "tbilisi",
+  ],
+  ["მატილდა", "როალდ დალი", "children", "sale", 19, "kutaisi"],
+  ["პეპი გრძელწინდა", "ასტრიდ ლინდგრენი", "children", "sale", 16, "tbilisi"],
   [
     "The Little Prince",
     "Antoine de Saint-Exupéry",
@@ -130,21 +156,77 @@ const BOOKS = [
   ["The Art of War", "Sun Tzu", "history", "giveaway", null, "tbilisi"],
 ];
 
+// Latin titles → OpenLibrary (good English coverage). Georgian → sulakauri.ge.
 async function fetchCover(title, author) {
+  return /[a-zA-Z]/.test(title)
+    ? fetchCoverOpenLibrary(title, author)
+    : fetchCoverSulakauri(title);
+}
+
+async function fetchCoverOpenLibrary(title, author) {
+  // Try title+author first, then title-only — OpenLibrary stores non-Latin
+  // authors transliterated, so the stricter query often misses.
+  for (const q of [
+    `title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`,
+    `title=${encodeURIComponent(title)}`,
+  ]) {
+    try {
+      const res = await fetch(
+        `https://openlibrary.org/search.json?${q}&limit=1&fields=cover_i`,
+      );
+      const json = await res.json();
+      const coverId = json?.docs?.[0]?.cover_i;
+      if (coverId)
+        return `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`;
+    } catch {
+      // try the next query shape
+    }
+  }
+  return null;
+}
+
+// Strip punctuation/whitespace/HTML entities so titles compare cleanly.
+function normalizeTitle(s) {
+  return (s || "")
+    .replace(/&#\d+;/g, "")
+    .replace(/[\s"“”.,:;!?()[\]\-–—’']+/g, "")
+    .toLowerCase();
+}
+
+// Scrape sulakauri.ge search for the cover of a Georgian book. Their search
+// falls back to unrelated "recommended" products when nothing matches, so we
+// accept a card's cover ONLY if its alt-title strictly matches the query
+// (equal, or one is a prefix of the other) — never the first card blindly.
+async function fetchCoverSulakauri(title) {
   try {
     const res = await fetch(
-      `https://openlibrary.org/search.json?title=${encodeURIComponent(
-        title,
-      )}&author=${encodeURIComponent(author)}&limit=1&fields=cover_i`,
+      `https://sulakauri.ge/?s=${encodeURIComponent(title)}&post_type=product`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 AppleWebKit/537.36",
+          "Accept-Language": "ka",
+        },
+      },
     );
-    const json = await res.json();
-    const coverId = json?.docs?.[0]?.cover_i;
-    return coverId
-      ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
-      : null;
+    const html = await res.text();
+    const nq = normalizeTitle(title);
+    const imgTags =
+      html.match(/<img[^>]*class="product-card-image"[^>]*>/g) ?? [];
+    for (const tag of imgTags) {
+      const src = tag.match(/src="([^"]+)"/)?.[1];
+      const alt = tag.match(/alt="([^"]*)"/)?.[1];
+      if (!src || !alt) continue;
+      const na = normalizeTitle(alt);
+      const match =
+        na === nq ||
+        (na.startsWith(nq) && nq.length >= 6) ||
+        (nq.startsWith(na) && na.length >= 6);
+      if (match) return src;
+    }
   } catch {
-    return null;
+    // fall through to no cover
   }
+  return null;
 }
 
 async function ensureDemoUser() {

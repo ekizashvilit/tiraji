@@ -28,6 +28,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "books.google.com" },
       { protocol: "https", hostname: "*.googleusercontent.com" },
       { protocol: "https", hostname: "covers.openlibrary.org" },
+      // Georgian-language covers sourced from sulakauri.ge (demo seed only)
+      { protocol: "https", hostname: "sulakauri.ge" },
     ],
   },
 };

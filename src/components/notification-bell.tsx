@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, MessageCircle, X } from "lucide-react";
+import { ArrowRight, Loader2, MessageCircle, X } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -112,6 +113,21 @@ export function NotificationBell() {
             <ConversationList conversations={convos} onNavigate={close} />
           )}
         </div>
+        {convos !== null && convos.length > 0 && (
+          <div className="border-t border-border p-3">
+            <Button
+              asChild
+              variant="ghost"
+              className="w-full gap-2 bg-muted font-semibold text-foreground hover:bg-accent"
+              onClick={close}
+            >
+              <Link href="/messages">
+                {tc("seeAll")}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

@@ -11,7 +11,11 @@ import { useRouter } from "@/i18n/navigation";
 import { CITIES, cityLabel } from "@/lib/cities";
 import { LANGUAGES, languageLabel } from "@/lib/languages";
 import { genreName } from "@/lib/listings-format";
-import { SELLABLE_TYPES, BOOK_CONDITIONS } from "@/lib/listing-constants";
+import {
+  SELLABLE_TYPES,
+  CREATABLE_TYPES,
+  BOOK_CONDITIONS,
+} from "@/lib/listing-constants";
 import type {
   GenreRow,
   ListingType,
@@ -49,13 +53,18 @@ export function SellForm({
   defaultCity,
   defaultType,
   listing,
+  onTypeChange,
 }: {
   genres: GenreRow[];
   defaultCity: string;
   defaultType: ListingType;
   listing?: EditableListing;
+  // Notified when the seller switches type, so a parent can react (e.g. update
+  // the page heading). The form still owns the type internally.
+  onTypeChange?: (type: ListingType) => void;
 }) {
   const t = useTranslations("sell");
+  const tw = useTranslations("wanted");
   const locale = useLocale();
   const router = useRouter();
   const isEdit = !!listing;
@@ -63,6 +72,7 @@ export function SellForm({
   const [listingType, setListingType] = useState<ListingType>(
     listing?.listing_type ?? defaultType,
   );
+  const isWanted = listingType === "wanted";
   const [title, setTitle] = useState(listing?.title ?? "");
   const [author, setAuthor] = useState(listing?.author ?? "");
   const [condition, setCondition] = useState<BookCondition | "">(
@@ -86,21 +96,37 @@ export function SellForm({
     listing?.cover_image_paths ?? [],
   );
 
+  // Wanted-only free-text notes (wanted posts have no photos/condition/genre).
+  const [description, setDescription] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
-  const [titleError, setTitleError] = useState<string | undefined>();
+  // title is required for every type; author + city are required for wanted.
+  const [errors, setErrors] = useState<{
+    title?: string;
+    author?: string;
+    city?: string;
+  }>({});
   const [formError, setFormError] = useState<string | undefined>();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
-    if (!title.trim()) {
-      setTitleError(t("errorTitle"));
+
+    const next: typeof errors = {};
+    if (!title.trim())
+      next.title = isWanted ? tw("titleRequired") : t("errorTitle");
+    if (isWanted && !author.trim()) next.author = tw("authorRequired");
+    if (isWanted && !city) next.city = tw("cityRequired");
+    if (Object.keys(next).length > 0) {
+      setErrors(next);
       return;
     }
-    setTitleError(undefined);
+    setErrors({});
 
     // Screen the free-text fields for offensive language before publishing.
-    const text = [title, author, swapWanted].filter(Boolean).join(" ");
+    const text = [title, author, isWanted ? description : swapWanted]
+      .filter(Boolean)
+      .join(" ");
     if (!isClean(text)) {
       setFormError(t("errorProfanity"));
       return;
@@ -116,6 +142,40 @@ export function SellForm({
     if (!user) {
       setSubmitting(false);
       router.push("/?auth=required");
+      return;
+    }
+
+    // Wanted posts skip photos/condition/genre and land on the new listing
+    // (they're only ever created, never edited, through this form).
+    if (isWanted) {
+      const { data, error } = await supabase
+        .from("listings")
+        .insert({
+          seller_id: user.id,
+          listing_type: "wanted",
+          title: title.trim(),
+          author: author.trim() || null,
+          description: description.trim() || null,
+          condition: null,
+          price: price.trim() ? Number(price) : null,
+          is_negotiable: false,
+          swap_wanted: null,
+          city: city || null,
+          book_language: null,
+          genre_id: null,
+          isbn: null,
+          cover_external_url: null,
+          cover_image_paths: [],
+        })
+        .select("id")
+        .single<{ id: string }>();
+      setSubmitting(false);
+      if (error || !data) {
+        toast.error(tw("saveError"));
+        return;
+      }
+      toast.success(tw("savedPublic"));
+      router.push(`/book/${data.id}`);
       return;
     }
 
@@ -183,13 +243,21 @@ export function SellForm({
       {/* Listing type */}
       <div className="space-y-2">
         <Label>{t("type")}</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {SELLABLE_TYPES.map((type) => (
+        <div
+          className={cn(
+            "grid gap-2",
+            isEdit ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
+          )}
+        >
+          {(isEdit ? SELLABLE_TYPES : CREATABLE_TYPES).map((type) => (
             <button
               key={type}
               type="button"
               aria-pressed={listingType === type}
-              onClick={() => setListingType(type)}
+              onClick={() => {
+                setListingType(type);
+                onTypeChange?.(type);
+              }}
               className={cn(
                 "rounded-lg border px-3 py-3 text-[0.95rem] font-semibold transition-colors",
                 listingType === type
@@ -211,13 +279,13 @@ export function SellForm({
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
-            setTitleError(undefined);
+            setErrors((prev) => ({ ...prev, title: undefined }));
           }}
           placeholder={t("titlePlaceholder")}
-          aria-invalid={!!titleError}
-          aria-describedby={titleError ? "title-error" : undefined}
+          aria-invalid={!!errors.title}
+          aria-describedby={errors.title ? "title-error" : undefined}
         />
-        <FieldError id="title-error" message={titleError} />
+        <FieldError id="title-error" message={errors.title} />
       </div>
 
       {/* Author */}
@@ -226,57 +294,72 @@ export function SellForm({
         <Input
           id="author"
           value={author}
-          onChange={(e) => setAuthor(e.target.value)}
+          onChange={(e) => {
+            setAuthor(e.target.value);
+            setErrors((prev) => ({ ...prev, author: undefined }));
+          }}
           placeholder={t("authorPlaceholder")}
+          aria-invalid={!!errors.author}
+          aria-describedby={errors.author ? "author-error" : undefined}
         />
+        <FieldError id="author-error" message={errors.author} />
       </div>
 
-      {/* Condition + Genre */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="condition">{t("condition")}</Label>
-          <Select
-            id="condition"
-            value={condition}
-            onChange={(e) => setCondition(e.target.value as BookCondition | "")}
-            className="h-11"
-          >
-            <option value="">{t("conditionPlaceholder")}</option>
-            {BOOK_CONDITIONS.map((c) => (
-              <option key={c} value={c}>
-                {t(`cond_${c}`)}
-              </option>
-            ))}
-          </Select>
-        </div>
+      {/* Condition + Genre (not on wanted posts) */}
+      {!isWanted && (
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="condition">{t("condition")}</Label>
+            <Select
+              id="condition"
+              value={condition}
+              onChange={(e) =>
+                setCondition(e.target.value as BookCondition | "")
+              }
+              className="h-11"
+            >
+              <option value="">{t("conditionPlaceholder")}</option>
+              {BOOK_CONDITIONS.map((c) => (
+                <option key={c} value={c}>
+                  {t(`cond_${c}`)}
+                </option>
+              ))}
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="genre">{t("genre")}</Label>
-          <Select
-            id="genre"
-            value={genreId}
-            onChange={(e) => setGenreId(e.target.value)}
-            className="h-11"
-          >
-            <option value="">{t("genrePlaceholder")}</option>
-            {genres.map((g) => (
-              <option key={g.id} value={g.id}>
-                {genreName(g, locale)}
-              </option>
-            ))}
-          </Select>
+          <div className="space-y-2">
+            <Label htmlFor="genre">{t("genre")}</Label>
+            <Select
+              id="genre"
+              value={genreId}
+              onChange={(e) => setGenreId(e.target.value)}
+              className="h-11"
+            >
+              <option value="">{t("genrePlaceholder")}</option>
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {genreName(g, locale)}
+                </option>
+              ))}
+            </Select>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* City + Language */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      {/* City (always) + Language (not on wanted posts) */}
+      <div className={cn("grid gap-6", !isWanted && "sm:grid-cols-2")}>
         <div className="space-y-2">
           <Label htmlFor="city">{t("city")}</Label>
           <Select
             id="city"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
+            onChange={(e) => {
+              setCity(e.target.value);
+              setErrors((prev) => ({ ...prev, city: undefined }));
+            }}
             className="h-11"
+            aria-invalid={!!errors.city}
+            aria-describedby={errors.city ? "city-error" : undefined}
           >
             <option value="">{t("cityPlaceholder")}</option>
             {CITIES.map((c) => (
@@ -285,24 +368,27 @@ export function SellForm({
               </option>
             ))}
           </Select>
+          <FieldError id="city-error" message={errors.city} />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="language">{t("language")}</Label>
-          <Select
-            id="language"
-            value={bookLanguage}
-            onChange={(e) => setBookLanguage(e.target.value)}
-            className="h-11"
-          >
-            <option value="">{t("languagePlaceholder")}</option>
-            {LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>
-                {languageLabel(l.code, locale)}
-              </option>
-            ))}
-          </Select>
-        </div>
+        {!isWanted && (
+          <div className="space-y-2">
+            <Label htmlFor="language">{t("language")}</Label>
+            <Select
+              id="language"
+              value={bookLanguage}
+              onChange={(e) => setBookLanguage(e.target.value)}
+              className="h-11"
+            >
+              <option value="">{t("languagePlaceholder")}</option>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {languageLabel(l.code, locale)}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Price (sale only) */}
@@ -335,6 +421,23 @@ export function SellForm({
         </div>
       )}
 
+      {/* Budget (wanted only) — what the requester is willing to pay */}
+      {isWanted && (
+        <div className="space-y-2">
+          <Label htmlFor="price">{tw("priceLabel")}</Label>
+          <Input
+            id="price"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder={tw("pricePlaceholder")}
+            className="max-w-40"
+          />
+        </div>
+      )}
+
       {/* Swap wanted (swap only) */}
       {listingType === "swap" && (
         <div className="space-y-2">
@@ -349,18 +452,35 @@ export function SellForm({
         </div>
       )}
 
-      {/* Photos */}
-      <div className="space-y-2">
-        <Label>{t("photos")}</Label>
-        <p className="text-sm text-muted-foreground">{t("photosHint")}</p>
-        <PhotoGrid
-          photos={photos}
-          checking={checking}
-          full={full}
-          onAdd={addPhotos}
-          onRemove={removePhoto}
-        />
-      </div>
+      {/* Notes (wanted only) — edition, condition, anything else sought */}
+      {isWanted && (
+        <div className="space-y-2">
+          <Label htmlFor="description">{tw("descLabel")}</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={tw("descPlaceholder")}
+            rows={4}
+            maxLength={1000}
+          />
+        </div>
+      )}
+
+      {/* Photos (not on wanted posts) */}
+      {!isWanted && (
+        <div className="space-y-2">
+          <Label>{t("photos")}</Label>
+          <p className="text-sm text-muted-foreground">{t("photosHint")}</p>
+          <PhotoGrid
+            photos={photos}
+            checking={checking}
+            full={full}
+            onAdd={addPhotos}
+            onRemove={removePhoto}
+          />
+        </div>
+      )}
 
       {formError && <p className="text-sm text-destructive">{formError}</p>}
 

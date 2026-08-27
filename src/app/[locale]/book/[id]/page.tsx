@@ -305,9 +305,11 @@ export default async function BookPage({ params }: Params) {
         </div>
       )}
 
-      {/* More from this seller (not shown on wanted posts — the "seller" is
-			    the requester, so their for-sale books here would be confusing) */}
-      {listing.listing_type !== "wanted" && sellerOther.length > 0 && (
+      {/* A single related shelf: prefer the seller's other books; fall back to
+          similar books only when they have none. Never shown on wanted posts —
+          the "seller" is the requester, so more-from-seller would confuse, and
+          we skip straight to similar. */}
+      {listing.listing_type !== "wanted" && sellerOther.length > 0 ? (
         <div className="mt-12">
           <BookShelf
             title={t("moreFromSeller")}
@@ -315,19 +317,18 @@ export default async function BookPage({ params }: Params) {
             listings={sellerOther}
           />
         </div>
-      )}
-
-      {/* Similar books */}
-      {similar.length > 0 && (
-        <div className="mt-12">
-          <BookShelf
-            title={t("similar")}
-            href={
-              listing.genre ? `/search?genre=${listing.genre.slug}` : "/buy"
-            }
-            listings={similar}
-          />
-        </div>
+      ) : (
+        similar.length > 0 && (
+          <div className="mt-12">
+            <BookShelf
+              title={t("similar")}
+              href={
+                listing.genre ? `/search?genre=${listing.genre.slug}` : "/buy"
+              }
+              listings={similar}
+            />
+          </div>
+        )
       )}
     </div>
   );

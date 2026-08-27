@@ -11,7 +11,6 @@ import {
   Menu,
   MessageCircle,
   Plus,
-  Search,
   Shield,
   UserRound,
 } from "lucide-react";
@@ -46,7 +45,6 @@ export function MobileMenu({
 }) {
   const t = useTranslations("auth");
   const tNav = useTranslations("nav");
-  const tw = useTranslations("wanted");
   const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -132,11 +130,12 @@ export function MobileMenu({
 
         <DropdownMenuSeparator className="my-1" />
 
-        {/* List a book — logged-out users get the sign-in sheet right away
-				    instead of bouncing through /sell first. */}
+        {/* Add a book — one flow for sale, swap, give away and wanted.
+				    Logged-out users get the sign-in sheet right away instead of
+				    bouncing through /add first. */}
         {user ? (
           <DropdownMenuItem asChild className={itemCls}>
-            <Link href="/sell">
+            <Link href="/add">
               <Plus className="size-4.5" />
               {tNav("sell")}
             </Link>
@@ -145,21 +144,6 @@ export function MobileMenu({
           <DropdownMenuItem onClick={openAuth} className={itemCls}>
             <Plus className="size-4.5" />
             {tNav("sell")}
-          </DropdownMenuItem>
-        )}
-
-        {/* Post a wanted book — same auth-gated pattern as List a book. */}
-        {user ? (
-          <DropdownMenuItem asChild className={itemCls}>
-            <Link href="/wanted/new">
-              <Search className="size-4.5" />
-              {tw("postCta")}
-            </Link>
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onClick={openAuth} className={itemCls}>
-            <Search className="size-4.5" />
-            {tw("postCta")}
           </DropdownMenuItem>
         )}
 

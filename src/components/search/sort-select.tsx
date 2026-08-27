@@ -34,6 +34,7 @@ export function SortSelect({ className }: { className?: string }) {
       className={cn("w-auto", className)}
     >
       <option value="recent">{t("sortRecent")}</option>
+      <option value="oldest">{t("sortOldest")}</option>
       {/* Relevance only makes sense once there's a text query. */}
       {params.get("q") && (
         <option value="relevance">{t("sortRelevance")}</option>

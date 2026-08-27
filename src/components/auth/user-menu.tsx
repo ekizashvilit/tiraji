@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Bell, BookMarked, LogOut, Search, Shield, UserRound } from "lucide-react";
+import {
+  Bell,
+  BookMarked,
+  LogOut,
+  Plus,
+  Shield,
+  UserRound,
+} from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -30,7 +37,7 @@ export function UserMenu({
   onNavigate?: () => void;
 }) {
   const t = useTranslations("auth");
-  const tw = useTranslations("wanted");
+  const tNav = useTranslations("nav");
   const ta = useTranslations("alerts");
   const router = useRouter();
   const { openAuth } = useAuthSheet();
@@ -141,9 +148,9 @@ export function UserMenu({
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="gap-3 px-3 py-2.5 text-[0.95rem]">
-          <Link href="/wanted/new">
-            <Search className="size-4.5" />
-            {tw("postCta")}
+          <Link href="/add">
+            <Plus className="size-4.5" />
+            {tNav("sell")}
           </Link>
         </DropdownMenuItem>
         {isAdmin && (

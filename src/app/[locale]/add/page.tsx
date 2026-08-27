@@ -1,11 +1,10 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getGenres } from "@/lib/genres";
-import { SELLABLE_TYPES } from "@/lib/listing-constants";
-import { PageHeader } from "@/components/page-header";
-import { SellForm } from "@/components/sell/sell-form";
+import { CREATABLE_TYPES } from "@/lib/listing-constants";
+import { SellScreen } from "@/components/sell/sell-screen";
 import type { ListingType } from "@/lib/supabase/types";
 
 export default async function SellPage({
@@ -17,8 +16,6 @@ export default async function SellPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("pages");
-  const tNav = await getTranslations("nav");
 
   const supabase = await createClient();
   const {
@@ -34,24 +31,15 @@ export default async function SellPage({
   ]);
 
   const { type } = await searchParams;
-  const defaultType: ListingType = SELLABLE_TYPES.includes(type as ListingType)
+  const defaultType: ListingType = CREATABLE_TYPES.includes(type as ListingType)
     ? (type as ListingType)
     : "sale";
 
   return (
-    <>
-      <PageHeader
-        title={t("sellTitle")}
-        lede={t("sellLede")}
-        crumbs={[{ label: tNav("home"), href: "/" }, { label: t("sellTitle") }]}
-      />
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <SellForm
-          genres={genres}
-          defaultCity={profile?.city ?? ""}
-          defaultType={defaultType}
-        />
-      </div>
-    </>
+    <SellScreen
+      genres={genres}
+      defaultCity={profile?.city ?? ""}
+      defaultType={defaultType}
+    />
   );
 }

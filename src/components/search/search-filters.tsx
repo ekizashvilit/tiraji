@@ -36,6 +36,7 @@ type Props = {
 
 const SORT_OPTIONS = [
   "recent",
+  "oldest",
   "relevance",
   "price_asc",
   "price_desc",
@@ -55,6 +56,7 @@ const FILTER_KEYS = [
 
 const SORT_LABEL_KEY: Record<string, string> = {
   recent: "sortRecent",
+  oldest: "sortOldest",
   relevance: "sortRelevance",
   price_asc: "sortPriceAsc",
   price_desc: "sortPriceDesc",
