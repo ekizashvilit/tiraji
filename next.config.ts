@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   // Allow the Cloudflare quick-tunnel domain to reach the dev server when
   // testing on a phone (`cloudflared tunnel --url http://localhost:3000`).
   allowedDevOrigins: ["*.trycloudflare.com"],
+  // The proxy (Node.js runtime) imports @supabase/ssr to refresh the auth
+  // cookie. Bundling Supabase's graph into the proxy makes the compiler hang
+  // indefinitely ("Compiling proxy ..." never finishes). Leave these packages
+  // as native `require` so the proxy — and every route — compiles.
+  serverExternalPackages: ["@supabase/ssr", "@supabase/supabase-js"],
   images: {
     remotePatterns: [
       // Uploaded photos served from Supabase Storage (public covers bucket)
