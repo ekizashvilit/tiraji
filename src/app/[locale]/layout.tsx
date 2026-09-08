@@ -15,11 +15,11 @@ import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "ტირაჟი — მეორადი წიგნები",
+    default: "ტირაჟი - მეორადი წიგნები",
     template: "%s · ტირაჟი",
   },
   description:
-    "Tiraji — buy, swap and give away second-hand, out-of-print and old books in Georgia.",
+    "Tiraji - buy, swap and give away second-hand, out-of-print and old books in Georgia.",
   // iOS Safari auto-links things that look like phone numbers/dates/addresses,
   // mutating the DOM before hydration and causing attribute mismatches. Disable it.
   formatDetection: {

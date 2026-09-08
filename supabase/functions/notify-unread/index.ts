@@ -29,6 +29,7 @@ type Row = {
   conversation_id: string;
   sender_id: string;
   conversation: {
+    
     buyer_id: string;
     seller_id: string;
   } | null;
@@ -144,7 +145,7 @@ async function sendEmail(
   const link = `${SITE_URL.replace(/\/$/, "")}/messages`;
   const plural = conversationCount > 1;
 
-  const subject = "ტირაჟი — გაქვთ წაუკითხავი შეტყობინება · You have unread messages";
+  const subject = "ტირაჟი - გაქვთ წაუკითხავი შეტყობინება · You have unread messages";
 
   const htmlContent = `
     <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#2B2420">

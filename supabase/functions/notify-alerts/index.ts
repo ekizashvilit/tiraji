@@ -129,8 +129,8 @@ async function sendEmail(to: string, books: Book[]): Promise<boolean> {
     .join("");
 
   const subject = plural
-    ? "ტირაჟი — დაემატა თქვენთვის საინტერესო წიგნები · New matching books on Tiraji"
-    : "ტირაჟი — დაემატა თქვენთვის საინტერესო წიგნი · A book you wanted is now listed";
+    ? "ტირაჟი - დაემატა თქვენთვის საინტერესო წიგნები · New matching books on Tiraji"
+    : "ტირაჟი - დაემატა თქვენთვის საინტერესო წიგნი · A book you wanted is now listed";
 
   const htmlContent = `
     <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#2B2420">
