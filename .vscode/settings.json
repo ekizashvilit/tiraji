@@ -1,0 +1,7 @@
+{
+  // Supabase Edge Functions run on Deno, not Node. Enable the Deno language
+  // server ONLY for that folder so `Deno.env.get(...)` resolves and the rest of
+  // the app keeps using the normal TypeScript/Next.js tooling.
+  "deno.enablePaths": ["supabase/functions"],
+  "deno.lint": true
+}
