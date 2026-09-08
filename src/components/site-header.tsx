@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import {
   ArrowLeftRight,
   BookMarked,
-  BookOpen,
   Gift,
   Plus,
   ShoppingBag,
@@ -64,7 +63,7 @@ export function SiteHeader({
         key={s.href}
         href={s.href}
         className={cn(
-          "caps relative inline-flex items-center gap-1.5 px-3 py-3 text-[0.95rem] font-semibold transition-colors hover:text-primary",
+          "caps relative inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap px-4 py-3 text-[0.95rem] font-semibold transition-colors hover:text-primary",
           active ? "text-primary" : "text-muted-foreground",
         )}
       >
@@ -89,13 +88,15 @@ export function SiteHeader({
         <div className="mx-auto flex h-20 max-w-6xl items-center gap-2 px-4 md:gap-6">
           <Link
             href="/"
-            className="flex shrink-0 items-center gap-2 text-primary"
+            className="flex shrink-0 items-center gap-2 text-primary mr-2 md:mr-0"
             aria-label="ტირაჟი"
           >
-            <BookOpen className="h-7 w-7" aria-hidden />
-            <span className="caps hidden text-2xl font-bold text-brand-dark md:inline">
-              {caps("ტირაჟი")}
-            </span>
+            <img
+              src="/logo.svg"
+              alt=""
+              className="h-10 w-auto md:h-14"
+              aria-hidden
+            />
           </Link>
 
           <HeaderSearch className="flex flex-1" />
@@ -130,8 +131,8 @@ export function SiteHeader({
 			    under the sticky header, and reappears when you scroll back to the top. */}
       {isHome && (
         <div className="bg-background">
-          <nav className="mx-auto flex max-w-6xl items-center justify-between px-3">
-            <div className="flex flex-1 items-center justify-between md:flex-none md:justify-start">
+          <nav className="mx-auto flex max-w-6xl items-center justify-between px-0 md:px-3">
+            <div className="no-scrollbar flex flex-1 items-center justify-start overflow-x-auto md:flex-none">
               {navLinks}
             </div>
             {signedIn ? (
