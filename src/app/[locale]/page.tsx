@@ -62,7 +62,7 @@ export default async function HomePage({
       </section>
 
       {/* Content */}
-      <div className="mx-auto max-w-6xl space-y-14 px-4 pb-16">
+      <div className="mx-auto max-w-6xl space-y-14 px-4 md:pb-16">
         <BookShelf
           title={t("recentTitle")}
           href="/buy"

@@ -15,7 +15,6 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { caps } from "@/lib/caps";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -53,8 +52,13 @@ export function AdminShell({
   const sidebar = (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-white/10 px-5 py-4">
-        <BookMarked className="size-6" aria-hidden />
-        <span className="caps text-lg font-bold">{caps("ტირაჟი")}</span>
+        <img
+          src="/logo-white.webp"
+          alt="ტირაჟი"
+          width={400}
+          height={338}
+          className="h-7 w-auto"
+        />
         <span className="ml-1 rounded bg-white/15 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide">
           {t("navShort")}
         </span>

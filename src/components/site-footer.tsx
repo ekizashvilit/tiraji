@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl";
-import { BookOpen } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 export function SiteFooter() {
@@ -9,9 +8,16 @@ export function SiteFooter() {
     <footer className="mt-16 bg-brand-dark text-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" aria-hidden />
-            <span className="caps text-xl font-bold">
+          <div className="flex items-end">
+            <img
+              src="/logo-white.webp"
+              alt=""
+              width={400}
+              height={338}
+              className="h-10 w-auto"
+              aria-hidden
+            />
+            <span className="text-2xl leading-none tracking-wide [font-family:var(--font-noto-serif)]">
               {"ტირაჟი".toUpperCase()}
             </span>
           </div>

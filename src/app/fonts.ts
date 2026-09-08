@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Noto_Sans_Georgian } from "next/font/google";
+import { Noto_Sans_Georgian, Noto_Serif_Georgian } from "next/font/google";
 
 // FiraGO — humanist sans (free, OFL). Body + headings. Contains Georgian Mkhedruli + Latin.
 export const firago = localFont({
@@ -20,4 +20,13 @@ export const notoGeorgian = Noto_Sans_Georgian({
   variable: "--font-noto-sans",
   display: "swap",
   weight: ["400", "500", "700"],
+});
+
+// Noto Serif Georgian — an elegant serif used for the brand wordmark. Supports
+// Georgian Mkhedruli + Mtavruli (capitals), so the uppercased logo text renders.
+export const notoSerifGeorgian = Noto_Serif_Georgian({
+  subsets: ["georgian"],
+  variable: "--font-noto-serif",
+  display: "swap",
+  weight: ["500", "600", "700"],
 });

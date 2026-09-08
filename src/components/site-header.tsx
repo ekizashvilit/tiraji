@@ -92,8 +92,10 @@ export function SiteHeader({
             aria-label="ტირაჟი"
           >
             <img
-              src="/logo.svg"
+              src="/logo.webp"
               alt=""
+              width={400}
+              height={338}
               className="h-10 w-auto md:h-14"
               aria-hidden
             />
@@ -132,7 +134,7 @@ export function SiteHeader({
       {isHome && (
         <div className="bg-background">
           <nav className="mx-auto flex max-w-6xl items-center justify-between px-0 md:px-3">
-            <div className="no-scrollbar flex flex-1 items-center justify-start overflow-x-auto md:flex-none">
+            <div className="no-scrollbar flex flex-1 items-center justify-between overflow-x-auto md:flex-none md:justify-start">
               {navLinks}
             </div>
             {signedIn ? (

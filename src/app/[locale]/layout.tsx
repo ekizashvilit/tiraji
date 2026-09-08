@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { firago, notoGeorgian } from "@/app/fonts";
+import { firago, notoGeorgian, notoSerifGeorgian } from "@/app/fonts";
 import { PublicChrome } from "@/components/public-chrome";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSheetProvider } from "@/components/auth/auth-sheet";
@@ -82,7 +82,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${firago.variable} ${notoGeorgian.variable} h-full antialiased`}
+      className={`${firago.variable} ${notoGeorgian.variable} ${notoSerifGeorgian.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider>
