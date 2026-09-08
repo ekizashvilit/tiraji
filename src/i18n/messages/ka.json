@@ -140,8 +140,6 @@
     "sortRelevance": "შესაბამისობა",
     "sortPriceAsc": "ფასი: ზრდადობით",
     "sortPriceDesc": "ფასი: კლებადობით",
-    "photo": "ფოტო",
-    "hasPhoto": "ფოტოთი",
     "results": "{count, plural, =0 {წიგნი არ არის} one {# წიგნი} other {# წიგნი}}"
   },
   "banners": {

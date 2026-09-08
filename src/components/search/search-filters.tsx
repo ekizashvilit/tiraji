@@ -51,7 +51,6 @@ const FILTER_KEYS = [
   "city",
   "min",
   "max",
-  "photo",
 ];
 
 const SORT_LABEL_KEY: Record<string, string> = {
@@ -139,7 +138,6 @@ export function SearchFilters({
   const showCity = cityOptions.length > 1;
   const showLanguage = languageOptions.length > 1;
   const showPrice = (facets.types.sale ?? 0) > 0;
-  const showPhoto = facets.total > 0;
 
   const clearButton = activeCount > 0 && (
     <button
@@ -272,16 +270,6 @@ export function SearchFilters({
               href={toggleHref("city", c)}
             />
           ))}
-        </Group>
-      )}
-
-      {showPhoto && (
-        <Group title={t("photo")}>
-          <OptionRow
-            label={t("hasPhoto")}
-            active={params.get("photo") === "1"}
-            href={hrefWith({ photo: params.get("photo") === "1" ? null : "1" })}
-          />
         </Group>
       )}
     </div>

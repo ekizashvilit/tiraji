@@ -62,7 +62,6 @@ export default async function SearchPage({
     languages: list(sp.language),
     minPrice: sp.min ? Number(sp.min) : undefined,
     maxPrice: sp.max ? Number(sp.max) : undefined,
-    hasPhoto: sp.photo === "1" ? true : undefined,
   };
 
   // A single term for the results header / empty state, whichever field the

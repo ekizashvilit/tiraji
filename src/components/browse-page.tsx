@@ -63,7 +63,6 @@ export async function BrowsePage({
     languages: list(sp.language),
     minPrice: sp.min ? Number(sp.min) : undefined,
     maxPrice: sp.max ? Number(sp.max) : undefined,
-    hasPhoto: sp.photo === "1" ? true : undefined,
   };
 
   const page = Math.max(1, Number(sp.page) || 1);
