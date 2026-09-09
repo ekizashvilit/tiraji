@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, usePathname, getPathname } from "@/i18n/navigation";
 import { normalizeGeorgianPhone, phoneToEmail } from "@/lib/phone";
 import { getSiteURL } from "@/lib/site-url";
 import { Button } from "@/components/ui/button";
@@ -24,12 +24,8 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
 type Mode = "signin" | "register";
 type Method = "phone" | "email";
-// Which panel of the sheet is showing: the sign-in/register form, the
-// forgot-password request, or the set-a-new-password step (recovery link).
 export type AuthPanel = "auth" | "forgot" | "reset";
 
-// Per-field validation messages; `form` covers whole-form errors (captcha,
-// server responses) shown above the submit button.
 type FieldErrors = {
   identifier?: string;
   password?: string;
@@ -40,9 +36,6 @@ type FieldErrors = {
 const MIN_PASSWORD = 8;
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-// The login/register form used inside the auth sheet. `onSuccess` fires after a
-// successful sign-in/up so the caller can close the sheet. `initialPanel` lets
-// the caller open straight into the password-recovery step (from an email link).
 export function AuthForm({
   onSuccess,
   initialPanel = "auth",
@@ -52,6 +45,8 @@ export function AuthForm({
 }) {
   const t = useTranslations("auth");
   const router = useRouter();
+  const locale = useLocale();
+  const pathname = usePathname();
 
   const [panel, setPanel] = useState<AuthPanel>(initialPanel);
   const [mode, setMode] = useState<Mode>("signin");
@@ -63,8 +58,6 @@ export function AuthForm({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sent, setSent] = useState(false);
 
-  // Cloudflare Turnstile: token is single-use, so we reset the widget after
-  // every auth attempt to get a fresh one for the next try.
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<TurnstileInstance>(null);
   function resetCaptcha() {
@@ -82,11 +75,8 @@ export function AuthForm({
     return t("error");
   }
 
-  // Resolve the entered identifier to the email Supabase authenticates against.
-  // Returns an `error` message (for the identifier field) when it's invalid.
   function resolveEmail():
-    | { email: string; phone: string | null }
-    | { error: string } {
+    { email: string; phone: string | null } | { error: string } {
     if (method === "phone") {
       const phone = normalizeGeorgianPhone(identifier);
       if (!phone) return { error: t("invalidPhone") };
@@ -98,7 +88,6 @@ export function AuthForm({
     return { email, phone: null };
   }
 
-  // When Turnstile is configured we require a token before hitting Supabase.
   function captchaOptions(): { captchaToken?: string } | "missing" {
     if (!SITE_KEY) return {};
     if (!captchaToken) return "missing";
@@ -108,8 +97,6 @@ export function AuthForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Validate every field up front so each input can show its own message,
-    // rather than bailing on the first problem or relying on native popups.
     const next: FieldErrors = {};
     let resolved: { email: string; phone: string | null } | null = null;
 
@@ -138,7 +125,6 @@ export function AuthForm({
       return;
     }
     setErrors({});
-    // resolved is guaranteed set here: identifier passed validation above.
     const { email, phone } = resolved!;
 
     const captcha = captchaOptions();
@@ -166,7 +152,6 @@ export function AuthForm({
         setLoading(false);
         return;
       }
-      // With email confirmation disabled, a session is returned immediately.
       if (!data.session) {
         setLoading(false);
         if (method === "email") setSent(true);
@@ -187,17 +172,17 @@ export function AuthForm({
       }
     }
 
-    // Stay on the current page; refresh so server components pick up the session
-    // (e.g. the header avatar), then let the caller close the sheet.
     router.refresh();
     onSuccess?.();
   }
 
   async function signInWithGoogle() {
     const supabase = createClient();
+    const next = getPathname({ href: pathname, locale });
+    const redirectTo = `${getSiteURL()}/auth/callback?next=${encodeURIComponent(next)}`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${getSiteURL()}/auth/callback` },
+      options: { redirectTo },
     });
   }
 
@@ -256,7 +241,9 @@ export function AuthForm({
             inputMode={method === "phone" ? "tel" : "email"}
             autoComplete={method === "phone" ? "tel" : "email"}
             aria-invalid={!!errors.identifier}
-            aria-describedby={errors.identifier ? "identifier-error" : undefined}
+            aria-describedby={
+              errors.identifier ? "identifier-error" : undefined
+            }
             value={identifier}
             onChange={(e) => {
               setIdentifier(
