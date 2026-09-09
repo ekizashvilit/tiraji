@@ -1,6 +1,8 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { publicClient } from "@/lib/supabase/public";
 import type {
   ListingType,
   BookCondition,
@@ -21,32 +23,43 @@ export {
   type ListingCard,
 } from "@/lib/listings-format";
 
-export async function getRecentListings(limit = 12): Promise<ListingCard[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select(CARD_COLUMNS)
-    .eq("status", "active")
-    .neq("listing_type", "wanted")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data as ListingCard[]) ?? [];
-}
+// The homepage shelves below are the same for every visitor, so they're cached
+// across requests (see ./supabase/public for why an anon, cookie-less client is
+// required inside `unstable_cache`). A short window keeps them near-fresh; the
+// "listings" tag allows on-demand invalidation via `revalidateTag` if wanted.
+const LISTINGS_REVALIDATE = 60;
 
-export async function getListingsByType(
-  type: ListingType,
-  limit = 12,
-): Promise<ListingCard[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select(CARD_COLUMNS)
-    .eq("status", "active")
-    .eq("listing_type", type)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data as ListingCard[]) ?? [];
-}
+export const getRecentListings = unstable_cache(
+  async (limit = 12): Promise<ListingCard[]> => {
+    const supabase = publicClient();
+    const { data } = await supabase
+      .from("listings")
+      .select(CARD_COLUMNS)
+      .eq("status", "active")
+      .neq("listing_type", "wanted")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data as ListingCard[]) ?? [];
+  },
+  ["recent-listings"],
+  { revalidate: LISTINGS_REVALIDATE, tags: ["listings"] },
+);
+
+export const getListingsByType = unstable_cache(
+  async (type: ListingType, limit = 12): Promise<ListingCard[]> => {
+    const supabase = publicClient();
+    const { data } = await supabase
+      .from("listings")
+      .select(CARD_COLUMNS)
+      .eq("status", "active")
+      .eq("listing_type", type)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data as ListingCard[]) ?? [];
+  },
+  ["listings-by-type"],
+  { revalidate: LISTINGS_REVALIDATE, tags: ["listings"] },
+);
 
 // A user's public (active) listings, for their profile page.
 export async function getListingsBySeller(
@@ -66,63 +79,68 @@ export async function getListingsBySeller(
 // The author with the most active listings, plus their books — for the dynamic
 // "featured author" shelf on the homepage. Returns null if no author has at
 // least two active listings (not worth a dedicated section).
-export async function getTopAuthorListings(
-  limit = 12,
-): Promise<{ author: string; listings: ListingCard[] } | null> {
-  const supabase = await createClient();
-  const { data: rows } = await supabase
-    .from("listings")
-    .select("author")
-    .eq("status", "active")
-    .neq("listing_type", "wanted")
-    .not("author", "is", null);
+export const getTopAuthorListings = unstable_cache(
+  async (
+    limit = 12,
+  ): Promise<{ author: string; listings: ListingCard[] } | null> => {
+    const supabase = publicClient();
+    const { data: rows } = await supabase
+      .from("listings")
+      .select("author")
+      .eq("status", "active")
+      .neq("listing_type", "wanted")
+      .not("author", "is", null);
 
-  const counts = new Map<string, number>();
-  for (const r of (rows as { author: string | null }[] | null) ?? []) {
-    const a = (r.author ?? "").trim();
-    if (a) counts.set(a, (counts.get(a) ?? 0) + 1);
-  }
-
-  let top: string | null = null;
-  let max = 0;
-  for (const [author, count] of counts) {
-    if (count > max) {
-      max = count;
-      top = author;
+    const counts = new Map<string, number>();
+    for (const r of (rows as { author: string | null }[] | null) ?? []) {
+      const a = (r.author ?? "").trim();
+      if (a) counts.set(a, (counts.get(a) ?? 0) + 1);
     }
-  }
-  if (!top || max < 2) return null;
 
-  const { data } = await supabase
-    .from("listings")
-    .select(CARD_COLUMNS)
-    .eq("status", "active")
-    .neq("listing_type", "wanted")
-    .eq("author", top)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return { author: top, listings: (data as ListingCard[]) ?? [] };
-}
+    let top: string | null = null;
+    let max = 0;
+    for (const [author, count] of counts) {
+      if (count > max) {
+        max = count;
+        top = author;
+      }
+    }
+    if (!top || max < 2) return null;
+
+    const { data } = await supabase
+      .from("listings")
+      .select(CARD_COLUMNS)
+      .eq("status", "active")
+      .neq("listing_type", "wanted")
+      .eq("author", top)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return { author: top, listings: (data as ListingCard[]) ?? [] };
+  },
+  ["top-author-listings"],
+  { revalidate: LISTINGS_REVALIDATE, tags: ["listings"] },
+);
 
 // Cheap sale listings (fixed price at or under the cap) — for the homepage
 // "Books under ₾X" shelf. Cheapest first.
-export async function getListingsUnderPrice(
-  maxPrice: number,
-  limit = 12,
-): Promise<ListingCard[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select(CARD_COLUMNS)
-    .eq("status", "active")
-    .eq("listing_type", "sale")
-    .eq("is_negotiable", false)
-    .not("price", "is", null)
-    .lte("price", maxPrice)
-    .order("price", { ascending: true })
-    .limit(limit);
-  return (data as ListingCard[]) ?? [];
-}
+export const getListingsUnderPrice = unstable_cache(
+  async (maxPrice: number, limit = 12): Promise<ListingCard[]> => {
+    const supabase = publicClient();
+    const { data } = await supabase
+      .from("listings")
+      .select(CARD_COLUMNS)
+      .eq("status", "active")
+      .eq("listing_type", "sale")
+      .eq("is_negotiable", false)
+      .not("price", "is", null)
+      .lte("price", maxPrice)
+      .order("price", { ascending: true })
+      .limit(limit);
+    return (data as ListingCard[]) ?? [];
+  },
+  ["listings-under-price"],
+  { revalidate: LISTINGS_REVALIDATE, tags: ["listings"] },
+);
 
 // A seller's other active listings (excluding the one being viewed) — for the
 // "More from this seller" shelf on the detail page.
@@ -168,21 +186,22 @@ export async function getSimilarListings(opts: {
   return (data as ListingCard[]) ?? [];
 }
 
-export async function getListingsByGenre(
-  genreId: number,
-  limit = 12,
-): Promise<ListingCard[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select(CARD_COLUMNS)
-    .eq("status", "active")
-    .neq("listing_type", "wanted")
-    .eq("genre_id", genreId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data as ListingCard[]) ?? [];
-}
+export const getListingsByGenre = unstable_cache(
+  async (genreId: number, limit = 12): Promise<ListingCard[]> => {
+    const supabase = publicClient();
+    const { data } = await supabase
+      .from("listings")
+      .select(CARD_COLUMNS)
+      .eq("status", "active")
+      .neq("listing_type", "wanted")
+      .eq("genre_id", genreId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data as ListingCard[]) ?? [];
+  },
+  ["listings-by-genre"],
+  { revalidate: LISTINGS_REVALIDATE, tags: ["listings"] },
+);
 
 // Full listing for the SSR detail page, with its genre and the seller's public
 // profile joined in. Wrapped in React `cache` so generateMetadata and the page
